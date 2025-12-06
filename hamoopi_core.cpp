@@ -69,12 +69,8 @@ enum SoundEffect {
 };
 
 // Audio state
-static int16_t audio_buffer[AUDIO_BUFFER_SIZE * 2]; // Stereo
-static int audio_position = 0;
-
 // Sound effect queue (simple system)
 static enum SoundEffect sound_queue[4] = {SOUND_NONE, SOUND_NONE, SOUND_NONE, SOUND_NONE};
-static int sound_queue_pos = 0;
 static int sound_effect_timer[4] = {0, 0, 0, 0};
 static int sound_effect_duration[4] = {0, 0, 0, 0};
 
@@ -98,7 +94,6 @@ static void play_sound(enum SoundEffect effect)
         if (sound_effect_timer[i] <= 0)
         {
             sound_queue[i] = effect;
-            sound_effect_timer[i] = 1;
             
             // Set duration based on effect type
             switch (effect)
@@ -119,6 +114,9 @@ static void play_sound(enum SoundEffect effect)
                     sound_effect_duration[i] = 0;
                     break;
             }
+            
+            // Initialize timer to duration
+            sound_effect_timer[i] = sound_effect_duration[i];
             break;
         }
     }
