@@ -1,1 +1,0 @@
-/home/runner/work/allegro-hamoopi/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/HAMOOPI.dir/link.d CMakeFiles/HAMOOPI.dir/HAMOOPI.cpp.o CMakeFiles/HAMOOPI.dir/allegro_compat.cpp.o -o HAMOOPI  /usr/lib/x86_64-linux-gnu/libSDL2.so -lSDL2_image -lSDL2_mixer -lSDL2_ttf
