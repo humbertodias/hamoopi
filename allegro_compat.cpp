@@ -299,12 +299,12 @@ void stretch_blit(BITMAP* source, BITMAP* dest, int source_x, int source_y, int 
     if (dest == screen && _sdl_renderer) {
         if (source->texture) {
             SDL_RenderCopy(_sdl_renderer, source->texture, &src_rect, &dst_rect);
-        } else if (source->surface) {
+        } else if (source->surface && source->texture) {
             // Update texture from surface if needed
             SDL_UpdateTexture(source->texture, nullptr, source->surface->pixels, source->surface->pitch);
             SDL_RenderCopy(_sdl_renderer, source->texture, &src_rect, &dst_rect);
         }
-        SDL_RenderPresent(_sdl_renderer);
+        // Note: SDL_RenderPresent is called once per frame in main game loop, not here
     } else if (source->texture && dest->texture && _sdl_renderer) {
         SDL_SetRenderTarget(_sdl_renderer, dest->texture);
         SDL_RenderCopy(_sdl_renderer, source->texture, &src_rect, &dst_rect);
@@ -921,4 +921,10 @@ void _update_keyboard_state() {
     SDL_PumpEvents();
     _key_state = (Uint8*)SDL_GetKeyboardState(nullptr);
     key = (const Uint8*)_key_state;
+}
+
+void _present_screen() {
+    if (_sdl_renderer) {
+        SDL_RenderPresent(_sdl_renderer);
+    }
 }

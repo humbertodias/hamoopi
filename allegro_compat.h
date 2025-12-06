@@ -145,7 +145,7 @@ struct BITMAP {
     SDL_Surface* surface;
     int w;
     int h;
-    Uint32* line; // For compatibility
+    Uint32* line; // For Allegro 4 compatibility (line[y] direct scanline access) - not implemented in SDL2 wrapper
 };
 
 // FONT structure  
@@ -288,6 +288,7 @@ int exists(const char* filename);
 // Helper functions for SDL2 event processing
 void _process_sdl_events();
 void _update_keyboard_state();
+void _present_screen(); // Call after drawing to screen is complete
 
 // Internal helper functions
 SDL_Surface* _load_pcx(const char* filename);
