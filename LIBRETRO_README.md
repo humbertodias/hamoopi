@@ -6,12 +6,13 @@ This directory contains the libretro port of HAMOOPI, allowing it to run on Retr
 
 The libretro core includes:
 - ✅ **Character Selection Screen** - Choose from 4 unique fighters
+- ✅ **Special Moves System** - Character-specific powerful abilities with cooldowns
 - ✅ Full 2-player fighting game implementation
 - ✅ **Multiple Rounds System** - Best of 3 rounds per match
 - ✅ **Animated Stage Backgrounds** - Themed stages for each character
 - ✅ Physics-based movement (walking, jumping)
 - ✅ **Block/Defend Mechanic** - Defend against attacks with B button
-- ✅ **Audio Effects** - Sound effects for attacks, jumps, hits, and blocks
+- ✅ **Audio Effects** - Sound effects for attacks, jumps, hits, blocks, and specials
 - ✅ Combat system with health tracking
 - ✅ Real-time gameplay at 60 FPS
 - ✅ Title screen and winner announcement
@@ -86,14 +87,18 @@ make -f Makefile.libretro platform=win
 
 ## Characters & Stages
 
-Choose from 4 unique fighters, each with distinct colors and themed stage:
+Choose from 4 unique fighters, each with distinct colors, special moves, and themed stage:
 - **FIRE** (Red) - Aggressive fighter
+  - **Special Move**: Fireball Projectile (10 damage) - Travels across screen
   - Stage: Volcano with lava glow and dark mountains
 - **WATER** (Blue) - Balanced fighter
+  - **Special Move**: Healing Wave - Restores 15 HP (max 100)
   - Stage: Ocean beach with animated waves
 - **EARTH** (Green) - Defensive fighter
+  - **Special Move**: Ground Stomp (12 damage) - Hits grounded opponents within 80 pixels
   - Stage: Forest with trees and grass details
 - **WIND** (Yellow) - Speed fighter
+  - **Special Move**: Dash Attack (8 damage) - Quick forward rush
   - Stage: Sky with floating clouds and platforms
 
 Each stage features animated elements and parallax layers for depth!
@@ -108,6 +113,7 @@ The libretro core maps standard RetroArch controller buttons to HAMOOPI controls
   - Up: Jump (in fight)
 - **A Button**: Confirm character selection OR Punch attack (in fight)
 - **B Button**: Block/Defend (in fight) - Reduces damage by 80%
+- **Y Button**: Special Move (in fight) - Character-specific special ability
 - **Start**: Begin game / Continue
 
 ### Player 2
@@ -122,10 +128,11 @@ The libretro core maps standard RetroArch controller buttons to HAMOOPI controls
   - Jump with UP
   - Attack with A button
   - **Block with B button** - Hold to defend (reduces damage to 1 HP, but slows movement)
-- **Objective**: Reduce opponent's health to zero
+  - **Special Move with Y button** - Character-specific powerful ability (3-second cooldown)
+- **Objective**: Win 2 out of 3 rounds by reducing opponent's health to zero each round
 - **Winner Screen**: Press START to return to character selection
 
-Each player starts with 100 HP. Land attacks to damage your opponent!
+Each player starts with 100 HP per round. Land attacks to damage your opponent!
 
 ### Blocking Mechanics
 - Hold B button to block incoming attacks
@@ -134,6 +141,25 @@ Each player starts with 100 HP. Land attacks to damage your opponent!
 - Cannot jump while blocking
 - Cannot attack while blocking
 - Visual shield indicator appears when blocking
+
+### Special Moves
+- Press Y button to activate your character's special move
+- Each special has a 3-second (180 frames) cooldown
+- "SPECIAL READY!" indicator shows when cooldown is finished
+- Yellow cooldown bar shows remaining time
+- **FIRE - Fireball**: Projectile that travels forward (10 damage)
+- **WATER - Healing Wave**: Restores 15 HP instantly
+- **EARTH - Ground Stomp**: Area damage to grounded opponents (12 damage, 80-pixel range)
+- **WIND - Dash Attack**: Fast dash forward with attack (8 damage)
+
+### Multiple Rounds System
+- Best of 3 rounds per match
+- First player to win 2 rounds wins the match
+- Health resets between rounds
+- Round indicators (3 circles per player) show match progress
+- 2-second round transition screen
+- Character selections preserved across rounds
+- Final score displayed on winner screen
 
 ## Files
 

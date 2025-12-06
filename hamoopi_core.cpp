@@ -27,7 +27,23 @@ typedef struct {
     bool on_ground;
     int character_id; // Character selection (0-3)
     bool is_blocking; // Whether player is currently blocking
+    int special_move_cooldown; // Cooldown for special moves
+    bool is_dashing; // For WIND character dash attack
+    int dash_timer; // Duration of dash
 } Player;
+
+// Projectile system for special moves
+typedef struct {
+    bool active;
+    float x, y;
+    float vx, vy;
+    int owner; // 0=P1, 1=P2
+    int type; // Character-specific projectile type
+    int lifetime;
+} Projectile;
+
+#define MAX_PROJECTILES 4
+static Projectile projectiles[MAX_PROJECTILES];
 
 static Player players[2];
 static int game_mode = 0; // 0=title, 1=character_select, 2=fight, 3=winner
@@ -61,6 +77,18 @@ static bool p2_a_pressed = false;
 #define BLOCKING_SPEED_MULTIPLIER 0.5f
 #define BLOCKING_COLOR_DIVISOR 2
 
+// Special move constants
+#define SPECIAL_MOVE_COOLDOWN 180  // 3 seconds @ 60 FPS
+#define FIRE_PROJECTILE_DAMAGE 10
+#define WATER_HEAL_AMOUNT 15
+#define EARTH_STOMP_DAMAGE 12
+#define EARTH_STOMP_RANGE 80.0f
+#define WIND_DASH_DAMAGE 8
+#define WIND_DASH_SPEED 12.0f
+#define WIND_DASH_DURATION 15  // frames
+#define WIND_DASH_HIT_RANGE 50.0f
+#define PROJECTILE_HIT_RADIUS 30.0f
+
 // Stage/background animation
 static int stage_animation_frame = 0;
 
@@ -74,7 +102,8 @@ enum SoundEffect {
     SOUND_JUMP = 1,
     SOUND_ATTACK = 2,
     SOUND_HIT = 3,
-    SOUND_BLOCK = 4
+    SOUND_BLOCK = 4,
+    SOUND_SPECIAL = 5  // Special move sound
 };
 
 // Audio state
@@ -118,6 +147,9 @@ static void play_sound(enum SoundEffect effect)
                     break;
                 case SOUND_BLOCK:
                     sound_effect_duration[i] = AUDIO_SAMPLE_RATE / 30; // 0.033 seconds
+                    break;
+                case SOUND_SPECIAL:
+                    sound_effect_duration[i] = AUDIO_SAMPLE_RATE / 10; // 0.1 seconds
                     break;
                 default:
                     sound_effect_duration[i] = 0;
@@ -178,6 +210,16 @@ static int16_t generate_sound_sample(enum SoundEffect effect, int position, int 
             }
             break;
             
+        case SOUND_SPECIAL:
+            // Special move power-up sound
+            {
+                float freq = 300.0f + t * 500.0f; // Rising sweep 300Hz to 800Hz
+                float phase = (float)position * freq * 2.0f * 3.14159f / AUDIO_SAMPLE_RATE;
+                float harmonic = sin(phase * 2.0f) * 0.3f; // Add harmonic
+                sample = (int16_t)((sin(phase) + harmonic) * amplitude * 32767.0f);
+            }
+            break;
+            
         default:
             sample = 0;
             break;
@@ -226,6 +268,94 @@ void hamoopi_get_audio_samples(int16_t* buffer, size_t frames)
     }
 }
 
+// Projectile helper functions
+static void spawn_projectile(int owner, int type, float x, float y, float vx, float vy)
+{
+    // Find an empty projectile slot
+    for (int i = 0; i < MAX_PROJECTILES; i++)
+    {
+        if (!projectiles[i].active)
+        {
+            projectiles[i].active = true;
+            projectiles[i].owner = owner;
+            projectiles[i].type = type;
+            projectiles[i].x = x;
+            projectiles[i].y = y;
+            projectiles[i].vx = vx;
+            projectiles[i].vy = vy;
+            projectiles[i].lifetime = 180; // 3 seconds max
+            break;
+        }
+    }
+}
+
+static void update_projectiles(void)
+{
+    for (int i = 0; i < MAX_PROJECTILES; i++)
+    {
+        if (!projectiles[i].active) continue;
+        
+        // Update position
+        projectiles[i].x += projectiles[i].vx;
+        projectiles[i].y += projectiles[i].vy;
+        projectiles[i].lifetime--;
+        
+        // Deactivate if out of bounds or expired
+        if (projectiles[i].x < 0 || projectiles[i].x > 640 ||
+            projectiles[i].y < 0 || projectiles[i].y > 480 ||
+            projectiles[i].lifetime <= 0)
+        {
+            projectiles[i].active = false;
+            continue;
+        }
+        
+        // Check collision with players
+        int target = (projectiles[i].owner == 0) ? 1 : 0;
+        Player* target_player = &players[target];
+        
+        float dx = projectiles[i].x - target_player->x;
+        float dy = projectiles[i].y - target_player->y;
+        float dist = sqrt(dx*dx + dy*dy);
+        
+        if (dist < PROJECTILE_HIT_RADIUS && target_player->health > 0)
+        {
+            // Hit!
+            if (target_player->is_blocking)
+            {
+                target_player->health -= BLOCKED_DAMAGE;
+                play_sound(SOUND_BLOCK);
+            }
+            else
+            {
+                target_player->health -= FIRE_PROJECTILE_DAMAGE;
+                play_sound(SOUND_HIT);
+            }
+            if (target_player->health < 0) target_player->health = 0;
+            projectiles[i].active = false;
+        }
+    }
+}
+
+static void draw_projectiles(BITMAP* buffer)
+{
+    for (int i = 0; i < MAX_PROJECTILES; i++)
+    {
+        if (!projectiles[i].active) continue;
+        
+        int x = (int)projectiles[i].x;
+        int y = (int)projectiles[i].y;
+        
+        // FIRE projectile - fireball
+        if (projectiles[i].type == 0)
+        {
+            // Draw fireball with glow effect
+            circlefill(buffer, x, y, 12, makecol(255, 100, 0));
+            circlefill(buffer, x, y, 8, makecol(255, 200, 0));
+            circle(buffer, x, y, 12, makecol(255, 150, 0));
+        }
+    }
+}
+
 // Key mapping for players
 // Player 1 keys
 static int p1_up_key = KEY_W;
@@ -268,7 +398,74 @@ static void init_player(Player* p, int player_num)
     p->facing = (player_num == 0) ? 1 : -1;
     p->on_ground = true;
     p->is_blocking = false;
+    p->special_move_cooldown = 0;
+    p->is_dashing = false;
+    p->dash_timer = 0;
     // character_id is preserved from selection
+}
+
+// Execute special move for a player
+static void execute_special_move(Player* player, Player* opponent, int player_num)
+{
+    play_sound(SOUND_SPECIAL); // Special move sound
+    
+    switch (player->character_id)
+    {
+        case 0: // FIRE - Fireball projectile
+            spawn_projectile(player_num, 0, player->x + 30.0f * player->facing, player->y, 
+                           8.0f * player->facing, 0.0f);
+            break;
+            
+        case 1: // WATER - Healing wave
+            player->health += WATER_HEAL_AMOUNT;
+            if (player->health > 100) player->health = 100;
+            break;
+            
+        case 2: // EARTH - Ground stomp
+            {
+                float dist = fabs(player->x - opponent->x);
+                if (dist < EARTH_STOMP_RANGE && opponent->on_ground && opponent->health > 0)
+                {
+                    if (opponent->is_blocking)
+                    {
+                        opponent->health -= BLOCKED_DAMAGE;
+                        play_sound(SOUND_BLOCK);
+                    }
+                    else
+                    {
+                        opponent->health -= EARTH_STOMP_DAMAGE;
+                        play_sound(SOUND_HIT);
+                    }
+                    if (opponent->health < 0) opponent->health = 0;
+                }
+            }
+            break;
+            
+        case 3: // WIND - Dash attack
+            player->is_dashing = true;
+            player->dash_timer = WIND_DASH_DURATION;
+            // Check for dash hit
+            {
+                float dist = fabs(player->x - opponent->x);
+                if (dist < WIND_DASH_HIT_RANGE && opponent->health > 0)
+                {
+                    if (opponent->is_blocking)
+                    {
+                        opponent->health -= BLOCKED_DAMAGE;
+                        play_sound(SOUND_BLOCK);
+                    }
+                    else
+                    {
+                        opponent->health -= WIND_DASH_DAMAGE;
+                        play_sound(SOUND_HIT);
+                    }
+                    if (opponent->health < 0) opponent->health = 0;
+                }
+            }
+            break;
+    }
+    
+    player->special_move_cooldown = SPECIAL_MOVE_COOLDOWN;
 }
 
 // Draw a simple fighter sprite with character color
@@ -317,6 +514,20 @@ static void draw_player(BITMAP* dest, Player* p)
     // Draw facing indicator (simple line)
     int dir = p->facing;
     line(dest, x, y - 60, x + dir * 20, y - 60, makecol(255, 255, 0));
+    
+    // Draw special effects
+    if (p->is_dashing)
+    {
+        // WIND dash effect - motion lines
+        for (int i = 1; i <= 3; i++)
+        {
+            int offset = i * 15;
+            line(dest, x - dir * offset, y - 30, x - dir * offset, y + 20, 
+                 makecol(200, 200, 255));
+            line(dest, x - dir * offset, y, x - dir * offset, y + 40, 
+                 makecol(150, 150, 255));
+        }
+    }
 }
 
 // Draw round indicators (circles for wins)
@@ -581,6 +792,12 @@ void hamoopi_init(void)
     p2_cursor = 1;
     p1_ready = false;
     p2_ready = false;
+    
+    // Initialize projectiles
+    for (int i = 0; i < MAX_PROJECTILES; i++)
+    {
+        projectiles[i].active = false;
+    }
     
     initialized = true;
     running = false;
@@ -852,6 +1069,29 @@ void hamoopi_run_frame(void)
                 }
             }
             
+            // Special move (Y button / bt3)
+            if (p1->special_move_cooldown > 0)
+            {
+                p1->special_move_cooldown--;
+            }
+            
+            // Handle WIND dash
+            if (p1->is_dashing)
+            {
+                p1->dash_timer--;
+                p1->vx = WIND_DASH_SPEED * p1->facing;
+                if (p1->dash_timer <= 0)
+                {
+                    p1->is_dashing = false;
+                }
+            }
+            
+            if (key[p1_bt3_key] && p1->special_move_cooldown == 0 && !p1->is_blocking)
+            {
+                Player* p2 = &players[1];
+                execute_special_move(p1, p2, 0);
+            }
+            
             // Physics
             p1->vy += 0.5f; // Gravity
             p1->x += p1->vx;
@@ -929,6 +1169,28 @@ void hamoopi_run_frame(void)
                 }
             }
             
+            // Special move (Y button / bt3)
+            if (p2->special_move_cooldown > 0)
+            {
+                p2->special_move_cooldown--;
+            }
+            
+            // Handle WIND dash
+            if (p2->is_dashing)
+            {
+                p2->dash_timer--;
+                p2->vx = WIND_DASH_SPEED * p2->facing;
+                if (p2->dash_timer <= 0)
+                {
+                    p2->is_dashing = false;
+                }
+            }
+            
+            if (key[p2_bt3_key] && p2->special_move_cooldown == 0 && !p2->is_blocking)
+            {
+                execute_special_move(p2, p1, 1);
+            }
+            
             // Physics
             p2->vy += 0.5f; // Gravity
             p2->x += p2->vx;
@@ -947,9 +1209,15 @@ void hamoopi_run_frame(void)
             if (p2->x > 620.0f) p2->x = 620.0f;
         }
         
+        // Update projectiles
+        update_projectiles();
+        
         // Draw players
         draw_player(game_buffer, p1);
         draw_player(game_buffer, p2);
+        
+        // Draw projectiles
+        draw_projectiles(game_buffer);
         
         // Draw HUD
         textout_ex(game_buffer, game_font, "P1", 50, 20, makecol(255, 100, 100), -1);
@@ -957,10 +1225,32 @@ void hamoopi_run_frame(void)
         sprintf(p1_health_str, "HP: %d", p1->health);
         textout_ex(game_buffer, game_font, p1_health_str, 50, 35, makecol(255, 255, 255), -1);
         
+        // P1 Special move cooldown indicator
+        if (p1->special_move_cooldown > 0)
+        {
+            int cooldown_width = (int)((float)p1->special_move_cooldown / SPECIAL_MOVE_COOLDOWN * 60.0f);
+            rectfill(game_buffer, 50, 50, 50 + cooldown_width, 55, makecol(150, 150, 0));
+        }
+        else
+        {
+            textout_ex(game_buffer, game_font, "SPECIAL READY!", 50, 50, makecol(255, 255, 0), -1);
+        }
+        
         textout_ex(game_buffer, game_font, "P2", 550, 20, makecol(100, 100, 255), -1);
         char p2_health_str[32];
         sprintf(p2_health_str, "HP: %d", p2->health);
         textout_ex(game_buffer, game_font, p2_health_str, 550, 35, makecol(255, 255, 255), -1);
+        
+        // P2 Special move cooldown indicator
+        if (p2->special_move_cooldown > 0)
+        {
+            int cooldown_width = (int)((float)p2->special_move_cooldown / SPECIAL_MOVE_COOLDOWN * 60.0f);
+            rectfill(game_buffer, 550, 50, 550 + cooldown_width, 55, makecol(150, 150, 0));
+        }
+        else
+        {
+            textout_ex(game_buffer, game_font, "SPECIAL READY!", 550, 50, makecol(255, 255, 0), -1);
+        }
         
         // Draw round indicators
         draw_round_indicators(game_buffer);
