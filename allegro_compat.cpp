@@ -162,10 +162,16 @@ BITMAP* create_bitmap(int width, int height) {
     bmp->surface = SDL_CreateRGBSurface(0, width, height, 32,
                                         0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
     
-    // Create texture
-    bmp->texture = SDL_CreateTexture(_sdl_renderer, SDL_PIXELFORMAT_ARGB8888,
-                                     SDL_TEXTUREACCESS_STREAMING, width, height);
-    SDL_SetTextureBlendMode(bmp->texture, SDL_BLENDMODE_BLEND);
+    // Create texture with TARGET access so we can render to it
+    if (_sdl_renderer) {
+        bmp->texture = SDL_CreateTexture(_sdl_renderer, SDL_PIXELFORMAT_ARGB8888,
+                                         SDL_TEXTUREACCESS_TARGET, width, height);
+        if (bmp->texture) {
+            SDL_SetTextureBlendMode(bmp->texture, SDL_BLENDMODE_BLEND);
+        }
+    } else {
+        bmp->texture = nullptr;
+    }
     
     bmp->line = nullptr;
     
@@ -191,15 +197,30 @@ BITMAP* load_bitmap(const char* filename, void* pal) {
     BITMAP* bmp = new BITMAP();
     bmp->w = surf->w;
     bmp->h = surf->h;
+    
+    // Set magenta (255, 0, 255) as transparent
+    SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, 255, 0, 255));
+    
     bmp->surface = surf;
     
-    // Create texture from surface
-    bmp->texture = SDL_CreateTextureFromSurface(_sdl_renderer, surf);
-    if (bmp->texture) {
-        SDL_SetTextureBlendMode(bmp->texture, SDL_BLENDMODE_BLEND);
-        
-        // Set magenta (255, 0, 255) as transparent
-        SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, 255, 0, 255));
+    // Create TARGET texture so we can render to it later
+    if (_sdl_renderer) {
+        bmp->texture = SDL_CreateTexture(_sdl_renderer, SDL_PIXELFORMAT_ARGB8888,
+                                         SDL_TEXTUREACCESS_TARGET, surf->w, surf->h);
+        if (bmp->texture) {
+            SDL_SetTextureBlendMode(bmp->texture, SDL_BLENDMODE_BLEND);
+            
+            // Copy surface content to texture
+            SDL_Texture* temp_tex = SDL_CreateTextureFromSurface(_sdl_renderer, surf);
+            if (temp_tex) {
+                SDL_SetRenderTarget(_sdl_renderer, bmp->texture);
+                SDL_RenderCopy(_sdl_renderer, temp_tex, nullptr, nullptr);
+                SDL_SetRenderTarget(_sdl_renderer, nullptr);
+                SDL_DestroyTexture(temp_tex);
+            }
+        }
+    } else {
+        bmp->texture = nullptr;
     }
     
     bmp->line = nullptr;
@@ -640,6 +661,7 @@ void textout_ex(BITMAP* bmp, FONT* f, const char* str, int x, int y, int color, 
     if (!bmp || !f || !str || !_sdl_renderer) return;
     
     if (f->ttf_font) {
+        // TTF font rendering
         SDL_Color fg = {(Uint8)((color >> 16) & 0xFF), (Uint8)((color >> 8) & 0xFF), (Uint8)(color & 0xFF), 255};
         SDL_Surface* text_surf = TTF_RenderText_Solid(f->ttf_font, str, fg);
         if (!text_surf) return;
@@ -653,6 +675,39 @@ void textout_ex(BITMAP* bmp, FONT* f, const char* str, int x, int y, int color, 
         
         SDL_DestroyTexture(text_tex);
         SDL_FreeSurface(text_surf);
+    } else if (f->bitmap_font) {
+        // Bitmap font rendering - render character by character
+        SDL_SetRenderTarget(_sdl_renderer, bmp == screen ? nullptr : bmp->texture);
+        
+        // Set color modulation for the bitmap font
+        Uint8 r = (color >> 16) & 0xFF;
+        Uint8 g = (color >> 8) & 0xFF;
+        Uint8 b = color & 0xFF;
+        SDL_SetTextureColorMod(f->bitmap_font, r, g, b);
+        
+        int current_x = x;
+        for (const char* c = str; *c != '\0'; c++) {
+            unsigned char ch = (unsigned char)*c;
+            
+            // Calculate source rect in the bitmap font (16x16 grid)
+            int char_row = ch / 16;
+            int char_col = ch % 16;
+            SDL_Rect src_rect = {
+                char_col * f->char_width,
+                char_row * f->char_height,
+                f->char_width,
+                f->char_height
+            };
+            
+            SDL_Rect dst_rect = {current_x, y, f->char_width, f->char_height};
+            SDL_RenderCopy(_sdl_renderer, f->bitmap_font, &src_rect, &dst_rect);
+            
+            current_x += f->char_width;
+        }
+        
+        // Reset color modulation
+        SDL_SetTextureColorMod(f->bitmap_font, 255, 255, 255);
+        SDL_SetRenderTarget(_sdl_renderer, nullptr);
     }
 }
 
