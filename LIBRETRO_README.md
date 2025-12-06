@@ -5,6 +5,7 @@ This directory contains the libretro port of HAMOOPI, allowing it to run on Retr
 ## Features
 
 The libretro core includes:
+- ✅ **Advanced Collision System** - Proper hitboxes, hurtboxes, body collision, and attack clashing
 - ✅ **Character Selection Screen** - Choose from 4 unique fighters
 - ✅ **Special Moves System** - Character-specific powerful abilities with cooldowns
 - ✅ Full 2-player fighting game implementation
@@ -17,6 +18,7 @@ The libretro core includes:
 - ✅ Real-time gameplay at 60 FPS
 - ✅ Title screen and winner announcement
 - ✅ Controller/keyboard support for both players
+- ✅ **Debug Visualization** - Toggle collision boxes with SELECT button
 
 ## Building the Libretro Core
 
@@ -161,6 +163,45 @@ Each player starts with 100 HP per round. Land attacks to damage your opponent!
 - Character selections preserved across rounds
 - Final score displayed on winner screen
 
+### Collision System
+
+HAMOOPI implements a professional fighting game collision system with multiple box types:
+
+**Collision Box Types:**
+- **Hurtbox** (Green) - Vulnerable area where player can be hit
+  - Shrinks when blocking for defensive advantage
+  - Always active when player is alive
+- **Hitbox** (Red) - Attack area that can damage opponents
+  - Only active during attack frames (frames 2-6 of 10-frame animation)
+  - Extends in front of player based on facing direction
+  - Checks against opponent's hurtbox for hits
+- **Body Collision Box** (Yellow) - Physical presence
+  - Prevents players from walking through each other
+  - Provides push-back force when overlapping
+- **Clash/Priority Box** (Orange) - Attack clashing area
+  - Active during attack startup and active frames (frames 1-7)
+  - When two clash boxes overlap, both attacks cancel out
+  - Players pushed back slightly on clash
+  - Clash sound effect plays
+- **Projectile Hitbox** (Magenta) - Fireball collision area
+  - 30-pixel radius around projectile center
+  - Checks against opponent's hurtbox
+  - Respects blocking mechanics
+
+**Debug Visualization:**
+- Press SELECT button during fight to toggle debug boxes
+- Color-coded boxes show all active collision areas
+- Legend displays at bottom of screen
+- Helps understand attack ranges and timing
+- Professional fighting game precision
+
+**Collision Features:**
+- Frame-accurate hit detection
+- Proper attack priority system
+- Body pushing prevents overlap
+- Attack clashing for mind games
+- Smaller hurtbox when blocking rewards defensive play
+
 ## Files
 
 - `libretro.cpp` - Main libretro API implementation
@@ -174,10 +215,11 @@ Each player starts with 100 HP per round. Land attacks to damage your opponent!
 ## Current Status
 
 This is a fully functional libretro fighting game:
-- ✅ Core builds successfully (36KB)
+- ✅ Core builds successfully (40KB)
 - ✅ Video output working (640x480 @ 60fps)
 - ✅ **Audio output fully implemented** - Procedural sound effects at 44.1kHz
 - ✅ **Animated stage backgrounds** - Themed stages with parallax effects
+- ✅ **Advanced collision system** - Hitboxes, hurtboxes, body collision, attack clashing, projectile hitboxes
 - ✅ Input handling implemented (2 players)
 - ✅ Frame-based execution
 - ✅ **Character selection screen fully integrated**
@@ -189,6 +231,7 @@ This is a fully functional libretro fighting game:
 - ✅ **Physics engine (gravity, movement, collision)**
 - ✅ **Combat system with health management and blocking**
 - ✅ **Game states (title, character select, fight, round transitions, match winner)**
+- ✅ **Debug visualization mode** - Toggle with SELECT button
 - ❌ Save states not implemented
 - ⚠️ Full HAMOOPI character system pending (using simple sprites for now)
 

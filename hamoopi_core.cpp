@@ -16,6 +16,12 @@ static int frame_count = 0;
 // Input state for two players
 hamoopi_input_t hamoopi_input[2] = {};
 
+// Collision box types
+typedef struct {
+    float x, y;     // World position (absolute coordinates)
+    float w, h;     // Width and height
+} CollisionBox;
+
 // Game state
 typedef struct {
     float x, y;
@@ -30,6 +36,7 @@ typedef struct {
     int special_move_cooldown; // Cooldown for special moves
     bool is_dashing; // For WIND character dash attack
     int dash_timer; // Duration of dash
+    int attack_frame; // Current frame of attack animation
 } Player;
 
 // Projectile system for special moves
@@ -40,10 +47,133 @@ typedef struct {
     int owner; // 0=P1, 1=P2
     int type; // Character-specific projectile type
     int lifetime;
+    CollisionBox hitbox; // Projectile hitbox
 } Projectile;
 
 #define MAX_PROJECTILES 4
 static Projectile projectiles[MAX_PROJECTILES];
+
+// Collision box definitions
+// Body collision box (for pushing)
+static CollisionBox get_body_box(Player* p)
+{
+    CollisionBox box;
+    box.x = p->x - 15;
+    box.y = p->y - 40;
+    box.w = 30;
+    box.h = 40;
+    return box;
+}
+
+// Hurtbox (vulnerable area)
+static CollisionBox get_hurtbox(Player* p)
+{
+    CollisionBox box;
+    if (p->is_blocking)
+    {
+        // Smaller hurtbox when blocking
+        box.x = p->x - 10;
+        box.y = p->y - 35;
+        box.w = 20;
+        box.h = 35;
+    }
+    else
+    {
+        // Normal hurtbox
+        box.x = p->x - 12;
+        box.y = p->y - 38;
+        box.w = 24;
+        box.h = 38;
+    }
+    return box;
+}
+
+// Hitbox (attacking area) - only active during attack frames
+static CollisionBox get_hitbox(Player* p)
+{
+    CollisionBox box;
+    // Hitbox is extended in front of player during attack
+    if (p->state == 3 && p->attack_frame >= 2 && p->attack_frame <= 6)
+    {
+        // Active attack frames
+        if (p->facing > 0)
+        {
+            box.x = p->x + 10;
+            box.y = p->y - 30;
+            box.w = 35;
+            box.h = 20;
+        }
+        else
+        {
+            box.x = p->x - 45;
+            box.y = p->y - 30;
+            box.w = 35;
+            box.h = 20;
+        }
+    }
+    else
+    {
+        // No active hitbox
+        box.x = p->x;
+        box.y = p->y;
+        box.w = 0;
+        box.h = 0;
+    }
+    return box;
+}
+
+// Clash/Priority box (for attack clashing)
+static CollisionBox get_clash_box(Player* p)
+{
+    CollisionBox box;
+    // Clash box is active during attack startup and active frames
+    if (p->state == 3 && p->attack_frame >= 1 && p->attack_frame <= 7)
+    {
+        if (p->facing > 0)
+        {
+            box.x = p->x;
+            box.y = p->y - 30;
+            box.w = 45;
+            box.h = 25;
+        }
+        else
+        {
+            box.x = p->x - 45;
+            box.y = p->y - 30;
+            box.w = 45;
+            box.h = 25;
+        }
+    }
+    else
+    {
+        box.x = p->x;
+        box.y = p->y;
+        box.w = 0;
+        box.h = 0;
+    }
+    return box;
+}
+
+// Box collision detection
+static bool boxes_overlap(CollisionBox a, CollisionBox b)
+{
+    return (a.x < b.x + b.w && 
+            a.x + a.w > b.x && 
+            a.y < b.y + b.h && 
+            a.y + a.h > b.y);
+}
+
+// Debug visualization for hitboxes
+static bool show_debug_boxes = false;
+
+static void draw_debug_box(BITMAP* dest, CollisionBox box, int color)
+{
+    if (show_debug_boxes && box.w > 0 && box.h > 0)
+    {
+        rect(dest, (int)box.x, (int)box.y, 
+             (int)(box.x + box.w), (int)(box.y + box.h), color);
+    }
+}
 
 static Player players[2];
 static int game_mode = 0; // 0=title, 1=character_select, 2=fight, 3=winner
@@ -76,6 +206,7 @@ static bool p2_a_pressed = false;
 #define BLOCKED_DAMAGE 1
 #define BLOCKING_SPEED_MULTIPLIER 0.5f
 #define BLOCKING_COLOR_DIVISOR 2
+#define ATTACK_DAMAGE_FRAME 2  // Frame on which damage is actually applied
 
 // Special move constants
 #define SPECIAL_MOVE_COOLDOWN 180  // 3 seconds @ 60 FPS
@@ -284,6 +415,12 @@ static void spawn_projectile(int owner, int type, float x, float y, float vx, fl
             projectiles[i].vx = vx;
             projectiles[i].vy = vy;
             projectiles[i].lifetime = 180; // 3 seconds max
+            
+            // Set projectile hitbox based on type
+            projectiles[i].hitbox.x = x - 15;
+            projectiles[i].hitbox.y = y - 15;
+            projectiles[i].hitbox.w = 30;
+            projectiles[i].hitbox.h = 30;
             break;
         }
     }
@@ -300,6 +437,10 @@ static void update_projectiles(void)
         projectiles[i].y += projectiles[i].vy;
         projectiles[i].lifetime--;
         
+        // Update hitbox position
+        projectiles[i].hitbox.x = projectiles[i].x - 15;
+        projectiles[i].hitbox.y = projectiles[i].y - 15;
+        
         // Deactivate if out of bounds or expired
         if (projectiles[i].x < 0 || projectiles[i].x > 640 ||
             projectiles[i].y < 0 || projectiles[i].y > 480 ||
@@ -309,15 +450,13 @@ static void update_projectiles(void)
             continue;
         }
         
-        // Check collision with players
+        // Check collision with players using hitbox vs hurtbox
         int target = (projectiles[i].owner == 0) ? 1 : 0;
         Player* target_player = &players[target];
         
-        float dx = projectiles[i].x - target_player->x;
-        float dy = projectiles[i].y - target_player->y;
-        float dist = sqrt(dx*dx + dy*dy);
+        CollisionBox target_hurtbox = get_hurtbox(target_player);
         
-        if (dist < PROJECTILE_HIT_RADIUS && target_player->health > 0)
+        if (boxes_overlap(projectiles[i].hitbox, target_hurtbox) && target_player->health > 0)
         {
             // Hit!
             if (target_player->is_blocking)
@@ -353,6 +492,9 @@ static void draw_projectiles(BITMAP* buffer)
             circlefill(buffer, x, y, 8, makecol(255, 200, 0));
             circle(buffer, x, y, 12, makecol(255, 150, 0));
         }
+        
+        // Draw debug hitbox
+        draw_debug_box(buffer, projectiles[i].hitbox, makecol(255, 0, 255));
     }
 }
 
@@ -401,6 +543,7 @@ static void init_player(Player* p, int player_num)
     p->special_move_cooldown = 0;
     p->is_dashing = false;
     p->dash_timer = 0;
+    p->attack_frame = 0;
     // character_id is preserved from selection
 }
 
@@ -528,6 +671,12 @@ static void draw_player(BITMAP* dest, Player* p)
                  makecol(150, 150, 255));
         }
     }
+    
+    // Draw debug collision boxes if enabled
+    draw_debug_box(dest, get_body_box(p), makecol(255, 255, 0));      // Yellow for body
+    draw_debug_box(dest, get_hurtbox(p), makecol(0, 255, 0));         // Green for hurtbox
+    draw_debug_box(dest, get_hitbox(p), makecol(255, 0, 0));          // Red for hitbox
+    draw_debug_box(dest, get_clash_box(p), makecol(255, 165, 0));     // Orange for clash box
 }
 
 // Draw round indicators (circles for wins)
@@ -1006,6 +1155,21 @@ void hamoopi_run_frame(void)
     {
         // Fighting game logic
         
+        // Toggle debug boxes with SELECT button (P1 only to avoid toggle conflicts)
+        static bool select_pressed = false;
+        if (key[p1_select_key])
+        {
+            if (!select_pressed)
+            {
+                show_debug_boxes = !show_debug_boxes;
+                select_pressed = true;
+            }
+        }
+        else
+        {
+            select_pressed = false;
+        }
+        
         // Draw stage background
         draw_stage_background(game_buffer, players[0].character_id, players[1].character_id);
         
@@ -1044,28 +1208,51 @@ void hamoopi_run_frame(void)
             if (key[p1_bt1_key] && p1_attack_cooldown == 0 && !p1->is_blocking)
             {
                 play_sound(SOUND_ATTACK); // Attack sound effect
-                
-                // Simple punch attack - check collision with P2
-                Player* p2 = &players[1];
-                float dist = fabs(p1->x - p2->x);
-                if (dist < 50.0f && p2->health > 0)
+                p1->state = 3; // Attack state
+                p1->attack_frame = 0; // Start attack animation
+                p1_attack_cooldown = 15; // 15 frames cooldown (~0.25 seconds)
+            }
+            
+            // Update attack animation
+            if (p1->state == 3)
+            {
+                p1->attack_frame++;
+                if (p1->attack_frame >= 10) // Attack lasts 10 frames
                 {
-                    // Check if P2 is blocking
-                    if (p2->is_blocking)
+                    p1->state = 0; // Return to idle
+                    p1->attack_frame = 0;
+                }
+                
+                // Check hitbox collision during active frames
+                if (p1->attack_frame >= 2 && p1->attack_frame <= 6)
+                {
+                    Player* p2 = &players[1];
+                    if (p2->health > 0)
                     {
-                        // Reduced damage when blocking
-                        p2->health -= BLOCKED_DAMAGE;
-                        if (p2->health < 0) p2->health = 0;
-                        play_sound(SOUND_BLOCK); // Block impact sound
+                        CollisionBox p1_hitbox = get_hitbox(p1);
+                        CollisionBox p2_hurtbox = get_hurtbox(p2);
+                        
+                        // Check for hit
+                        if (boxes_overlap(p1_hitbox, p2_hurtbox))
+                        {
+                            // Only apply damage once per attack
+                            if (p1->attack_frame == 2)
+                            {
+                                if (p2->is_blocking)
+                                {
+                                    p2->health -= BLOCKED_DAMAGE;
+                                    if (p2->health < 0) p2->health = 0;
+                                    play_sound(SOUND_BLOCK);
+                                }
+                                else
+                                {
+                                    p2->health -= NORMAL_DAMAGE;
+                                    if (p2->health < 0) p2->health = 0;
+                                    play_sound(SOUND_HIT);
+                                }
+                            }
+                        }
                     }
-                    else
-                    {
-                        // Full damage
-                        p2->health -= NORMAL_DAMAGE;
-                        if (p2->health < 0) p2->health = 0;
-                        play_sound(SOUND_HIT); // Hit sound effect
-                    }
-                    p1_attack_cooldown = 15; // 15 frames cooldown (~0.25 seconds)
                 }
             }
             
@@ -1145,27 +1332,50 @@ void hamoopi_run_frame(void)
             if (key[p2_bt1_key] && p2_attack_cooldown == 0 && !p2->is_blocking)
             {
                 play_sound(SOUND_ATTACK); // Attack sound effect
-                
-                // Simple punch attack - check collision with P1
-                float dist = fabs(p2->x - p1->x);
-                if (dist < 50.0f && p1->health > 0)
+                p2->state = 3; // Attack state
+                p2->attack_frame = 0; // Start attack animation
+                p2_attack_cooldown = 15; // 15 frames cooldown (~0.25 seconds)
+            }
+            
+            // Update attack animation
+            if (p2->state == 3)
+            {
+                p2->attack_frame++;
+                if (p2->attack_frame >= 10) // Attack lasts 10 frames
                 {
-                    // Check if P1 is blocking
-                    if (p1->is_blocking)
+                    p2->state = 0; // Return to idle
+                    p2->attack_frame = 0;
+                }
+                
+                // Check hitbox collision during active frames
+                if (p2->attack_frame >= 2 && p2->attack_frame <= 6)
+                {
+                    if (p1->health > 0)
                     {
-                        // Reduced damage when blocking
-                        p1->health -= BLOCKED_DAMAGE;
-                        if (p1->health < 0) p1->health = 0;
-                        play_sound(SOUND_BLOCK); // Block impact sound
+                        CollisionBox p2_hitbox = get_hitbox(p2);
+                        CollisionBox p1_hurtbox = get_hurtbox(p1);
+                        
+                        // Check for hit
+                        if (boxes_overlap(p2_hitbox, p1_hurtbox))
+                        {
+                            // Only apply damage once per attack
+                            if (p2->attack_frame == 2)
+                            {
+                                if (p1->is_blocking)
+                                {
+                                    p1->health -= BLOCKED_DAMAGE;
+                                    if (p1->health < 0) p1->health = 0;
+                                    play_sound(SOUND_BLOCK);
+                                }
+                                else
+                                {
+                                    p1->health -= NORMAL_DAMAGE;
+                                    if (p1->health < 0) p1->health = 0;
+                                    play_sound(SOUND_HIT);
+                                }
+                            }
+                        }
                     }
-                    else
-                    {
-                        // Full damage
-                        p1->health -= NORMAL_DAMAGE;
-                        if (p1->health < 0) p1->health = 0;
-                        play_sound(SOUND_HIT); // Hit sound effect
-                    }
-                    p2_attack_cooldown = 15; // 15 frames cooldown (~0.25 seconds)
                 }
             }
             
@@ -1207,6 +1417,46 @@ void hamoopi_run_frame(void)
             // Boundary check
             if (p2->x < 20.0f) p2->x = 20.0f;
             if (p2->x > 620.0f) p2->x = 620.0f;
+        }
+        
+        // Body collision - prevent players from walking through each other
+        CollisionBox p1_body = get_body_box(p1);
+        CollisionBox p2_body = get_body_box(p2);
+        if (boxes_overlap(p1_body, p2_body))
+        {
+            // Push players apart
+            float push_force = 2.0f;
+            if (p1->x < p2->x)
+            {
+                p1->x -= push_force;
+                p2->x += push_force;
+            }
+            else
+            {
+                p1->x += push_force;
+                p2->x -= push_force;
+            }
+        }
+        
+        // Attack clashing - check if both players are attacking
+        if (p1->state == 3 && p2->state == 3)
+        {
+            CollisionBox p1_clash = get_clash_box(p1);
+            CollisionBox p2_clash = get_clash_box(p2);
+            
+            if (boxes_overlap(p1_clash, p2_clash) && p1_clash.w > 0 && p2_clash.w > 0)
+            {
+                // Attacks clash! Cancel both attacks
+                p1->state = 0;
+                p1->attack_frame = 0;
+                p2->state = 0;
+                p2->attack_frame = 0;
+                play_sound(SOUND_BLOCK); // Clash sound
+                
+                // Push players back slightly
+                p1->vx = -4.0f * p1->facing;
+                p2->vx = -4.0f * p2->facing;
+            }
         }
         
         // Update projectiles
@@ -1254,6 +1504,13 @@ void hamoopi_run_frame(void)
         
         // Draw round indicators
         draw_round_indicators(game_buffer);
+        
+        // Debug info
+        if (show_debug_boxes)
+        {
+            textout_ex(game_buffer, game_font, "DEBUG MODE - SELECT to toggle", 10, 460, makecol(255, 255, 0), -1);
+            textout_ex(game_buffer, game_font, "Yellow=Body Green=Hurtbox Red=Hitbox Orange=Clash", 10, 470, makecol(255, 255, 255), -1);
+        }
         
         // Check for round winner
         if (round_transition_timer > 0)
