@@ -7,6 +7,7 @@ This directory contains the libretro port of HAMOOPI, allowing it to run on Retr
 The libretro core includes:
 - ✅ **Character Selection Screen** - Choose from 4 unique fighters
 - ✅ Full 2-player fighting game implementation
+- ✅ **Multiple Rounds System** - Best of 3 rounds per match
 - ✅ **Animated Stage Backgrounds** - Themed stages for each character
 - ✅ Physics-based movement (walking, jumping)
 - ✅ **Block/Defend Mechanic** - Defend against attacks with B button
@@ -77,7 +78,11 @@ make -f Makefile.libretro platform=win
    - Press A button to confirm selection
    - Both players must select before continuing
 3. **Fight!** → Battle begins when both players are ready
-4. **Winner Screen** → Press START to return to character selection
+   - **Best of 3 Rounds**: First to win 2 rounds wins the match
+   - Round indicators shown at top of screen
+   - Health resets between rounds
+   - 2-second transition between rounds
+4. **Match Winner Screen** → Shows final score, press START to return to character selection
 
 ## Characters & Stages
 
@@ -152,11 +157,12 @@ This is a fully functional libretro fighting game:
 - ✅ **Character selection screen fully integrated**
 - ✅ **4 playable characters with unique colors and stages**
 - ✅ **Block/Defend mechanic fully implemented**
+- ✅ **Multiple rounds system** - Best of 3 rounds with score tracking
 - ✅ **Audio effects for all actions** (jump, attack, hit, block)
 - ✅ **Game logic fully integrated**
 - ✅ **Physics engine (gravity, movement, collision)**
 - ✅ **Combat system with health management and blocking**
-- ✅ **Game states (title, character select, fight, winner)**
+- ✅ **Game states (title, character select, fight, round transitions, match winner)**
 - ❌ Save states not implemented
 - ⚠️ Full HAMOOPI character system pending (using simple sprites for now)
 
@@ -164,6 +170,12 @@ This is a fully functional libretro fighting game:
 
 The core implements a complete fighting game with:
 - **Character Selection**: 4 fighters with distinct visual styles
+- **Multiple Rounds System**: Best of 3 rounds per match
+  - Round indicators displayed at top of screen
+  - Health resets between rounds
+  - Score tracking (e.g., 2-1, 2-0)
+  - 2-second transition between rounds showing round result
+  - First to win 2 rounds wins the match
 - **Stage Backgrounds**: Character-themed animated stages
   - **FIRE**: Volcano with lava glow and mountain silhouettes
   - **WATER**: Ocean beach with animated wave effects

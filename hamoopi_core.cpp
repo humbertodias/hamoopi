@@ -32,6 +32,12 @@ typedef struct {
 static Player players[2];
 static int game_mode = 0; // 0=title, 1=character_select, 2=fight, 3=winner
 
+// Round system (best of 3)
+static int p1_rounds_won = 0;
+static int p2_rounds_won = 0;
+static int current_round = 1;
+static int round_transition_timer = 0;
+
 // Character selection state
 static int p1_cursor = 0;
 static int p2_cursor = 1;
@@ -311,6 +317,46 @@ static void draw_player(BITMAP* dest, Player* p)
     // Draw facing indicator (simple line)
     int dir = p->facing;
     line(dest, x, y - 60, x + dir * 20, y - 60, makecol(255, 255, 0));
+}
+
+// Draw round indicators (circles for wins)
+static void draw_round_indicators(BITMAP* dest)
+{
+    // P1 rounds (left side)
+    int p1_x = 100;
+    int y = 60;
+    for (int i = 0; i < 3; i++)
+    {
+        int x = p1_x + i * 25;
+        if (i < p1_rounds_won)
+        {
+            circlefill(dest, x, y, 8, makecol(255, 200, 100)); // Won rounds (filled)
+        }
+        else
+        {
+            circle(dest, x, y, 8, makecol(150, 150, 150)); // Unwon rounds (outline)
+        }
+    }
+    
+    // P2 rounds (right side)
+    int p2_x = 540;
+    for (int i = 0; i < 3; i++)
+    {
+        int x = p2_x - i * 25;
+        if (i < p2_rounds_won)
+        {
+            circlefill(dest, x, y, 8, makecol(100, 200, 255)); // Won rounds (filled)
+        }
+        else
+        {
+            circle(dest, x, y, 8, makecol(150, 150, 150)); // Unwon rounds (outline)
+        }
+    }
+    
+    // Current round text
+    char round_text[32];
+    sprintf(round_text, "ROUND %d", current_round);
+    textout_centre_ex(dest, font, round_text, 320, 55, makecol(255, 255, 255), -1);
 }
 
 // Draw character selection box
@@ -731,6 +777,12 @@ void hamoopi_run_frame(void)
             players[0].character_id = p1_cursor;
             init_player(&players[1], 1);
             players[1].character_id = p2_cursor;
+            
+            // Reset round system for new match
+            p1_rounds_won = 0;
+            p2_rounds_won = 0;
+            current_round = 1;
+            round_transition_timer = 0;
         }
     }
     else if (game_mode == 2)
@@ -910,24 +962,80 @@ void hamoopi_run_frame(void)
         sprintf(p2_health_str, "HP: %d", p2->health);
         textout_ex(game_buffer, game_font, p2_health_str, 550, 35, makecol(255, 255, 255), -1);
         
-        // Check for winner
-        if (p1->health <= 0 || p2->health <= 0)
+        // Draw round indicators
+        draw_round_indicators(game_buffer);
+        
+        // Check for round winner
+        if (round_transition_timer > 0)
         {
-            game_mode = 3;
+            // Display round result
+            round_transition_timer--;
+            
+            if (p1->health <= 0)
+            {
+                textout_centre_ex(game_buffer, game_font, "ROUND OVER!", 320, 200, makecol(255, 255, 255), -1);
+                textout_centre_ex(game_buffer, game_font, "PLAYER 2 WINS ROUND!", 320, 230, makecol(100, 200, 255), -1);
+            }
+            else
+            {
+                textout_centre_ex(game_buffer, game_font, "ROUND OVER!", 320, 200, makecol(255, 255, 255), -1);
+                textout_centre_ex(game_buffer, game_font, "PLAYER 1 WINS ROUND!", 320, 230, makecol(255, 200, 100), -1);
+            }
+            
+            // After timer expires, check if match is over or start next round
+            if (round_transition_timer == 0)
+            {
+                if (p1_rounds_won >= 2 || p2_rounds_won >= 2)
+                {
+                    // Match over - go to winner screen
+                    game_mode = 3;
+                }
+                else
+                {
+                    // Start next round
+                    current_round++;
+                    init_player(&players[0], 0);
+                    players[0].character_id = players[0].character_id; // Keep character
+                    init_player(&players[1], 1);
+                    players[1].character_id = players[1].character_id; // Keep character
+                }
+            }
+        }
+        else if (p1->health <= 0 || p2->health <= 0)
+        {
+            // Round just ended - award point and start transition
+            if (p1->health <= 0)
+            {
+                p2_rounds_won++;
+            }
+            else
+            {
+                p1_rounds_won++;
+            }
+            round_transition_timer = 120; // 2 seconds at 60 FPS
         }
     }
     else if (game_mode == 3)
     {
-        // Winner screen
+        // Match winner screen
         clear_to_color(game_buffer, makecol(20, 20, 40));
         
-        if (players[0].health > 0)
+        // Draw round indicators
+        draw_round_indicators(game_buffer);
+        
+        if (p1_rounds_won > p2_rounds_won)
         {
-            textout_centre_ex(game_buffer, game_font, "PLAYER 1 WINS!", 320, 200, makecol(255, 200, 100), -1);
+            textout_centre_ex(game_buffer, game_font, "PLAYER 1 WINS THE MATCH!", 320, 200, makecol(255, 200, 100), -1);
+            char score_text[64];
+            sprintf(score_text, "Score: %d - %d", p1_rounds_won, p2_rounds_won);
+            textout_centre_ex(game_buffer, game_font, score_text, 320, 230, makecol(200, 200, 200), -1);
         }
         else
         {
-            textout_centre_ex(game_buffer, game_font, "PLAYER 2 WINS!", 320, 200, makecol(100, 200, 255), -1);
+            textout_centre_ex(game_buffer, game_font, "PLAYER 2 WINS THE MATCH!", 320, 200, makecol(100, 200, 255), -1);
+            char score_text[64];
+            sprintf(score_text, "Score: %d - %d", p1_rounds_won, p2_rounds_won);
+            textout_centre_ex(game_buffer, game_font, score_text, 320, 230, makecol(200, 200, 200), -1);
         }
         
         textout_centre_ex(game_buffer, game_font, "Press START for rematch", 320, 250, makecol(200, 200, 200), -1);
