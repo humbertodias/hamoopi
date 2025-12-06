@@ -93,6 +93,11 @@ void retro_set_environment(retro_environment_t cb)
    
    bool no_content = true;
    cb(RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME, &no_content);
+   
+   // Set up logging
+   struct retro_log_callback log;
+   if (cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
+      log_cb = log.log;
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -233,6 +238,8 @@ bool retro_load_game(const struct retro_game_info *info)
    {
       if (log_cb)
          log_cb(RETRO_LOG_ERROR, "XRGB8888 is not supported.\n");
+      else
+         fprintf(stderr, "HAMOOPI: XRGB8888 is not supported.\n");
       return false;
    }
 

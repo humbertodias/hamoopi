@@ -11,7 +11,7 @@ static bool initialized = false;
 static bool running = false;
 
 // Input state for two players
-hamoopi_input_t hamoopi_input[2] = {0};
+hamoopi_input_t hamoopi_input[2] = {};
 
 // Key mapping (for now, we'll use a simple approach)
 // Player 1 keys
