@@ -4,16 +4,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // Global state variables
 static BITMAP* screen_buffer = NULL;
+static BITMAP* game_buffer = NULL;
 static bool initialized = false;
 static bool running = false;
+static int frame_count = 0;
 
 // Input state for two players
 hamoopi_input_t hamoopi_input[2] = {};
 
-// Key mapping (for now, we'll use a simple approach)
+// Game state
+typedef struct {
+    float x, y;
+    float vx, vy;
+    int health;
+    int state; // 0=idle, 1=walk, 2=jump, 3=attack, 4=hit
+    int anim_frame;
+    int facing; // 1=right, -1=left
+    bool on_ground;
+} Player;
+
+static Player players[2];
+static int game_mode = 0; // 0=title, 1=fight, 2=winner
+
+// Fonts
+static FONT* game_font = NULL;
+
+// Key mapping for players
 // Player 1 keys
 static int p1_up_key = KEY_W;
 static int p1_down_key = KEY_S;
@@ -42,113 +62,317 @@ static int p2_bt6_key = KEY_6_PAD;
 static int p2_select_key = KEY_7_PAD;
 static int p2_start_key = KEY_8_PAD;
 
+// Initialize player state
+static void init_player(Player* p, int player_num)
+{
+    p->x = (player_num == 0) ? 150.0f : 490.0f;
+    p->y = 350.0f;
+    p->vx = 0.0f;
+    p->vy = 0.0f;
+    p->health = 100;
+    p->state = 0;
+    p->anim_frame = 0;
+    p->facing = (player_num == 0) ? 1 : -1;
+    p->on_ground = true;
+}
+
+// Draw a simple fighter sprite
+static void draw_player(BITMAP* dest, Player* p, int color)
+{
+    int x = (int)p->x;
+    int y = (int)p->y;
+    
+    // Draw body
+    rectfill(dest, x - 15, y - 50, x + 15, y, color);
+    
+    // Draw head
+    circlefill(dest, x, y - 60, 10, color);
+    
+    // Draw health bar above player
+    int bar_width = 60;
+    int health_width = (p->health * bar_width) / 100;
+    rect(dest, x - 30, y - 80, x + 30, y - 75, makecol(255, 255, 255));
+    rectfill(dest, x - 30, y - 80, x - 30 + health_width, y - 75, makecol(0, 255, 0));
+    
+    // Draw facing indicator (simple line)
+    int dir = p->facing;
+    line(dest, x, y - 60, x + dir * 20, y - 60, makecol(255, 255, 0));
+}
+
 void hamoopi_init(void)
 {
-   if (initialized)
-      return;
-   
-   // Create a screen buffer for rendering
-   screen_buffer = create_bitmap(640, 480);
-   if (!screen_buffer)
-   {
-      fprintf(stderr, "Failed to create screen buffer\n");
-      return;
-   }
-   
-   clear_to_color(screen_buffer, makecol(0, 0, 0));
-   
-   // Override the global Allegro 'screen' variable
-   screen = screen_buffer;
-   
-   // Initialize keyboard state
-   install_keyboard();
-   
-   initialized = true;
-   running = false;
+    if (initialized)
+        return;
+    
+    // Create screen buffer for rendering
+    screen_buffer = create_bitmap(640, 480);
+    game_buffer = create_bitmap(640, 480);
+    
+    if (!screen_buffer || !game_buffer)
+    {
+        fprintf(stderr, "Failed to create screen buffers\n");
+        return;
+    }
+    
+    clear_to_color(screen_buffer, makecol(0, 0, 0));
+    clear_to_color(game_buffer, makecol(0, 0, 0));
+    
+    // Override the global Allegro 'screen' variable
+    screen = screen_buffer;
+    
+    // Initialize keyboard state
+    install_keyboard();
+    
+    // Initialize game font
+    game_font = font;
+    
+    // Initialize players
+    init_player(&players[0], 0);
+    init_player(&players[1], 1);
+    
+    game_mode = 0; // Start at title screen
+    frame_count = 0;
+    
+    initialized = true;
+    running = false;
 }
 
 void hamoopi_deinit(void)
 {
-   if (!initialized)
-      return;
-   
-   if (screen_buffer)
-   {
-      destroy_bitmap(screen_buffer);
-      screen_buffer = NULL;
-   }
-   
-   screen = NULL;
-   initialized = false;
-   running = false;
+    if (!initialized)
+        return;
+    
+    if (game_buffer)
+    {
+        destroy_bitmap(game_buffer);
+        game_buffer = NULL;
+    }
+    
+    if (screen_buffer)
+    {
+        destroy_bitmap(screen_buffer);
+        screen_buffer = NULL;
+    }
+    
+    screen = NULL;
+    initialized = false;
+    running = false;
 }
 
 void hamoopi_reset(void)
 {
-   // Reset game state (to be implemented based on HAMOOPI's reset logic)
-   // For now, just clear the screen
-   if (screen_buffer)
-      clear_to_color(screen_buffer, makecol(0, 0, 0));
+    // Reset game state
+    init_player(&players[0], 0);
+    init_player(&players[1], 1);
+    game_mode = 0;
+    frame_count = 0;
+    
+    if (screen_buffer)
+        clear_to_color(screen_buffer, makecol(0, 0, 0));
+    if (game_buffer)
+        clear_to_color(game_buffer, makecol(0, 0, 0));
 }
 
 void hamoopi_run_frame(void)
 {
-   if (!initialized || !screen_buffer)
-      return;
-   
-   // Update the Allegro key array based on hamoopi_input state
-   key[p1_up_key] = hamoopi_input[0].up;
-   key[p1_down_key] = hamoopi_input[0].down;
-   key[p1_left_key] = hamoopi_input[0].left;
-   key[p1_right_key] = hamoopi_input[0].right;
-   key[p1_bt1_key] = hamoopi_input[0].a;
-   key[p1_bt2_key] = hamoopi_input[0].b;
-   key[p1_bt3_key] = hamoopi_input[0].y;
-   key[p1_bt4_key] = hamoopi_input[0].x;
-   key[p1_bt5_key] = hamoopi_input[0].l;
-   key[p1_bt6_key] = hamoopi_input[0].r;
-   key[p1_select_key] = hamoopi_input[0].select;
-   key[p1_start_key] = hamoopi_input[0].start;
-   
-   key[p2_up_key] = hamoopi_input[1].up;
-   key[p2_down_key] = hamoopi_input[1].down;
-   key[p2_left_key] = hamoopi_input[1].left;
-   key[p2_right_key] = hamoopi_input[1].right;
-   key[p2_bt1_key] = hamoopi_input[1].a;
-   key[p2_bt2_key] = hamoopi_input[1].b;
-   key[p2_bt3_key] = hamoopi_input[1].y;
-   key[p2_bt4_key] = hamoopi_input[1].x;
-   key[p2_bt5_key] = hamoopi_input[1].l;
-   key[p2_bt6_key] = hamoopi_input[1].r;
-   key[p2_select_key] = hamoopi_input[1].select;
-   key[p2_start_key] = hamoopi_input[1].start;
-   
-   // Here we would call the main game loop iteration
-   // For now, just draw a test pattern
-   if (!running)
-   {
-      running = true;
-      // First frame - draw something visible
-      clear_to_color(screen_buffer, makecol(32, 32, 64));
-      
-      // Draw a test pattern
-      for (int i = 0; i < 480; i += 20)
-      {
-         hline(screen_buffer, 0, i, 640, makecol(64, 64, 128));
-      }
-      for (int i = 0; i < 640; i += 20)
-      {
-         vline(screen_buffer, i, 0, 480, makecol(64, 64, 128));
-      }
-      
-      // Draw "HAMOOPI" text
-      textout_centre_ex(screen_buffer, font, "HAMOOPI", 320, 220, makecol(255, 255, 255), -1);
-      textout_centre_ex(screen_buffer, font, "Libretro Core", 320, 240, makecol(200, 200, 200), -1);
-      textout_centre_ex(screen_buffer, font, "Press START to begin", 320, 260, makecol(150, 150, 150), -1);
-   }
-   
-   // Simulate game logic updates here
-   // TODO: This is where the main HAMOOPI game loop would be called
+    if (!initialized || !screen_buffer || !game_buffer)
+        return;
+    
+    frame_count++;
+    
+    // Update the Allegro key array based on hamoopi_input state
+    key[p1_up_key] = hamoopi_input[0].up;
+    key[p1_down_key] = hamoopi_input[0].down;
+    key[p1_left_key] = hamoopi_input[0].left;
+    key[p1_right_key] = hamoopi_input[0].right;
+    key[p1_bt1_key] = hamoopi_input[0].a;
+    key[p1_bt2_key] = hamoopi_input[0].b;
+    key[p1_bt3_key] = hamoopi_input[0].y;
+    key[p1_bt4_key] = hamoopi_input[0].x;
+    key[p1_bt5_key] = hamoopi_input[0].l;
+    key[p1_bt6_key] = hamoopi_input[0].r;
+    key[p1_select_key] = hamoopi_input[0].select;
+    key[p1_start_key] = hamoopi_input[0].start;
+    
+    key[p2_up_key] = hamoopi_input[1].up;
+    key[p2_down_key] = hamoopi_input[1].down;
+    key[p2_left_key] = hamoopi_input[1].left;
+    key[p2_right_key] = hamoopi_input[1].right;
+    key[p2_bt1_key] = hamoopi_input[1].a;
+    key[p2_bt2_key] = hamoopi_input[1].b;
+    key[p2_bt3_key] = hamoopi_input[1].y;
+    key[p2_bt4_key] = hamoopi_input[1].x;
+    key[p2_bt5_key] = hamoopi_input[1].l;
+    key[p2_bt6_key] = hamoopi_input[1].r;
+    key[p2_select_key] = hamoopi_input[1].select;
+    key[p2_start_key] = hamoopi_input[1].start;
+    
+    // Clear game buffer
+    clear_to_color(game_buffer, makecol(20, 40, 80));
+    
+    // Game mode logic
+    if (game_mode == 0)
+    {
+        // Title screen
+        textout_centre_ex(game_buffer, game_font, "HAMOOPI", 320, 150, makecol(255, 255, 255), -1);
+        textout_centre_ex(game_buffer, game_font, "Libretro Core - Fighting Game Demo", 320, 180, makecol(200, 200, 200), -1);
+        textout_centre_ex(game_buffer, game_font, "Press START to begin", 320, 240, makecol(150, 200, 150), -1);
+        textout_centre_ex(game_buffer, game_font, "Player 1: WASD + JKL", 320, 300, makecol(150, 150, 200), -1);
+        textout_centre_ex(game_buffer, game_font, "Player 2: Arrows + Numpad", 320, 320, makecol(150, 150, 200), -1);
+        
+        if (key[p1_start_key] || key[p2_start_key])
+        {
+            game_mode = 1;
+            init_player(&players[0], 0);
+            init_player(&players[1], 1);
+        }
+    }
+    else if (game_mode == 1)
+    {
+        // Fighting game logic
+        
+        // Draw ground
+        hline(game_buffer, 0, 400, 640, makecol(100, 200, 100));
+        
+        // Update Player 1
+        Player* p1 = &players[0];
+        if (p1->health > 0)
+        {
+            // Movement
+            if (key[p1_left_key]) { p1->vx = -3.0f; p1->facing = -1; }
+            else if (key[p1_right_key]) { p1->vx = 3.0f; p1->facing = 1; }
+            else { p1->vx *= 0.8f; }
+            
+            // Jump
+            if (key[p1_up_key] && p1->on_ground)
+            {
+                p1->vy = -12.0f;
+                p1->on_ground = false;
+            }
+            
+            // Attack
+            if (key[p1_bt1_key])
+            {
+                // Simple punch attack - check collision with P2
+                Player* p2 = &players[1];
+                float dist = fabs(p1->x - p2->x);
+                if (dist < 50.0f && p2->health > 0)
+                {
+                    p2->health -= 1;
+                    if (p2->health < 0) p2->health = 0;
+                }
+            }
+            
+            // Physics
+            p1->vy += 0.5f; // Gravity
+            p1->x += p1->vx;
+            p1->y += p1->vy;
+            
+            // Collision with ground
+            if (p1->y >= 350.0f)
+            {
+                p1->y = 350.0f;
+                p1->vy = 0.0f;
+                p1->on_ground = true;
+            }
+            
+            // Boundary check
+            if (p1->x < 20.0f) p1->x = 20.0f;
+            if (p1->x > 620.0f) p1->x = 620.0f;
+        }
+        
+        // Update Player 2
+        Player* p2 = &players[1];
+        if (p2->health > 0)
+        {
+            // Movement
+            if (key[p2_left_key]) { p2->vx = -3.0f; p2->facing = -1; }
+            else if (key[p2_right_key]) { p2->vx = 3.0f; p2->facing = 1; }
+            else { p2->vx *= 0.8f; }
+            
+            // Jump
+            if (key[p2_up_key] && p2->on_ground)
+            {
+                p2->vy = -12.0f;
+                p2->on_ground = false;
+            }
+            
+            // Attack
+            if (key[p2_bt1_key])
+            {
+                // Simple punch attack - check collision with P1
+                float dist = fabs(p2->x - p1->x);
+                if (dist < 50.0f && p1->health > 0)
+                {
+                    p1->health -= 1;
+                    if (p1->health < 0) p1->health = 0;
+                }
+            }
+            
+            // Physics
+            p2->vy += 0.5f; // Gravity
+            p2->x += p2->vx;
+            p2->y += p2->vy;
+            
+            // Collision with ground
+            if (p2->y >= 350.0f)
+            {
+                p2->y = 350.0f;
+                p2->vy = 0.0f;
+                p2->on_ground = true;
+            }
+            
+            // Boundary check
+            if (p2->x < 20.0f) p2->x = 20.0f;
+            if (p2->x > 620.0f) p2->x = 620.0f;
+        }
+        
+        // Draw players
+        draw_player(game_buffer, p1, makecol(255, 100, 100));
+        draw_player(game_buffer, p2, makecol(100, 100, 255));
+        
+        // Draw HUD
+        textout_ex(game_buffer, game_font, "P1", 50, 20, makecol(255, 100, 100), -1);
+        char health_str[32];
+        sprintf(health_str, "HP: %d", p1->health);
+        textout_ex(game_buffer, game_font, health_str, 50, 35, makecol(255, 255, 255), -1);
+        
+        textout_ex(game_buffer, game_font, "P2", 550, 20, makecol(100, 100, 255), -1);
+        sprintf(health_str, "HP: %d", p2->health);
+        textout_ex(game_buffer, game_font, health_str, 550, 35, makecol(255, 255, 255), -1);
+        
+        // Check for winner
+        if (p1->health <= 0 || p2->health <= 0)
+        {
+            game_mode = 2;
+        }
+    }
+    else if (game_mode == 2)
+    {
+        // Winner screen
+        clear_to_color(game_buffer, makecol(20, 20, 40));
+        
+        if (players[0].health > 0)
+        {
+            textout_centre_ex(game_buffer, game_font, "PLAYER 1 WINS!", 320, 200, makecol(255, 200, 100), -1);
+        }
+        else
+        {
+            textout_centre_ex(game_buffer, game_font, "PLAYER 2 WINS!", 320, 200, makecol(100, 200, 255), -1);
+        }
+        
+        textout_centre_ex(game_buffer, game_font, "Press START for rematch", 320, 250, makecol(200, 200, 200), -1);
+        
+        if (key[p1_start_key] || key[p2_start_key])
+        {
+            game_mode = 1;
+            init_player(&players[0], 0);
+            init_player(&players[1], 1);
+        }
+    }
+    
+    // Copy game buffer to screen buffer
+    blit(game_buffer, screen_buffer, 0, 0, 0, 0, 640, 480);
 }
 
 BITMAP* hamoopi_get_screen_buffer(void)
