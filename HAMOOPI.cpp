@@ -32,7 +32,7 @@
 	8- Revisar / otimizar todo o código
 *******************************************************************************/
 
-#include <allegro.h>
+#include "allegro_compat.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -1062,6 +1062,8 @@ set_window_title(versao);
 while (sair==0)
 {
 
+_process_sdl_events(); // Process SDL events
+_update_keyboard_state(); // Update keyboard state
 check_keys_P1(); check_keys_P2(); //verifica teclas key_press, key_hold, key_released
 delay=timer;
 Segundos=((timer/60)-Minutos*60)-Horas*3600;
