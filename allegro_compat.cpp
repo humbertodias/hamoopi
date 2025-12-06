@@ -1023,7 +1023,8 @@ void _process_sdl_events() {
 }
 
 void _update_keyboard_state() {
-    SDL_PumpEvents();
+    // Update keyboard state - SDL_GetKeyboardState returns the current state
+    // We need to ensure events are pumped first
     _key_state = (Uint8*)SDL_GetKeyboardState(nullptr);
     key = (const Uint8*)_key_state;
 }
