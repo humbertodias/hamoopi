@@ -615,21 +615,53 @@ FONT* _load_pcx_font(const char* filename) {
     SDL_Surface* surf = _load_pcx(filename);
     if (!surf) return nullptr;
     
-    // Set magenta (255, 0, 255) as transparent for font
-    SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, 255, 0, 255));
+    // Allegro bitmap fonts typically have black characters on magenta/transparent background
+    // We need to convert black to white so SDL color modulation works
+    // (black * any_color = black, but white * any_color = any_color)
+    
+    // Convert surface to RGBA format for easier manipulation
+    SDL_Surface* rgba_surf = SDL_ConvertSurfaceFormat(surf, SDL_PIXELFORMAT_RGBA32, 0);
+    SDL_FreeSurface(surf);
+    
+    if (!rgba_surf) return nullptr;
+    
+    // Invert black pixels to white, keep magenta as transparent
+    SDL_LockSurface(rgba_surf);
+    Uint32* pixels = (Uint32*)rgba_surf->pixels;
+    int pixel_count = rgba_surf->w * rgba_surf->h;
+    
+    for (int i = 0; i < pixel_count; i++) {
+        Uint8 r, g, b, a;
+        SDL_GetRGBA(pixels[i], rgba_surf->format, &r, &g, &b, &a);
+        
+        // If pixel is magenta (transparency), make it fully transparent
+        if (r == 255 && g == 0 && b == 255) {
+            pixels[i] = SDL_MapRGBA(rgba_surf->format, 255, 255, 255, 0);
+        }
+        // If pixel is black or very dark (character), make it white
+        else if (r < 50 && g < 50 && b < 50) {
+            pixels[i] = SDL_MapRGBA(rgba_surf->format, 255, 255, 255, 255);
+        }
+        // Everything else (like yellow borders) make transparent
+        else {
+            pixels[i] = SDL_MapRGBA(rgba_surf->format, 255, 255, 255, 0);
+        }
+    }
+    
+    SDL_UnlockSurface(rgba_surf);
     
     FONT* font = new FONT();
     font->ttf_font = nullptr;
-    font->char_height = surf->h / 16; // Assume 16 rows
-    font->char_width = surf->w / 16;  // Assume 16 cols
+    font->char_height = rgba_surf->h / 16; // Assume 16 rows
+    font->char_width = rgba_surf->w / 16;  // Assume 16 cols
     
-    // Create texture with blend mode for transparency
-    font->bitmap_font = SDL_CreateTextureFromSurface(_sdl_renderer, surf);
+    // Create texture from the modified surface
+    font->bitmap_font = SDL_CreateTextureFromSurface(_sdl_renderer, rgba_surf);
     if (font->bitmap_font) {
         SDL_SetTextureBlendMode(font->bitmap_font, SDL_BLENDMODE_BLEND);
     }
     
-    SDL_FreeSurface(surf);
+    SDL_FreeSurface(rgba_surf);
     return font;
 }
 
@@ -684,29 +716,25 @@ void textout_ex(BITMAP* bmp, FONT* f, const char* str, int x, int y, int color, 
         SDL_DestroyTexture(text_tex);
         SDL_FreeSurface(text_surf);
     } else if (f->bitmap_font) {
-        // Bitmap font rendering - render character by character
+        // Bitmap font rendering
+        // Fonts are now white characters on transparent background (converted during loading)
+        // So color modulation will work: white * color = color
+        
         if (!bmp->texture) return;
         
         SDL_SetRenderTarget(_sdl_renderer, bmp == screen ? nullptr : bmp->texture);
         
-        // For bitmap fonts, we assume white characters on transparent background
-        // So we can use color modulation to change the color
         Uint8 r = (color >> 16) & 0xFF;
         Uint8 g = (color >> 8) & 0xFF;
         Uint8 b = color & 0xFF;
         
-        // Try setting both color mod and alpha mod
+        // Set color modulation for the bitmap font
         SDL_SetTextureColorMod(f->bitmap_font, r, g, b);
         SDL_SetTextureAlphaMod(f->bitmap_font, 255);
         
         int current_x = x;
         for (const char* c = str; *c != '\0'; c++) {
             unsigned char ch = (unsigned char)*c;
-            
-            // Skip non-printable characters except space
-            if (ch < 32 && ch != ' ') {
-                continue;
-            }
             
             // Calculate source rect in the bitmap font (16x16 grid)
             int char_row = ch / 16;
@@ -719,8 +747,6 @@ void textout_ex(BITMAP* bmp, FONT* f, const char* str, int x, int y, int color, 
             };
             
             SDL_Rect dst_rect = {current_x, y, f->char_width, f->char_height};
-            
-            // Render the character
             SDL_RenderCopy(_sdl_renderer, f->bitmap_font, &src_rect, &dst_rect);
             
             current_x += f->char_width;
