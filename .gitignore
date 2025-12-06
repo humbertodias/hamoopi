@@ -8,3 +8,6 @@ cmake-build-debug
 *.dylib
 *.dll
 !hamoopi_libretro.info
+
+# CodeQL build artifacts
+_codeql_*
