@@ -2,3 +2,9 @@
 build
 .idea
 cmake-build-debug
+
+# Libretro build artifacts
+*.so
+*.dylib
+*.dll
+hamoopi_libretro.*
