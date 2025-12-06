@@ -247,8 +247,8 @@ static void load_character_sprites(int char_id)
     const char* char_name = "CharTemplate";
     
     // Load essential animations based on HAMOOPI specification
-    // State 0: Stance/Idle
-    load_animation(sprites, 0, char_name);
+    // State 100: Stance/Idle
+    load_animation(sprites, 100, char_name);
     
     // State 420: Walking forward
     load_animation(sprites, 420, char_name);
@@ -369,7 +369,7 @@ static BITMAP* get_sprite_frame(Player* p)
     }
     else  // Idle
     {
-        sprite_state = 0;  // Stance
+        sprite_state = 100;  // Stance
     }
     
     Animation* anim = get_animation(sprites, sprite_state);
