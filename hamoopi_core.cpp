@@ -22,6 +22,26 @@ typedef struct {
     float w, h;     // Width and height
 } CollisionBox;
 
+// Sprite animation system
+#define MAX_ANIM_FRAMES 30
+#define MAX_ANIMATIONS 20
+
+typedef struct {
+    BITMAP* frames[MAX_ANIM_FRAMES];
+    int frame_count;
+    int state_id;  // Animation state ID (e.g., 100 for walk, 200 for attack)
+} Animation;
+
+typedef struct {
+    Animation animations[MAX_ANIMATIONS];
+    int anim_count;
+    bool loaded;
+} SpriteSet;
+
+// Sprite cache for all characters
+static SpriteSet character_sprites[4];  // One for each character (FIRE, WATER, EARTH, WIND)
+static bool sprites_loaded = false;
+
 // Game state
 typedef struct {
     float x, y;
@@ -29,6 +49,7 @@ typedef struct {
     int health;
     int state; // 0=idle, 1=walk, 2=jump, 3=attack, 4=hit
     int anim_frame;
+    int anim_timer;  // Timer for animation frame updates
     int facing; // 1=right, -1=left
     bool on_ground;
     int character_id; // Character selection (0-3)
@@ -173,6 +194,207 @@ static void draw_debug_box(BITMAP* dest, CollisionBox box, int color)
         rect(dest, (int)box.x, (int)box.y, 
              (int)(box.x + box.w), (int)(box.y + box.h), color);
     }
+}
+
+// Sprite loading and animation system
+static void load_animation(SpriteSet* sprites, int state_id, const char* char_name)
+{
+    char filename[256];
+    Animation* anim = &sprites->animations[sprites->anim_count];
+    anim->state_id = state_id;
+    anim->frame_count = 0;
+    
+    // Load up to MAX_ANIM_FRAMES for this animation state
+    for (int frame = 0; frame < MAX_ANIM_FRAMES && anim->frame_count < MAX_ANIM_FRAMES; frame++)
+    {
+        snprintf(filename, sizeof(filename), "chars/%s/%d_%02d.pcx", char_name, state_id, frame);
+        
+        // Try to load the sprite
+        BITMAP* sprite = load_bitmap(filename, NULL);
+        if (sprite)
+        {
+            anim->frames[anim->frame_count] = sprite;
+            anim->frame_count++;
+        }
+        else
+        {
+            // No more frames for this animation
+            break;
+        }
+    }
+    
+    // Only count the animation if it has at least one frame
+    if (anim->frame_count > 0)
+    {
+        sprites->anim_count++;
+    }
+}
+
+static void load_character_sprites(int char_id)
+{
+    if (character_sprites[char_id].loaded)
+    {
+        return;  // Already loaded
+    }
+    
+    SpriteSet* sprites = &character_sprites[char_id];
+    sprites->anim_count = 0;
+    sprites->loaded = false;
+    
+    // Use CharTemplate as the character folder (all chars use same animations)
+    const char* char_name = "CharTemplate";
+    
+    // Load essential animations
+    // State 0: Stance/Idle (000)
+    load_animation(sprites, 0, char_name);
+    
+    // State 100: Walk forward
+    load_animation(sprites, 100, char_name);
+    
+    // State 101: Walk backward  
+    load_animation(sprites, 101, char_name);
+    
+    // State 151: Jump
+    load_animation(sprites, 151, char_name);
+    
+    // State 200: Light punch
+    load_animation(sprites, 200, char_name);
+    
+    // State 201: Medium punch
+    load_animation(sprites, 201, char_name);
+    
+    // State 300: Special move 1
+    load_animation(sprites, 300, char_name);
+    
+    // State 410: Block
+    load_animation(sprites, 410, char_name);
+    
+    // State 501: Hit/hurt
+    load_animation(sprites, 501, char_name);
+    
+    sprites->loaded = true;
+}
+
+static Animation* get_animation(SpriteSet* sprites, int state_id)
+{
+    for (int i = 0; i < sprites->anim_count; i++)
+    {
+        if (sprites->animations[i].state_id == state_id)
+        {
+            return &sprites->animations[i];
+        }
+    }
+    return NULL;
+}
+
+static BITMAP* get_sprite_frame(Player* p)
+{
+    if (!sprites_loaded)
+    {
+        return NULL;
+    }
+    
+    SpriteSet* sprites = &character_sprites[p->character_id];
+    if (!sprites->loaded)
+    {
+        return NULL;
+    }
+    
+    // Map game state to sprite animation state
+    int sprite_state = 0;
+    
+    if (p->is_blocking)
+    {
+        sprite_state = 410;  // Block animation
+    }
+    else if (p->state == 3)  // Attack
+    {
+        sprite_state = 200;  // Light punch
+    }
+    else if (p->state == 2)  // Jump
+    {
+        sprite_state = 151;  // Jump animation
+    }
+    else if (p->state == 1)  // Walk
+    {
+        sprite_state = 100;  // Walk forward
+    }
+    else  // Idle
+    {
+        sprite_state = 0;  // Stance
+    }
+    
+    Animation* anim = get_animation(sprites, sprite_state);
+    if (!anim || anim->frame_count == 0)
+    {
+        // Fallback to idle if animation not found
+        anim = get_animation(sprites, 0);
+        if (!anim || anim->frame_count == 0)
+        {
+            return NULL;
+        }
+    }
+    
+    // Get current frame (wrap around if needed)
+    int frame_index = p->anim_frame % anim->frame_count;
+    return anim->frames[frame_index];
+}
+
+static void init_sprite_system()
+{
+    if (sprites_loaded)
+    {
+        return;
+    }
+    
+    // Initialize all sprite sets
+    for (int i = 0; i < 4; i++)
+    {
+        character_sprites[i].loaded = false;
+        character_sprites[i].anim_count = 0;
+        for (int j = 0; j < MAX_ANIMATIONS; j++)
+        {
+            character_sprites[i].animations[j].frame_count = 0;
+            for (int k = 0; k < MAX_ANIM_FRAMES; k++)
+            {
+                character_sprites[i].animations[j].frames[k] = NULL;
+            }
+        }
+    }
+    
+    sprites_loaded = true;
+}
+
+static void cleanup_sprite_system()
+{
+    if (!sprites_loaded)
+    {
+        return;
+    }
+    
+    // Free all loaded sprites
+    for (int i = 0; i < 4; i++)
+    {
+        SpriteSet* sprites = &character_sprites[i];
+        if (sprites->loaded)
+        {
+            for (int j = 0; j < sprites->anim_count; j++)
+            {
+                Animation* anim = &sprites->animations[j];
+                for (int k = 0; k < anim->frame_count; k++)
+                {
+                    if (anim->frames[k])
+                    {
+                        destroy_bitmap(anim->frames[k]);
+                        anim->frames[k] = NULL;
+                    }
+                }
+            }
+            sprites->loaded = false;
+        }
+    }
+    
+    sprites_loaded = false;
 }
 
 static Player players[2];
@@ -537,6 +759,7 @@ static void init_player(Player* p, int player_num)
     p->health = 100;
     p->state = 0;
     p->anim_frame = 0;
+    p->anim_timer = 0;
     p->facing = (player_num == 0) ? 1 : -1;
     p->on_ground = true;
     p->is_blocking = false;
@@ -617,35 +840,100 @@ static void draw_player(BITMAP* dest, Player* p)
     int x = (int)p->x;
     int y = (int)p->y;
     
-    // Get character color
+    // Get character color for tinting/fallback
     int color = makecol(char_colors[p->character_id][0], 
                         char_colors[p->character_id][1], 
                         char_colors[p->character_id][2]);
     
-    // If blocking, draw shield in front and darker body
-    if (p->is_blocking)
+    // Try to get sprite frame
+    BITMAP* sprite = get_sprite_frame(p);
+    
+    if (sprite)
     {
-        // Draw darker body when blocking
-        int dark_color = makecol(char_colors[p->character_id][0] / BLOCKING_COLOR_DIVISOR, 
-                                  char_colors[p->character_id][1] / BLOCKING_COLOR_DIVISOR, 
-                                  char_colors[p->character_id][2] / BLOCKING_COLOR_DIVISOR);
-        rectfill(dest, x - 15, y - 50, x + 15, y, dark_color);
-        circlefill(dest, x, y - 60, 10, dark_color);
+        // Draw sprite
+        int sprite_x = x - (sprite->w / 2);
+        int sprite_y = y - sprite->h;
         
-        // Draw shield in front of player
-        int shield_x = x + (p->facing * 20);
-        int shield_color = makecol(150, 150, 255); // Blue shield
-        circlefill(dest, shield_x, y - 30, 15, shield_color);
-        circle(dest, shield_x, y - 30, 16, makecol(255, 255, 255));
-        circle(dest, shield_x, y - 30, 17, makecol(255, 255, 255));
+        // Draw sprite with horizontal flip for left-facing characters
+        if (p->facing < 0)
+        {
+            // Create temporary flipped bitmap
+            BITMAP* flipped = create_bitmap(sprite->w, sprite->h);
+            if (flipped)
+            {
+                clear_to_color(flipped, makecol(255, 0, 255));  // Transparent color
+                // Manually flip horizontally
+                for (int sy = 0; sy < sprite->h; sy++)
+                {
+                    for (int sx = 0; sx < sprite->w; sx++)
+                    {
+                        putpixel(flipped, sprite->w - 1 - sx, sy, getpixel(sprite, sx, sy));
+                    }
+                }
+                draw_sprite(dest, flipped, sprite_x, sprite_y);
+                destroy_bitmap(flipped);
+            }
+            else
+            {
+                // Fallback if flipped bitmap creation fails
+                draw_sprite(dest, sprite, sprite_x, sprite_y);
+            }
+        }
+        else
+        {
+            draw_sprite(dest, sprite, sprite_x, sprite_y);
+        }
+        
+        // Apply character color tint by drawing a semi-transparent overlay
+        // This preserves sprite details while adding character color
+        if (p->is_blocking)
+        {
+            // Darker tint when blocking
+            int dark_color = makecol(char_colors[p->character_id][0] / BLOCKING_COLOR_DIVISOR, 
+                                      char_colors[p->character_id][1] / BLOCKING_COLOR_DIVISOR, 
+                                      char_colors[p->character_id][2] / BLOCKING_COLOR_DIVISOR);
+            drawing_mode(DRAW_MODE_TRANS, NULL, 0, 0);
+            set_trans_blender(0, 0, 0, 128);
+            rectfill(dest, sprite_x, sprite_y, sprite_x + sprite->w, sprite_y + sprite->h, dark_color);
+            solid_mode();
+        }
+        
+        // Draw shield in front if blocking
+        if (p->is_blocking)
+        {
+            int shield_x = x + (p->facing * 30);
+            int shield_y = y - 40;
+            int shield_color = makecol(150, 150, 255);
+            circlefill(dest, shield_x, shield_y, 15, shield_color);
+            circle(dest, shield_x, shield_y, 16, makecol(255, 255, 255));
+            circle(dest, shield_x, shield_y, 17, makecol(255, 255, 255));
+        }
     }
     else
     {
-        // Draw normal body
-        rectfill(dest, x - 15, y - 50, x + 15, y, color);
+        // Fallback to geometric shapes if sprites not loaded
+        if (p->is_blocking)
+        {
+            int dark_color = makecol(char_colors[p->character_id][0] / BLOCKING_COLOR_DIVISOR, 
+                                      char_colors[p->character_id][1] / BLOCKING_COLOR_DIVISOR, 
+                                      char_colors[p->character_id][2] / BLOCKING_COLOR_DIVISOR);
+            rectfill(dest, x - 15, y - 50, x + 15, y, dark_color);
+            circlefill(dest, x, y - 60, 10, dark_color);
+            
+            int shield_x = x + (p->facing * 20);
+            int shield_color = makecol(150, 150, 255);
+            circlefill(dest, shield_x, y - 30, 15, shield_color);
+            circle(dest, shield_x, y - 30, 16, makecol(255, 255, 255));
+            circle(dest, shield_x, y - 30, 17, makecol(255, 255, 255));
+        }
+        else
+        {
+            rectfill(dest, x - 15, y - 50, x + 15, y, color);
+            circlefill(dest, x, y - 60, 10, color);
+        }
         
-        // Draw head
-        circlefill(dest, x, y - 60, 10, color);
+        int dir = p->facing;
+        line(dest, x, y - 60, x + dir * 20, y - 60, makecol(255, 255, 0));
     }
     
     // Draw health bar above player
@@ -654,14 +942,10 @@ static void draw_player(BITMAP* dest, Player* p)
     rect(dest, x - 30, y - 80, x + 30, y - 75, makecol(255, 255, 255));
     rectfill(dest, x - 30, y - 80, x - 30 + health_width, y - 75, makecol(0, 255, 0));
     
-    // Draw facing indicator (simple line)
-    int dir = p->facing;
-    line(dest, x, y - 60, x + dir * 20, y - 60, makecol(255, 255, 0));
-    
     // Draw special effects
     if (p->is_dashing)
     {
-        // WIND dash effect - motion lines
+        int dir = p->facing;
         for (int i = 1; i <= 3; i++)
         {
             int offset = i * 15;
@@ -927,6 +1211,9 @@ void hamoopi_init(void)
     // Initialize game font
     game_font = font;
     
+    // Initialize sprite system
+    init_sprite_system();
+    
     // Initialize players with default characters
     init_player(&players[0], 0);
     players[0].character_id = 0;
@@ -956,6 +1243,9 @@ void hamoopi_deinit(void)
 {
     if (!initialized)
         return;
+    
+    // Cleanup sprite system
+    cleanup_sprite_system();
     
     if (game_buffer)
     {
@@ -1143,6 +1433,10 @@ void hamoopi_run_frame(void)
             players[0].character_id = p1_cursor;
             init_player(&players[1], 1);
             players[1].character_id = p2_cursor;
+            
+            // Load sprites for selected characters
+            load_character_sprites(p1_cursor);
+            load_character_sprites(p2_cursor);
             
             // Reset round system for new match
             p1_rounds_won = 0;
@@ -1435,6 +1729,61 @@ void hamoopi_run_frame(void)
             {
                 p1->x += push_force;
                 p2->x -= push_force;
+            }
+        }
+        
+        // Update animation frames
+        p1->anim_timer++;
+        p2->anim_timer++;
+        
+        // Update animation frame every 5 game frames (12 FPS animation at 60 FPS game)
+        if (p1->anim_timer >= 5)
+        {
+            p1->anim_timer = 0;
+            p1->anim_frame++;
+        }
+        if (p2->anim_timer >= 5)
+        {
+            p2->anim_timer = 0;
+            p2->anim_frame++;
+        }
+        
+        // Update player states based on movement
+        if (p1->health > 0)
+        {
+            if (p1->state != 3 && !p1->is_blocking)  // Not attacking or blocking
+            {
+                if (!p1->on_ground)
+                {
+                    p1->state = 2;  // Jump
+                }
+                else if (fabs(p1->vx) > 0.5f)
+                {
+                    p1->state = 1;  // Walk
+                }
+                else
+                {
+                    p1->state = 0;  // Idle
+                }
+            }
+        }
+        
+        if (p2->health > 0)
+        {
+            if (p2->state != 3 && !p2->is_blocking)  // Not attacking or blocking
+            {
+                if (!p2->on_ground)
+                {
+                    p2->state = 2;  // Jump
+                }
+                else if (fabs(p2->vx) > 0.5f)
+                {
+                    p2->state = 1;  // Walk
+                }
+                else
+                {
+                    p2->state = 0;  // Idle
+                }
             }
         }
         

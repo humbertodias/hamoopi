@@ -5,6 +5,7 @@ This directory contains the libretro port of HAMOOPI, allowing it to run on Retr
 ## Features
 
 The libretro core includes:
+- ✅ **Animated Sprite System** - Real character sprites loaded from PCX files with frame-by-frame animation
 - ✅ **Advanced Collision System** - Proper hitboxes, hurtboxes, body collision, and attack clashing
 - ✅ **Character Selection Screen** - Choose from 4 unique fighters
 - ✅ **Special Moves System** - Character-specific powerful abilities with cooldowns
