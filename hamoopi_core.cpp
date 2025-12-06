@@ -236,6 +236,9 @@ void hamoopi_run_frame(void)
         
         // Update Player 1
         Player* p1 = &players[0];
+        static int p1_attack_cooldown = 0;
+        if (p1_attack_cooldown > 0) p1_attack_cooldown--;
+        
         if (p1->health > 0)
         {
             // Movement
@@ -250,16 +253,17 @@ void hamoopi_run_frame(void)
                 p1->on_ground = false;
             }
             
-            // Attack
-            if (key[p1_bt1_key])
+            // Attack with cooldown
+            if (key[p1_bt1_key] && p1_attack_cooldown == 0)
             {
                 // Simple punch attack - check collision with P2
                 Player* p2 = &players[1];
                 float dist = fabs(p1->x - p2->x);
                 if (dist < 50.0f && p2->health > 0)
                 {
-                    p2->health -= 1;
+                    p2->health -= 5; // 5 damage per attack
                     if (p2->health < 0) p2->health = 0;
+                    p1_attack_cooldown = 15; // 15 frames cooldown (~0.25 seconds)
                 }
             }
             
@@ -283,6 +287,9 @@ void hamoopi_run_frame(void)
         
         // Update Player 2
         Player* p2 = &players[1];
+        static int p2_attack_cooldown = 0;
+        if (p2_attack_cooldown > 0) p2_attack_cooldown--;
+        
         if (p2->health > 0)
         {
             // Movement
@@ -297,15 +304,16 @@ void hamoopi_run_frame(void)
                 p2->on_ground = false;
             }
             
-            // Attack
-            if (key[p2_bt1_key])
+            // Attack with cooldown
+            if (key[p2_bt1_key] && p2_attack_cooldown == 0)
             {
                 // Simple punch attack - check collision with P1
                 float dist = fabs(p2->x - p1->x);
                 if (dist < 50.0f && p1->health > 0)
                 {
-                    p1->health -= 1;
+                    p1->health -= 5; // 5 damage per attack
                     if (p1->health < 0) p1->health = 0;
+                    p2_attack_cooldown = 15; // 15 frames cooldown (~0.25 seconds)
                 }
             }
             
@@ -333,13 +341,14 @@ void hamoopi_run_frame(void)
         
         // Draw HUD
         textout_ex(game_buffer, game_font, "P1", 50, 20, makecol(255, 100, 100), -1);
-        char health_str[32];
-        sprintf(health_str, "HP: %d", p1->health);
-        textout_ex(game_buffer, game_font, health_str, 50, 35, makecol(255, 255, 255), -1);
+        char p1_health_str[32];
+        sprintf(p1_health_str, "HP: %d", p1->health);
+        textout_ex(game_buffer, game_font, p1_health_str, 50, 35, makecol(255, 255, 255), -1);
         
         textout_ex(game_buffer, game_font, "P2", 550, 20, makecol(100, 100, 255), -1);
-        sprintf(health_str, "HP: %d", p2->health);
-        textout_ex(game_buffer, game_font, health_str, 550, 35, makecol(255, 255, 255), -1);
+        char p2_health_str[32];
+        sprintf(p2_health_str, "HP: %d", p2->health);
+        textout_ex(game_buffer, game_font, p2_health_str, 550, 35, makecol(255, 255, 255), -1);
         
         // Check for winner
         if (p1->health <= 0 || p2->health <= 0)
