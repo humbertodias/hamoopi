@@ -208,7 +208,8 @@ static void load_animation(SpriteSet* sprites, int state_id, const char* char_na
     // Load up to MAX_ANIM_FRAMES for this animation state
     for (int frame = 0; frame < MAX_ANIM_FRAMES && anim->frame_count < MAX_ANIM_FRAMES; frame++)
     {
-        snprintf(filename, sizeof(filename), "chars/%s/%d_%02d.pcx", char_name, state_id, frame);
+        // HAMOOPI specification uses 3-digit state IDs (e.g., 000, 151, 420)
+        snprintf(filename, sizeof(filename), "chars/%s/%03d_%02d.pcx", char_name, state_id, frame);
         
         // Try to load the sprite
         BITMAP* sprite = load_bitmap(filename, NULL);
