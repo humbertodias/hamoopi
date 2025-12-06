@@ -21,11 +21,12 @@ typedef struct {
     float x, y;
     float vx, vy;
     int health;
-    int state; // 0=idle, 1=walk, 2=jump, 3=attack, 4=hit
+    int state; // 0=idle, 1=walk, 2=jump, 3=attack, 4=hit, 5=blocking
     int anim_frame;
     int facing; // 1=right, -1=left
     bool on_ground;
     int character_id; // Character selection (0-3)
+    bool is_blocking; // Whether player is currently blocking
 } Player;
 
 static Player players[2];
@@ -100,6 +101,7 @@ static void init_player(Player* p, int player_num)
     p->anim_frame = 0;
     p->facing = (player_num == 0) ? 1 : -1;
     p->on_ground = true;
+    p->is_blocking = false;
     // character_id is preserved from selection
 }
 
@@ -114,11 +116,31 @@ static void draw_player(BITMAP* dest, Player* p)
                         char_colors[p->character_id][1], 
                         char_colors[p->character_id][2]);
     
-    // Draw body
-    rectfill(dest, x - 15, y - 50, x + 15, y, color);
-    
-    // Draw head
-    circlefill(dest, x, y - 60, 10, color);
+    // If blocking, draw shield in front and darker body
+    if (p->is_blocking)
+    {
+        // Draw darker body when blocking
+        int dark_color = makecol(char_colors[p->character_id][0] / 2, 
+                                  char_colors[p->character_id][1] / 2, 
+                                  char_colors[p->character_id][2] / 2);
+        rectfill(dest, x - 15, y - 50, x + 15, y, dark_color);
+        circlefill(dest, x, y - 60, 10, dark_color);
+        
+        // Draw shield in front of player
+        int shield_x = x + (p->facing * 20);
+        int shield_color = makecol(150, 150, 255); // Blue shield
+        circlefill(dest, shield_x, y - 30, 15, shield_color);
+        circle(dest, shield_x, y - 30, 16, makecol(255, 255, 255));
+        circle(dest, shield_x, y - 30, 17, makecol(255, 255, 255));
+    }
+    else
+    {
+        // Draw normal body
+        rectfill(dest, x - 15, y - 50, x + 15, y, color);
+        
+        // Draw head
+        circlefill(dest, x, y - 60, 10, color);
+    }
     
     // Draw health bar above player
     int bar_width = 60;
@@ -416,28 +438,43 @@ void hamoopi_run_frame(void)
         
         if (p1->health > 0)
         {
-            // Movement
-            if (key[p1_left_key]) { p1->vx = -3.0f; p1->facing = -1; }
-            else if (key[p1_right_key]) { p1->vx = 3.0f; p1->facing = 1; }
+            // Check if blocking (B button / bt2)
+            p1->is_blocking = key[p1_bt2_key];
+            
+            // Movement (slower when blocking)
+            float speed_multiplier = p1->is_blocking ? 0.5f : 1.0f;
+            if (key[p1_left_key]) { p1->vx = -3.0f * speed_multiplier; p1->facing = -1; }
+            else if (key[p1_right_key]) { p1->vx = 3.0f * speed_multiplier; p1->facing = 1; }
             else { p1->vx *= 0.8f; }
             
-            // Jump
-            if (key[p1_up_key] && p1->on_ground)
+            // Jump (can't jump while blocking)
+            if (key[p1_up_key] && p1->on_ground && !p1->is_blocking)
             {
                 p1->vy = -12.0f;
                 p1->on_ground = false;
             }
             
-            // Attack with cooldown
-            if (key[p1_bt1_key] && p1_attack_cooldown == 0)
+            // Attack with cooldown (can't attack while blocking)
+            if (key[p1_bt1_key] && p1_attack_cooldown == 0 && !p1->is_blocking)
             {
                 // Simple punch attack - check collision with P2
                 Player* p2 = &players[1];
                 float dist = fabs(p1->x - p2->x);
                 if (dist < 50.0f && p2->health > 0)
                 {
-                    p2->health -= 5; // 5 damage per attack
-                    if (p2->health < 0) p2->health = 0;
+                    // Check if P2 is blocking
+                    if (p2->is_blocking)
+                    {
+                        // Reduced damage when blocking
+                        p2->health -= 1; // Only 1 damage instead of 5
+                        if (p2->health < 0) p2->health = 0;
+                    }
+                    else
+                    {
+                        // Full damage
+                        p2->health -= 5;
+                        if (p2->health < 0) p2->health = 0;
+                    }
                     p1_attack_cooldown = 15; // 15 frames cooldown (~0.25 seconds)
                 }
             }
@@ -467,27 +504,42 @@ void hamoopi_run_frame(void)
         
         if (p2->health > 0)
         {
-            // Movement
-            if (key[p2_left_key]) { p2->vx = -3.0f; p2->facing = -1; }
-            else if (key[p2_right_key]) { p2->vx = 3.0f; p2->facing = 1; }
+            // Check if blocking (B button / bt2)
+            p2->is_blocking = key[p2_bt2_key];
+            
+            // Movement (slower when blocking)
+            float speed_multiplier = p2->is_blocking ? 0.5f : 1.0f;
+            if (key[p2_left_key]) { p2->vx = -3.0f * speed_multiplier; p2->facing = -1; }
+            else if (key[p2_right_key]) { p2->vx = 3.0f * speed_multiplier; p2->facing = 1; }
             else { p2->vx *= 0.8f; }
             
-            // Jump
-            if (key[p2_up_key] && p2->on_ground)
+            // Jump (can't jump while blocking)
+            if (key[p2_up_key] && p2->on_ground && !p2->is_blocking)
             {
                 p2->vy = -12.0f;
                 p2->on_ground = false;
             }
             
-            // Attack with cooldown
-            if (key[p2_bt1_key] && p2_attack_cooldown == 0)
+            // Attack with cooldown (can't attack while blocking)
+            if (key[p2_bt1_key] && p2_attack_cooldown == 0 && !p2->is_blocking)
             {
                 // Simple punch attack - check collision with P1
                 float dist = fabs(p2->x - p1->x);
                 if (dist < 50.0f && p1->health > 0)
                 {
-                    p1->health -= 5; // 5 damage per attack
-                    if (p1->health < 0) p1->health = 0;
+                    // Check if P1 is blocking
+                    if (p1->is_blocking)
+                    {
+                        // Reduced damage when blocking
+                        p1->health -= 1; // Only 1 damage instead of 5
+                        if (p1->health < 0) p1->health = 0;
+                    }
+                    else
+                    {
+                        // Full damage
+                        p1->health -= 5;
+                        if (p1->health < 0) p1->health = 0;
+                    }
                     p2_attack_cooldown = 15; // 15 frames cooldown (~0.25 seconds)
                 }
             }
