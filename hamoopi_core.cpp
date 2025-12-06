@@ -118,6 +118,24 @@ typedef struct {
 #define MAX_PROJECTILES 4
 static Projectile projectiles[MAX_PROJECTILES];
 
+// Helper function to find collision boxes from loaded INI data
+static CollisionBoxConfig* find_collision_box_config(int char_id, int state_id, int frame)
+{
+    if (char_id < 0 || char_id >= 4 || !character_configs[char_id].loaded)
+        return NULL;
+    
+    CharacterConfig* config = &character_configs[char_id];
+    for (int i = 0; i < config->collision_box_count; i++)
+    {
+        if (config->collision_boxes[i].state_id == state_id && 
+            config->collision_boxes[i].frame == frame)
+        {
+            return &config->collision_boxes[i];
+        }
+    }
+    return NULL;
+}
+
 // Collision box definitions
 // Body collision box (for pushing)
 static CollisionBox get_body_box(Player* p)
@@ -130,10 +148,43 @@ static CollisionBox get_body_box(Player* p)
     return box;
 }
 
-// Hurtbox (vulnerable area)
+// Hurtbox (vulnerable area) - now loads from chbox.ini
 static CollisionBox get_hurtbox(Player* p)
 {
     CollisionBox box;
+    
+    // Get current animation state ID
+    int state_id = 0;  // Default idle
+    if (p->state == 1) state_id = p->facing > 0 ? 420 : 410;  // Walk
+    else if (p->state == 2) state_id = 300;  // Jump
+    else if (p->state == 3) state_id = 151;  // Attack
+    else if (p->state == 5) state_id = 200;  // Crouch
+    else if (p->state == 6) state_id = 201;  // Crouch attack
+    else if (p->is_blocking && p->is_crouching) state_id = 208;  // Crouch block
+    
+    // Try to load from INI data
+    CollisionBoxConfig* config = find_collision_box_config(p->character_id, state_id, p->anim_frame);
+    if (config && config->hurtbox_count > 0)
+    {
+        // Use first hurtbox from INI, adjusted for player position and facing
+        CollisionBox ini_box = config->hurtboxes[0];
+        if (p->facing > 0)
+        {
+            box.x = p->x + ini_box.x;
+            box.y = p->y + ini_box.y;
+        }
+        else
+        {
+            // Mirror for left-facing
+            box.x = p->x - ini_box.x - ini_box.w;
+            box.y = p->y + ini_box.y;
+        }
+        box.w = ini_box.w;
+        box.h = ini_box.h;
+        return box;
+    }
+    
+    // Fallback to hardcoded values if INI not found
     if (p->is_crouching)
     {
         // Smaller hurtbox when crouching (only 50% height)
@@ -161,11 +212,48 @@ static CollisionBox get_hurtbox(Player* p)
     return box;
 }
 
-// Hitbox (attacking area) - only active during attack frames
+// Hitbox (attacking area) - now loads from chbox.ini
 static CollisionBox get_hitbox(Player* p)
 {
     CollisionBox box;
-    // Hitbox is extended in front of player during attack
+    
+    // Only check for hitbox during attack states
+    if (p->state != 3 && p->state != 6)
+    {
+        // No active hitbox
+        box.x = p->x;
+        box.y = p->y;
+        box.w = 0;
+        box.h = 0;
+        return box;
+    }
+    
+    // Get current animation state ID
+    int state_id = (p->state == 3) ? 151 : 201;  // Attack or crouch attack
+    
+    // Try to load from INI data
+    CollisionBoxConfig* config = find_collision_box_config(p->character_id, state_id, p->anim_frame);
+    if (config && config->hitbox_count > 0 && p->attack_frame >= 2 && p->attack_frame <= 6)
+    {
+        // Use first hitbox from INI, adjusted for player position and facing
+        CollisionBox ini_box = config->hitboxes[0];
+        if (p->facing > 0)
+        {
+            box.x = p->x + ini_box.x;
+            box.y = p->y + ini_box.y;
+        }
+        else
+        {
+            // Mirror for left-facing
+            box.x = p->x - ini_box.x - ini_box.w;
+            box.y = p->y + ini_box.y;
+        }
+        box.w = ini_box.w;
+        box.h = ini_box.h;
+        return box;
+    }
+    
+    // Fallback to hardcoded values if INI not found
     if (p->state == 3 && p->attack_frame >= 2 && p->attack_frame <= 6)
     {
         // Active attack frames
@@ -182,6 +270,24 @@ static CollisionBox get_hitbox(Player* p)
             box.y = p->y - 30;
             box.w = 35;
             box.h = 20;
+        }
+    }
+    else if (p->state == 6 && p->attack_frame >= 2 && p->attack_frame <= 6)
+    {
+        // Crouch attack hitbox
+        if (p->facing > 0)
+        {
+            box.x = p->x + 10;
+            box.y = p->y - 15;
+            box.w = 35;
+            box.h = 15;
+        }
+        else
+        {
+            box.x = p->x - 45;
+            box.y = p->y - 15;
+            box.w = 35;
+            box.h = 15;
         }
     }
     else
