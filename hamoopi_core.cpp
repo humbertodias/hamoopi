@@ -37,12 +37,23 @@ static int p2_cursor = 1;
 static bool p1_ready = false;
 static bool p2_ready = false;
 
+// Input tracking for character selection
+static bool p1_left_pressed = false;
+static bool p1_right_pressed = false;
+static bool p1_a_pressed = false;
+static bool p2_left_pressed = false;
+static bool p2_right_pressed = false;
+static bool p2_a_pressed = false;
+
+// Character system constants
+#define NUM_CHARACTERS 4
+
 // Character colors for visual distinction
-static const int char_colors[4][3] = {
-    {255, 100, 100},  // Red
-    {100, 100, 255},  // Blue
-    {100, 255, 100},  // Green
-    {255, 255, 100}   // Yellow
+static const int char_colors[NUM_CHARACTERS][3] = {
+    {255, 100, 100},  // Red - FIRE
+    {100, 100, 255},  // Blue - WATER
+    {100, 255, 100},  // Green - EARTH
+    {255, 255, 100}   // Yellow - WIND
 };
 
 // Fonts
@@ -93,7 +104,7 @@ static void init_player(Player* p, int player_num)
 }
 
 // Draw a simple fighter sprite with character color
-static void draw_player(BITMAP* dest, Player* p, int player_num)
+static void draw_player(BITMAP* dest, Player* p)
 {
     int x = (int)p->x;
     int y = (int)p->y;
@@ -307,7 +318,7 @@ void hamoopi_run_frame(void)
         int start_y = 100;
         int spacing = 100;
         
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < NUM_CHARACTERS; i++)
         {
             int x = start_x + (i * spacing);
             draw_character_box(game_buffer, i, x, start_y, 
@@ -315,7 +326,7 @@ void hamoopi_run_frame(void)
         }
         
         // Draw second row for Player 2
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < NUM_CHARACTERS; i++)
         {
             int x = start_x + (i * spacing);
             draw_character_box(game_buffer, i, x, start_y + 150, 
@@ -329,26 +340,19 @@ void hamoopi_run_frame(void)
         // Instructions
         textout_centre_ex(game_buffer, game_font, "Left/Right to select, A to confirm", 320, 420, makecol(200, 200, 200), -1);
         
-        static bool p1_left_pressed = false;
-        static bool p1_right_pressed = false;
-        static bool p1_a_pressed = false;
-        static bool p2_left_pressed = false;
-        static bool p2_right_pressed = false;
-        static bool p2_a_pressed = false;
-        
         // Player 1 input (only if not ready)
         if (!p1_ready)
         {
             if (key[p1_left_key] && !p1_left_pressed)
             {
-                p1_cursor = (p1_cursor - 1 + 4) % 4;
+                p1_cursor = (p1_cursor - 1 + NUM_CHARACTERS) % NUM_CHARACTERS;
                 p1_left_pressed = true;
             }
             if (!key[p1_left_key]) p1_left_pressed = false;
             
             if (key[p1_right_key] && !p1_right_pressed)
             {
-                p1_cursor = (p1_cursor + 1) % 4;
+                p1_cursor = (p1_cursor + 1) % NUM_CHARACTERS;
                 p1_right_pressed = true;
             }
             if (!key[p1_right_key]) p1_right_pressed = false;
@@ -367,14 +371,14 @@ void hamoopi_run_frame(void)
         {
             if (key[p2_left_key] && !p2_left_pressed)
             {
-                p2_cursor = (p2_cursor - 1 + 4) % 4;
+                p2_cursor = (p2_cursor - 1 + NUM_CHARACTERS) % NUM_CHARACTERS;
                 p2_left_pressed = true;
             }
             if (!key[p2_left_key]) p2_left_pressed = false;
             
             if (key[p2_right_key] && !p2_right_pressed)
             {
-                p2_cursor = (p2_cursor + 1) % 4;
+                p2_cursor = (p2_cursor + 1) % NUM_CHARACTERS;
                 p2_right_pressed = true;
             }
             if (!key[p2_right_key]) p2_right_pressed = false;
@@ -507,8 +511,8 @@ void hamoopi_run_frame(void)
         }
         
         // Draw players
-        draw_player(game_buffer, p1, 0);
-        draw_player(game_buffer, p2, 1);
+        draw_player(game_buffer, p1);
+        draw_player(game_buffer, p2);
         
         // Draw HUD
         textout_ex(game_buffer, game_font, "P1", 50, 20, makecol(255, 100, 100), -1);
