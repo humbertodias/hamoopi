@@ -244,33 +244,57 @@ static void load_character_sprites(int char_id)
     // Use CharTemplate as the character folder (all chars use same animations)
     const char* char_name = "CharTemplate";
     
-    // Load essential animations
-    // State 0: Stance/Idle (000)
+    // Load essential animations based on HAMOOPI specification
+    // State 0: Stance/Idle
     load_animation(sprites, 0, char_name);
     
-    // State 100: Walk forward
-    load_animation(sprites, 100, char_name);
+    // State 420: Walking forward
+    load_animation(sprites, 420, char_name);
     
-    // State 101: Walk backward  
-    load_animation(sprites, 101, char_name);
-    
-    // State 151: Jump
-    load_animation(sprites, 151, char_name);
-    
-    // State 200: Light punch
-    load_animation(sprites, 200, char_name);
-    
-    // State 201: Medium punch
-    load_animation(sprites, 201, char_name);
-    
-    // State 300: Special move 1
-    load_animation(sprites, 300, char_name);
-    
-    // State 410: Block
+    // State 410: Walking backward
     load_animation(sprites, 410, char_name);
     
-    // State 501: Hit/hurt
+    // State 300: Neutral jump
+    load_animation(sprites, 300, char_name);
+    
+    // State 320: Forward jump
+    load_animation(sprites, 320, char_name);
+    
+    // State 310: Backward jump
+    load_animation(sprites, 310, char_name);
+    
+    // State 151: Close range weak punch
+    load_animation(sprites, 151, char_name);
+    
+    // State 152: Close range medium punch
+    load_animation(sprites, 152, char_name);
+    
+    // State 153: Close range strong punch
+    load_animation(sprites, 153, char_name);
+    
+    // State 200: Crouching
+    load_animation(sprites, 200, char_name);
+    
+    // State 207: Start blocking crouched
+    load_animation(sprites, 207, char_name);
+    
+    // State 208: Blocking crouched
+    load_animation(sprites, 208, char_name);
+    
+    // State 501: Getting hit type 1 weak
     load_animation(sprites, 501, char_name);
+    
+    // State 502: Getting hit type 1 medium
+    load_animation(sprites, 502, char_name);
+    
+    // State 700: Special move 1
+    load_animation(sprites, 700, char_name);
+    
+    // State 610: Intro
+    load_animation(sprites, 610, char_name);
+    
+    // State 611: Victory 1
+    load_animation(sprites, 611, char_name);
     
     sprites->loaded = true;
 }
@@ -300,24 +324,46 @@ static BITMAP* get_sprite_frame(Player* p)
         return NULL;
     }
     
-    // Map game state to sprite animation state
+    // Map game state to sprite animation state (HAMOOPI specification)
     int sprite_state = 0;
     
     if (p->is_blocking)
     {
-        sprite_state = 410;  // Block animation
+        sprite_state = 208;  // Blocking crouched (208) - defensive stance
     }
     else if (p->state == 3)  // Attack
     {
-        sprite_state = 200;  // Light punch
+        sprite_state = 151;  // Close range weak punch (151)
     }
     else if (p->state == 2)  // Jump
     {
-        sprite_state = 151;  // Jump animation
+        // Determine jump direction based on velocity
+        if (p->vx > 0.5f)
+        {
+            sprite_state = 320;  // Forward jump
+        }
+        else if (p->vx < -0.5f)
+        {
+            sprite_state = 310;  // Backward jump
+        }
+        else
+        {
+            sprite_state = 300;  // Neutral jump
+        }
     }
     else if (p->state == 1)  // Walk
     {
-        sprite_state = 100;  // Walk forward
+        // Determine walk direction relative to facing
+        // Moving in facing direction = forward walk (420)
+        // Moving against facing = backward walk (410)
+        if ((p->facing > 0 && p->vx > 0) || (p->facing < 0 && p->vx < 0))
+        {
+            sprite_state = 420;  // Walking forward
+        }
+        else
+        {
+            sprite_state = 410;  // Walking backward
+        }
     }
     else  // Idle
     {
