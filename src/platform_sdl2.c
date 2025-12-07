@@ -187,6 +187,12 @@ int platform_set_gfx_mode(int mode, int width, int height, int v_width, int v_he
                                               SDL_TEXTUREACCESS_STREAMING, width, height);
         g_screen->w = width;
         g_screen->h = height;
+        
+        // Set magenta as transparent for the screen surface too
+        if (g_screen->surface) {
+            SDL_Surface *surf = (SDL_Surface*)g_screen->surface;
+            SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, 255, 0, 255));
+        }
     }
     
     return 0;
@@ -259,6 +265,10 @@ PlatformBitmap* platform_create_bitmap(int width, int height) {
             free(pb);
             return NULL;
         }
+        
+        // Set magenta (255, 0, 255) as the color key for transparency
+        SDL_Surface *surf = (SDL_Surface*)pb->surface;
+        SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, 255, 0, 255));
     }
     return pb;
 }
@@ -297,6 +307,9 @@ PlatformBitmap* platform_load_bitmap(const char *filename, void *palette) {
         return NULL;
     }
     
+    // Set magenta as the color key for transparency
+    SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 255, 0, 255));
+    
     PlatformBitmap *pb = (PlatformBitmap*)malloc(sizeof(PlatformBitmap));
     if (pb) {
         pb->surface = surface;
@@ -318,7 +331,14 @@ void platform_clear_bitmap(PlatformBitmap *bitmap) {
 
 void platform_clear_to_color(PlatformBitmap *bitmap, PlatformColor color) {
     if (bitmap && bitmap->surface) {
-        SDL_FillRect(bitmap->surface, NULL, color);
+        SDL_Surface *surf = (SDL_Surface*)bitmap->surface;
+        SDL_FillRect(surf, NULL, color);
+        
+        // If clearing to magenta (255, 0, 255), set it as the color key for transparency
+        // This is the standard Allegro transparency color
+        if ((color & 0x00FFFFFF) == 0x00FF00FF) {  // Check if RGB is 255, 0, 255
+            SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, 255, 0, 255));
+        }
     }
 }
 
