@@ -8,11 +8,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Forward declarations for opaque types
+// Include backend-specific headers
+#ifdef USE_ALLEGRO4
+#include <allegro.h>
+#endif
+
+// Platform-specific type definitions
+#ifdef USE_ALLEGRO4
+typedef BITMAP PlatformBitmap;
+typedef FONT PlatformFont;
+typedef SAMPLE PlatformSample;
+typedef MIDI PlatformMidi;
+#else
+// Forward declarations for opaque types (for future SDL2 implementation)
 typedef struct PlatformBitmap PlatformBitmap;
 typedef struct PlatformFont PlatformFont;
 typedef struct PlatformSample PlatformSample;
 typedef struct PlatformMidi PlatformMidi;
+#endif
 
 // Color type
 typedef unsigned int PlatformColor;

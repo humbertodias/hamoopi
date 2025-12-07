@@ -32,7 +32,7 @@
 	8- Revisar / otimizar todo o código
 *******************************************************************************/
 
-#include <allegro.h>
+#include "platform_compat.h"
 #include <stdio.h>
 #include <math.h>
 

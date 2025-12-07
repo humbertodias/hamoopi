@@ -1,26 +1,8 @@
 // platform_allegro.c - Allegro 4 implementation of platform abstraction layer
 
 #include "platform.h"
-#include <allegro.h>
 #include <stdarg.h>
 #include <string.h>
-
-// Map our opaque types to Allegro types
-struct PlatformBitmap {
-    BITMAP *allegro_bitmap;
-};
-
-struct PlatformFont {
-    FONT *allegro_font;
-};
-
-struct PlatformSample {
-    SAMPLE *allegro_sample;
-};
-
-struct PlatformMidi {
-    MIDI *allegro_midi;
-};
 
 // ============================================================================
 // INITIALIZATION & SYSTEM
@@ -77,11 +59,7 @@ volatile char* platform_get_key_state(void) {
 }
 
 PlatformBitmap* platform_get_screen(void) {
-    PlatformBitmap *pb = (PlatformBitmap*)malloc(sizeof(PlatformBitmap));
-    if (pb) {
-        pb->allegro_bitmap = screen;
-    }
-    return pb;
+    return screen;
 }
 
 // ============================================================================
@@ -89,124 +67,101 @@ PlatformBitmap* platform_get_screen(void) {
 // ============================================================================
 
 PlatformBitmap* platform_create_bitmap(int width, int height) {
-    PlatformBitmap *pb = (PlatformBitmap*)malloc(sizeof(PlatformBitmap));
-    if (pb) {
-        pb->allegro_bitmap = create_bitmap(width, height);
-        if (!pb->allegro_bitmap) {
-            free(pb);
-            return NULL;
-        }
-    }
-    return pb;
+    return create_bitmap(width, height);
 }
 
 void platform_destroy_bitmap(PlatformBitmap *bitmap) {
     if (bitmap) {
-        if (bitmap->allegro_bitmap) {
-            destroy_bitmap(bitmap->allegro_bitmap);
-        }
-        free(bitmap);
+        destroy_bitmap(bitmap);
     }
 }
 
 PlatformBitmap* platform_load_bitmap(const char *filename, void *palette) {
-    PlatformBitmap *pb = (PlatformBitmap*)malloc(sizeof(PlatformBitmap));
-    if (pb) {
-        pb->allegro_bitmap = load_bitmap(filename, palette);
-        if (!pb->allegro_bitmap) {
-            free(pb);
-            return NULL;
-        }
-    }
-    return pb;
+    return load_bitmap(filename, palette);
 }
 
 void platform_clear_bitmap(PlatformBitmap *bitmap) {
-    if (bitmap && bitmap->allegro_bitmap) {
-        clear_bitmap(bitmap->allegro_bitmap);
+    if (bitmap) {
+        clear_bitmap(bitmap);
     }
 }
 
 void platform_clear_to_color(PlatformBitmap *bitmap, PlatformColor color) {
-    if (bitmap && bitmap->allegro_bitmap) {
-        clear_to_color(bitmap->allegro_bitmap, color);
+    if (bitmap) {
+        clear_to_color(bitmap, color);
     }
 }
 
 void platform_draw_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) {
-    if (dest && dest->allegro_bitmap && src && src->allegro_bitmap) {
-        draw_sprite(dest->allegro_bitmap, src->allegro_bitmap, x, y);
+    if (dest && src) {
+        draw_sprite(dest, src, x, y);
     }
 }
 
 void platform_stretch_blit(PlatformBitmap *src, PlatformBitmap *dest,
                           int src_x, int src_y, int src_w, int src_h,
                           int dest_x, int dest_y, int dest_w, int dest_h) {
-    if (src && src->allegro_bitmap && dest && dest->allegro_bitmap) {
-        stretch_blit(src->allegro_bitmap, dest->allegro_bitmap,
-                    src_x, src_y, src_w, src_h,
-                    dest_x, dest_y, dest_w, dest_h);
+    if (src && dest) {
+        stretch_blit(src, dest, src_x, src_y, src_w, src_h, dest_x, dest_y, dest_w, dest_h);
     }
 }
 
 void platform_blit(PlatformBitmap *src, PlatformBitmap *dest,
                   int src_x, int src_y, int dest_x, int dest_y, int w, int h) {
-    if (src && src->allegro_bitmap && dest && dest->allegro_bitmap) {
-        blit(src->allegro_bitmap, dest->allegro_bitmap,
-            src_x, src_y, dest_x, dest_y, w, h);
+    if (src && dest) {
+        blit(src, dest, src_x, src_y, dest_x, dest_y, w, h);
     }
 }
 
 void platform_masked_blit(PlatformBitmap *src, PlatformBitmap *dest,
                          int src_x, int src_y, int dest_x, int dest_y, int w, int h) {
-    if (src && src->allegro_bitmap && dest && dest->allegro_bitmap) {
-        masked_blit(src->allegro_bitmap, dest->allegro_bitmap,
-                   src_x, src_y, dest_x, dest_y, w, h);
+    if (src && dest) {
+        masked_blit(src, dest, src_x, src_y, dest_x, dest_y, w, h);
     }
 }
 
 void platform_draw_sprite_h_flip(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) {
-    if (dest && dest->allegro_bitmap && src && src->allegro_bitmap) {
-        draw_sprite_h_flip(dest->allegro_bitmap, src->allegro_bitmap, x, y);
+    if (dest && src) {
+        draw_sprite_h_flip(dest, src, x, y);
     }
 }
 
 void platform_draw_sprite_v_flip(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) {
-    if (dest && dest->allegro_bitmap && src && src->allegro_bitmap) {
-        draw_sprite_v_flip(dest->allegro_bitmap, src->allegro_bitmap, x, y);
+    if (dest && src) {
+        draw_sprite_v_flip(dest, src, x, y);
     }
 }
 
 void platform_draw_sprite_vh_flip(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) {
-    if (dest && dest->allegro_bitmap && src && src->allegro_bitmap) {
-        draw_sprite_vh_flip(dest->allegro_bitmap, src->allegro_bitmap, x, y);
+    if (dest && src) {
+        draw_sprite_vh_flip(dest, src, x, y);
     }
 }
 
 void platform_rotate_sprite(PlatformBitmap *dest, PlatformBitmap *src,
                            int x, int y, int angle) {
-    if (dest && dest->allegro_bitmap && src && src->allegro_bitmap) {
-        rotate_sprite(dest->allegro_bitmap, src->allegro_bitmap, x, y, itofix(angle));
+    if (dest && src) {
+        rotate_sprite(dest, src, x, y, itofix(angle));
     }
 }
 
 void platform_pivot_sprite(PlatformBitmap *dest, PlatformBitmap *src,
                           int x, int y, int cx, int cy, int angle) {
-    if (dest && dest->allegro_bitmap && src && src->allegro_bitmap) {
-        pivot_sprite(dest->allegro_bitmap, src->allegro_bitmap, x, y, cx, cy, itofix(angle));
+    if (dest && src) {
+        pivot_sprite(dest, src, x, y, cx, cy, itofix(angle));
     }
 }
 
 PlatformColor platform_getpixel(PlatformBitmap *bitmap, int x, int y) {
-    if (bitmap && bitmap->allegro_bitmap) {
-        return getpixel(bitmap->allegro_bitmap, x, y);
+    if (bitmap) {
+        return getpixel(bitmap, x, y);
     }
     return 0;
 }
 
 void platform_putpixel(PlatformBitmap *bitmap, int x, int y, PlatformColor color) {
-    if (bitmap && bitmap->allegro_bitmap) {
-        putpixel(bitmap->allegro_bitmap, x, y, color);
+    if (bitmap) {
+        putpixel(bitmap, x, y, color);
     }
 }
 
@@ -215,32 +170,32 @@ void platform_putpixel(PlatformBitmap *bitmap, int x, int y, PlatformColor color
 // ============================================================================
 
 void platform_line(PlatformBitmap *bitmap, int x1, int y1, int x2, int y2, PlatformColor color) {
-    if (bitmap && bitmap->allegro_bitmap) {
-        line(bitmap->allegro_bitmap, x1, y1, x2, y2, color);
+    if (bitmap) {
+        line(bitmap, x1, y1, x2, y2, color);
     }
 }
 
 void platform_rect(PlatformBitmap *bitmap, int x1, int y1, int x2, int y2, PlatformColor color) {
-    if (bitmap && bitmap->allegro_bitmap) {
-        rect(bitmap->allegro_bitmap, x1, y1, x2, y2, color);
+    if (bitmap) {
+        rect(bitmap, x1, y1, x2, y2, color);
     }
 }
 
 void platform_rectfill(PlatformBitmap *bitmap, int x1, int y1, int x2, int y2, PlatformColor color) {
-    if (bitmap && bitmap->allegro_bitmap) {
-        rectfill(bitmap->allegro_bitmap, x1, y1, x2, y2, color);
+    if (bitmap) {
+        rectfill(bitmap, x1, y1, x2, y2, color);
     }
 }
 
 void platform_circle(PlatformBitmap *bitmap, int x, int y, int radius, PlatformColor color) {
-    if (bitmap && bitmap->allegro_bitmap) {
-        circle(bitmap->allegro_bitmap, x, y, radius, color);
+    if (bitmap) {
+        circle(bitmap, x, y, radius, color);
     }
 }
 
 void platform_circlefill(PlatformBitmap *bitmap, int x, int y, int radius, PlatformColor color) {
-    if (bitmap && bitmap->allegro_bitmap) {
-        circlefill(bitmap->allegro_bitmap, x, y, radius, color);
+    if (bitmap) {
+        circlefill(bitmap, x, y, radius, color);
     }
 }
 
@@ -253,65 +208,54 @@ PlatformColor platform_makecol(int r, int g, int b) {
 // ============================================================================
 
 PlatformFont* platform_load_font(const char *filename, void *palette, void *param) {
-    PlatformFont *pf = (PlatformFont*)malloc(sizeof(PlatformFont));
-    if (pf) {
-        pf->allegro_font = load_font(filename, palette, param);
-        if (!pf->allegro_font) {
-            free(pf);
-            return NULL;
-        }
-    }
-    return pf;
+    return load_font(filename, palette, param);
 }
 
 void platform_destroy_font(PlatformFont *font) {
     if (font) {
-        if (font->allegro_font) {
-            destroy_font(font->allegro_font);
-        }
-        free(font);
+        destroy_font(font);
     }
 }
 
 void platform_textout_ex(PlatformBitmap *bitmap, PlatformFont *font,
                         const char *text, int x, int y,
                         PlatformColor color, PlatformColor bg) {
-    if (bitmap && bitmap->allegro_bitmap && font && font->allegro_font) {
-        textout_ex(bitmap->allegro_bitmap, font->allegro_font, text, x, y, color, bg);
+    if (bitmap && font) {
+        textout_ex(bitmap, font, text, x, y, color, bg);
     }
 }
 
 void platform_textout_centre_ex(PlatformBitmap *bitmap, PlatformFont *font,
                                const char *text, int x, int y,
                                PlatformColor color, PlatformColor bg) {
-    if (bitmap && bitmap->allegro_bitmap && font && font->allegro_font) {
-        textout_centre_ex(bitmap->allegro_bitmap, font->allegro_font, text, x, y, color, bg);
+    if (bitmap && font) {
+        textout_centre_ex(bitmap, font, text, x, y, color, bg);
     }
 }
 
 void platform_textprintf_ex(PlatformBitmap *bitmap, PlatformFont *font,
                            int x, int y, PlatformColor color, PlatformColor bg,
                            const char *format, ...) {
-    if (bitmap && bitmap->allegro_bitmap && font && font->allegro_font) {
+    if (bitmap && font) {
         va_list args;
         va_start(args, format);
         char buffer[1024];
         vsnprintf(buffer, sizeof(buffer), format, args);
         va_end(args);
-        textout_ex(bitmap->allegro_bitmap, font->allegro_font, buffer, x, y, color, bg);
+        textout_ex(bitmap, font, buffer, x, y, color, bg);
     }
 }
 
 void platform_textprintf_centre_ex(PlatformBitmap *bitmap, PlatformFont *font,
                                   int x, int y, PlatformColor color, PlatformColor bg,
                                   const char *format, ...) {
-    if (bitmap && bitmap->allegro_bitmap && font && font->allegro_font) {
+    if (bitmap && font) {
         va_list args;
         va_start(args, format);
         char buffer[1024];
         vsnprintf(buffer, sizeof(buffer), format, args);
         va_end(args);
-        textout_centre_ex(bitmap->allegro_bitmap, font->allegro_font, buffer, x, y, color, bg);
+        textout_centre_ex(bitmap, font, buffer, x, y, color, bg);
     }
 }
 
@@ -324,57 +268,35 @@ int platform_install_sound(int digi, int midi, const char *cfg) {
 }
 
 PlatformSample* platform_load_sample(const char *filename) {
-    PlatformSample *ps = (PlatformSample*)malloc(sizeof(PlatformSample));
-    if (ps) {
-        ps->allegro_sample = load_sample(filename);
-        if (!ps->allegro_sample) {
-            free(ps);
-            return NULL;
-        }
-    }
-    return ps;
+    return load_sample(filename);
 }
 
 PlatformMidi* platform_load_midi(const char *filename) {
-    PlatformMidi *pm = (PlatformMidi*)malloc(sizeof(PlatformMidi));
-    if (pm) {
-        pm->allegro_midi = load_midi(filename);
-        if (!pm->allegro_midi) {
-            free(pm);
-            return NULL;
-        }
-    }
-    return pm;
+    return load_midi(filename);
 }
 
 void platform_destroy_sample(PlatformSample *sample) {
     if (sample) {
-        if (sample->allegro_sample) {
-            destroy_sample(sample->allegro_sample);
-        }
-        free(sample);
+        destroy_sample(sample);
     }
 }
 
 void platform_destroy_midi(PlatformMidi *midi) {
     if (midi) {
-        if (midi->allegro_midi) {
-            destroy_midi(midi->allegro_midi);
-        }
-        free(midi);
+        destroy_midi(midi);
     }
 }
 
 int platform_play_sample(PlatformSample *sample, int vol, int pan, int freq, int loop) {
-    if (sample && sample->allegro_sample) {
-        return play_sample(sample->allegro_sample, vol, pan, freq, loop);
+    if (sample) {
+        return play_sample(sample, vol, pan, freq, loop);
     }
     return -1;
 }
 
 int platform_play_midi(PlatformMidi *midi, int loop) {
-    if (midi && midi->allegro_midi) {
-        return play_midi(midi->allegro_midi, loop);
+    if (midi) {
+        return play_midi(midi, loop);
     }
     return -1;
 }
@@ -388,8 +310,8 @@ void platform_set_volume(int digi, int midi) {
 }
 
 void platform_adjust_sample(PlatformSample *sample, int vol, int pan, int freq, int loop) {
-    if (sample && sample->allegro_sample) {
-        adjust_sample(sample->allegro_sample, vol, pan, freq, loop);
+    if (sample) {
+        adjust_sample(sample, vol, pan, freq, loop);
     }
 }
 

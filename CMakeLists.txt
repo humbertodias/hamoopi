@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.7)
 project(HAMOOPI)
+
+# Define which backend to use
+add_definitions(-DUSE_ALLEGRO4)
+
 add_executable(HAMOOPI src/HAMOOPI.c src/platform_allegro.c)
 
 # Find Allegro
