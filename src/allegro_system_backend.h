@@ -18,7 +18,7 @@ public:
     AllegroSystemBackend() : timer_callback(nullptr) {}
     
     bool init() override {
-        return allegro_init() == 0 && install_timer() == 0;
+        return allegro_init() == 0 && ::install_timer() == 0;
     }
     
     void shutdown() override {

@@ -4,6 +4,7 @@
 #include "graphics_backend.h"
 #include <allegro.h>
 #include <cstdarg>
+#include <cstdio>
 
 class AllegroGraphicsBackend : public GraphicsBackend {
 public:
