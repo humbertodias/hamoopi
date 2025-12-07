@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 project(HAMOOPI)
-add_executable(HAMOOPI src/HAMOOPI.cpp)
+add_executable(HAMOOPI src/HAMOOPI.c)
 
 # Find Allegro
 find_package(Alleg4 4)
@@ -9,4 +9,4 @@ find_package(Alleg4 4)
 target_include_directories(HAMOOPI PRIVATE ${ALLEGRO_INCLUDE_DIR})
 
 # Link with dependencies
-target_link_libraries(HAMOOPI alleg)
+target_link_libraries(HAMOOPI alleg m)
