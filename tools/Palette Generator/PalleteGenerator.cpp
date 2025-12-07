@@ -1,5 +1,7 @@
 #include <allegro.h>
 
+// 2025 - v01
+
 // DECLARACOES INICIAIS //
 int sair=0; void sair_allegro() {sair=1;}; 
 int timer=0; void tempo() {timer++;};
@@ -21,7 +23,7 @@ int main()
   install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL);
   BITMAP *buffer = create_bitmap(640,480);
 	
-	// DeclaraÁ„o de vari·veis
+	// Declarac√£o de vari√°veis
   int x, y;
   int Pal0found, Pal1found, Pal2found, Pal3found, Pal4found, Pal5found, Pal6found, Pal7found, Pal8found;
   Pal0found = Pal1found = Pal2found = Pal3found = Pal4found = Pal5found = Pal6found = Pal7found = Pal8found = 1;
@@ -46,20 +48,20 @@ int main()
 		};
 	};
 	
-	// DeclaraÁ„o de Bitmaps
+	// Declara√ß√£o de Bitmaps
 	BITMAP *bmp;
 	BITMAP *SlotPallete = create_bitmap(32,10);
-	SlotPallete = load_bitmap("pallete.pcx", NULL); if (!SlotPallete) { Palletefound=0; };
+	SlotPallete = load_bitmap("data/pallete.pcx", NULL); if (!SlotPallete) { Palletefound=0; };
 	if(Palletefound==0){
 		bmp = create_sub_bitmap(screen, 0, 0, 32, 10); 
 		clear_to_color(bmp, makecol(255, 000, 255)); 
-		save_bitmap("pallete.pcx", bmp, NULL);
-		SlotPallete = load_bitmap("pallete.pcx", NULL); 
+		save_bitmap("data/pallete.pcx", bmp, NULL);
+		SlotPallete = load_bitmap("data/pallete.pcx", NULL); 
 	};
 	BITMAP *SlotPalleteDisplay = create_bitmap(256,80);
-	BITMAP *EditorBackground = load_bitmap("system/EditorBackground.pcx", NULL);
-	BITMAP *SlotVazio = load_bitmap("system/SlotVazio.pcx", NULL);
-	BITMAP *StatusOK  = load_bitmap("system/StatusOK.pcx", NULL);
+	BITMAP *EditorBackground = load_bitmap("data/system/EditorBackground.pcx", NULL);
+	BITMAP *SlotVazio = load_bitmap("data/system/SlotVazio.pcx", NULL);
+	BITMAP *StatusOK  = load_bitmap("data/system/StatusOK.pcx", NULL);
 	BITMAP *StripPal0 = create_bitmap(32,1); clear_to_color(StripPal0, makecol(255, 000, 255)); 
 	BITMAP *StripPal1 = create_bitmap(32,1); clear_to_color(StripPal1, makecol(255, 000, 255));
 	BITMAP *StripPal2 = create_bitmap(32,1); clear_to_color(StripPal2, makecol(255, 000, 255));
@@ -69,15 +71,15 @@ int main()
 	BITMAP *StripPal6 = create_bitmap(32,1); clear_to_color(StripPal6, makecol(255, 000, 255));
 	BITMAP *StripPal7 = create_bitmap(32,1); clear_to_color(StripPal7, makecol(255, 000, 255));
 	BITMAP *StripPal8 = create_bitmap(32,1); clear_to_color(StripPal8, makecol(255, 000, 255));
-	BITMAP *Slot0 = load_bitmap("pal0.pcx", NULL); if (!Slot0) { Pal0found=0; };
-	BITMAP *Slot1 = load_bitmap("pal1.pcx", NULL); if (!Slot1) { Pal1found=0; };
-	BITMAP *Slot2 = load_bitmap("pal2.pcx", NULL); if (!Slot2) { Pal2found=0; };
-	BITMAP *Slot3 = load_bitmap("pal3.pcx", NULL); if (!Slot3) { Pal3found=0; };
-	BITMAP *Slot4 = load_bitmap("pal4.pcx", NULL); if (!Slot4) { Pal4found=0; };
-	BITMAP *Slot5 = load_bitmap("pal5.pcx", NULL); if (!Slot5) { Pal5found=0; };
-	BITMAP *Slot6 = load_bitmap("pal6.pcx", NULL); if (!Slot6) { Pal6found=0; };
-	BITMAP *Slot7 = load_bitmap("pal7.pcx", NULL); if (!Slot7) { Pal7found=0; };
-	BITMAP *Slot8 = load_bitmap("pal8.pcx", NULL); if (!Slot8) { Pal8found=0; };
+	BITMAP *Slot0 = load_bitmap("data/pal0.pcx", NULL); if (!Slot0) { Pal0found=0; };
+	BITMAP *Slot1 = load_bitmap("data/pal1.pcx", NULL); if (!Slot1) { Pal1found=0; };
+	BITMAP *Slot2 = load_bitmap("data/pal2.pcx", NULL); if (!Slot2) { Pal2found=0; };
+	BITMAP *Slot3 = load_bitmap("data/pal3.pcx", NULL); if (!Slot3) { Pal3found=0; };
+	BITMAP *Slot4 = load_bitmap("data/pal4.pcx", NULL); if (!Slot4) { Pal4found=0; };
+	BITMAP *Slot5 = load_bitmap("data/pal5.pcx", NULL); if (!Slot5) { Pal5found=0; };
+	BITMAP *Slot6 = load_bitmap("data/pal6.pcx", NULL); if (!Slot6) { Pal6found=0; };
+	BITMAP *Slot7 = load_bitmap("data/pal7.pcx", NULL); if (!Slot7) { Pal7found=0; };
+	BITMAP *Slot8 = load_bitmap("data/pal8.pcx", NULL); if (!Slot8) { Pal8found=0; };
   
   // LOOP DE JOGO // 
   while (sair==0)
@@ -221,7 +223,7 @@ int main()
 		blit(StripPal6, SlotPallete, 0, 0, 0, 6, 32, 1);
 		blit(StripPal7, SlotPallete, 0, 0, 0, 7, 32, 1);
 		blit(StripPal8, SlotPallete, 0, 0, 0, 8, 32, 1);
-		save_bitmap("pallete.pcx", SlotPallete, NULL);
+		save_bitmap("data/pallete.pcx", SlotPallete, NULL);
 		if(Pal0found==1){ Slot0OK=1; };
 		if(Pal1found==1){ Slot1OK=1; };
 		if(Pal2found==1){ Slot2OK=1; };
@@ -311,27 +313,27 @@ int main()
 	textprintf_right_ex(buffer, font, 122+128*3+0+70+1, 130+212+1, makecol(000,000,000), -1, "HOLD");
 	textprintf_right_ex(buffer, font, 122+128*3+0+70+0, 130+212+0, makecol(255,255,255), -1, "HOLD");
 	
-	textprintf_centre_ex(buffer, font, 64+128*0+0+64+1, 76+128*0+0+116+1, makecol(000,000,000), -1, "pal0.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*0+0+64+0, 76+128*0+0+116+0, makecol(255,255,255), -1, "pal0.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*0+0+64+1, 76+128*1+0+118+1, makecol(000,000,000), -1, "pal1.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*0+0+64+0, 76+128*1+0+118+0, makecol(255,255,255), -1, "pal1.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*1+0+64+1, 76+128*1+0+118+1, makecol(000,000,000), -1, "pal2.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*1+0+64+0, 76+128*1+0+118+0, makecol(255,255,255), -1, "pal2.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*2+0+64+1, 76+128*1+0+118+1, makecol(000,000,000), -1, "pal3.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*2+0+64+0, 76+128*1+0+118+0, makecol(255,255,255), -1, "pal3.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*3+0+64+1, 76+128*1+0+118+1, makecol(000,000,000), -1, "pal4.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*3+0+64+0, 76+128*1+0+118+0, makecol(255,255,255), -1, "pal4.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*0+0+64+1, 76+128*2+0+120+1, makecol(000,000,000), -1, "pal5.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*0+0+64+0, 76+128*2+0+120+0, makecol(255,255,255), -1, "pal5.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*1+0+64+1, 76+128*2+0+120+1, makecol(000,000,000), -1, "pal6.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*1+0+64+0, 76+128*2+0+120+0, makecol(255,255,255), -1, "pal6.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*2+0+64+1, 76+128*2+0+120+1, makecol(000,000,000), -1, "pal7.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*2+0+64+0, 76+128*2+0+120+0, makecol(255,255,255), -1, "pal7.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*3+0+64+1, 76+128*2+0+120+1, makecol(000,000,000), -1, "pal8.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*0+0+64+1, 76+128*0+0+116+1, makecol(000,000,000), -1, "data/pal0.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*0+0+64+0, 76+128*0+0+116+0, makecol(255,255,255), -1, "data/pal0.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*0+0+64+1, 76+128*1+0+118+1, makecol(000,000,000), -1, "data/pal1.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*0+0+64+0, 76+128*1+0+118+0, makecol(255,255,255), -1, "data/pal1.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*1+0+64+1, 76+128*1+0+118+1, makecol(000,000,000), -1, "data/pal2.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*1+0+64+0, 76+128*1+0+118+0, makecol(255,255,255), -1, "data/pal2.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*2+0+64+1, 76+128*1+0+118+1, makecol(000,000,000), -1, "data/pal3.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*2+0+64+0, 76+128*1+0+118+0, makecol(255,255,255), -1, "data/pal3.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*3+0+64+1, 76+128*1+0+118+1, makecol(000,000,000), -1, "data/pal4.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*3+0+64+0, 76+128*1+0+118+0, makecol(255,255,255), -1, "data/pal4.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*0+0+64+1, 76+128*2+0+120+1, makecol(000,000,000), -1, "data/pal5.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*0+0+64+0, 76+128*2+0+120+0, makecol(255,255,255), -1, "data/pal5.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*1+0+64+1, 76+128*2+0+120+1, makecol(000,000,000), -1, "data/pal6.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*1+0+64+0, 76+128*2+0+120+0, makecol(255,255,255), -1, "data/pal6.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*2+0+64+1, 76+128*2+0+120+1, makecol(000,000,000), -1, "data/pal7.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*2+0+64+0, 76+128*2+0+120+0, makecol(255,255,255), -1, "data/pal7.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*3+0+64+1, 76+128*2+0+120+1, makecol(000,000,000), -1, "data/pal8.pcx");
 	textprintf_centre_ex(buffer, font, 64+128*3+0+64+0, 76+128*2+0+120+0, makecol(255,255,255), -1, "pal8.pcx");
 	
-	textprintf_centre_ex(buffer, font, 64+128*2+0+64+1, 76+128*0+0+102+1, makecol(000,000,000), -1, "pallete.pcx");
-	textprintf_centre_ex(buffer, font, 64+128*2+0+64+0, 76+128*0+0+102+0, makecol(255,255,255), -1, "pallete.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*2+0+64+1, 76+128*0+0+102+1, makecol(000,000,000), -1, "data/pallete.pcx");
+	textprintf_centre_ex(buffer, font, 64+128*2+0+64+0, 76+128*0+0+102+0, makecol(255,255,255), -1, "data/pallete.pcx");
 	
 	//DEBUG
 	draw_sprite(buffer, StripPal0, 80, 30+3);
