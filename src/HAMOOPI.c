@@ -963,7 +963,7 @@ int SelectBGID=1;
 //Carrega Miniaturas - SELECT CHARS
 for(int ind=1;ind<=MAX_CHARS;ind++){
 if (Qtde_Personagens_Instalados>=ind) {
-char MINIstring[99]=""; sprintf(MINIstring, "data/data/chars/%s/000_01.pcx", Lista_de_Personagens_Instalados[ind]);
+char MINIstring[99]=""; sprintf(MINIstring, "data/chars/%s/000_01.pcx", Lista_de_Personagens_Instalados[ind]);
 MINIspr[ind] = load_bitmap(MINIstring, NULL);
 if (!MINIspr[ind]) { MINIspr[ind]=load_bitmap("data/system/000_01.pcx", NULL); }
 stretch_blit(MINIspr[ind], MINIsprDisplay[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0, MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
@@ -974,7 +974,7 @@ destroy_bitmap(MINIspr[ind]);
 //miniaturas do arcade mode
 for(int ind=1;ind<=8;ind++){
 if (Qtde_Personagens_Instalados>=ind) {
-char MINIstring[99]=""; sprintf(MINIstring, "data/data/chars/%s/000_01.pcx", Lista_de_Personagens_ArcadeMode[ind]);
+char MINIstring[99]=""; sprintf(MINIstring, "data/chars/%s/000_01.pcx", Lista_de_Personagens_ArcadeMode[ind]);
 MINIspr[ind] = load_bitmap(MINIstring, NULL);
 if (!MINIspr[ind]) { MINIspr[ind]=load_bitmap("data/system/000_01.pcx", NULL); }
 stretch_blit(MINIspr[ind], MINIsprDisplayArcadeMode[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0, MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
@@ -985,7 +985,7 @@ destroy_bitmap(MINIspr[ind]);
 //P1 miniatura da foto ingame
 strcpy(P[1].Name, (char *)get_config_string("CHARS", "char1", ""));
 char P1_1s[25]="";
-sprintf(P1_1s, "data/data/chars/%s/000_01.pcx", P[1].Name);
+sprintf(P1_1s, "data/chars/%s/000_01.pcx", P[1].Name);
 BITMAP *P1_1 = load_bitmap(P1_1s, NULL);
 if (!P1_1) { P1_1=load_bitmap("data/system/000_01.pcx", NULL); }
 //P2 miniatura da foto ingame
@@ -1953,14 +1953,14 @@ if (NumPersonagensEscolhidos==2) { timermenus=0; }
 //atualiza gps do mapa
 if (Qtde_Cenarios_Instalados>=1 && timermenus==0){
 char bg_choice_string[25];
-if (SelectBGID==1) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[1]); }
-if (SelectBGID==2) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[2]); }
-if (SelectBGID==3) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[3]); }
-if (SelectBGID==4) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[4]); }
-if (SelectBGID==5) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[5]); }
-if (SelectBGID==6) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[6]); }
-if (SelectBGID==7) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[7]); }
-if (SelectBGID==8) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[8]); }
+if (SelectBGID==1) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[1]); }
+if (SelectBGID==2) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[2]); }
+if (SelectBGID==3) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[3]); }
+if (SelectBGID==4) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[4]); }
+if (SelectBGID==5) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[5]); }
+if (SelectBGID==6) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[6]); }
+if (SelectBGID==7) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[7]); }
+if (SelectBGID==8) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[8]); }
 set_config_file(bg_choice_string);
 MapPosX=get_config_int ( "DATA", "MapPosX", 0 );
 MapPosY=get_config_int ( "DATA", "MapPosY", 0 );
@@ -2021,14 +2021,14 @@ SelectBGID--; play_sample(cursor, 255, 128, 1000, 0); AtualizaGPS=1;
 if (AtualizaGPS==1){
 AtualizaGPS=0;
 char bg_choice_string[25];
-if (SelectBGID==1) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[1]); }
-if (SelectBGID==2) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[2]); }
-if (SelectBGID==3) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[3]); }
-if (SelectBGID==4) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[4]); }
-if (SelectBGID==5) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[5]); }
-if (SelectBGID==6) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[6]); }
-if (SelectBGID==7) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[7]); }
-if (SelectBGID==8) { sprintf(bg_choice_string, "backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[8]); }
+if (SelectBGID==1) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[1]); }
+if (SelectBGID==2) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[2]); }
+if (SelectBGID==3) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[3]); }
+if (SelectBGID==4) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[4]); }
+if (SelectBGID==5) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[5]); }
+if (SelectBGID==6) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[6]); }
+if (SelectBGID==7) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[7]); }
+if (SelectBGID==8) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[8]); }
 set_config_file(bg_choice_string);
 MapPosX=get_config_int ( "DATA", "MapPosX", 0 );
 MapPosY=get_config_int ( "DATA", "MapPosY", 0 );
@@ -2162,7 +2162,7 @@ if (Estagio_Atual==8){ draw_sprite(bufferx, spr_cursor_historia, 64+(64*7), 400)
 //desenha gps do mapa
 if (timermenus==0){
 char bg_choice_string[25];
-sprintf(bg_choice_string, "backgrounds/%s/config.ini", ChoiceBG);
+sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", ChoiceBG);
 set_config_file(bg_choice_string);
 MapPosX=get_config_int ( "DATA", "MapPosX", 0 );
 MapPosY=get_config_int ( "DATA", "MapPosY", 0 );
