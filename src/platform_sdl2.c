@@ -665,7 +665,7 @@ void platform_textout_ex(PlatformBitmap *bitmap, PlatformFont *font,
                         PlatformColor color, PlatformColor bg) {
     if (bitmap && bitmap->surface && font && font->font && text) {
         SDL_Color fg = { (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 255 };
-        SDL_Surface *text_surface = TTF_RenderText_Solid(font->font, text, fg);
+        SDL_Surface *text_surface = TTF_RenderUTF8_Blended(font->font, text, fg);
         
         if (text_surface) {
             SDL_Rect dest_rect = { x, y, text_surface->w, text_surface->h };
