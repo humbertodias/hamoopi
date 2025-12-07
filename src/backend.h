@@ -46,7 +46,7 @@ int backend_install_mouse(void);
 void backend_clear_keybuf(void);
 
 // Sound functions
-int backend_install_sound(int digi, int midi);
+int backend_install_sound(int digi, int midi, char *cfg_path);
 void backend_set_volume(int digi_volume, int midi_volume);
 HM_SAMPLE backend_load_sample(const char* filename);
 void backend_destroy_sample(HM_SAMPLE sample);
@@ -70,6 +70,18 @@ int backend_bitmap_height(HM_BITMAP bmp);
 // Drawing functions
 void backend_blit(HM_BITMAP source, HM_BITMAP dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height);
 void backend_masked_blit(HM_BITMAP source, HM_BITMAP dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height);
+void backend_masked_backend_stretch_blit(
+    HM_BITMAP source,
+    HM_BITMAP dest,
+    int source_x,
+    int source_y,
+    int source_width,
+    int source_height,
+    int dest_x,
+    int dest_y,
+    int dest_width,
+    int dest_height
+);
 void backend_stretch_blit(HM_BITMAP source, HM_BITMAP dest, int source_x, int source_y, int source_width, int source_height, int dest_x, int dest_y, int dest_width, int dest_height);
 void backend_stretch_sprite(HM_BITMAP bmp, HM_BITMAP sprite, int x, int y, int w, int h);
 void backend_draw_sprite(HM_BITMAP bmp, HM_BITMAP sprite, int x, int y);
@@ -127,10 +139,13 @@ void backend_set_uformat(int format);
 // Callback functions
 void backend_set_close_button_callback(void (*proc)(void));
 
+void backend_solid_mode();
+
 // Key code constants
 #define HM_KEY_ESC      1
 #define HM_KEY_ENTER    28
 #define HM_KEY_SPACE    57
+
 #define HM_KEY_F1       59
 #define HM_KEY_F2       60
 #define HM_KEY_F3       61
@@ -143,15 +158,18 @@ void backend_set_close_button_callback(void (*proc)(void));
 #define HM_KEY_F10      68
 #define HM_KEY_F11      87
 #define HM_KEY_F12      88
+
 #define HM_KEY_ALT      56
 #define HM_KEY_LSHIFT   42
 #define HM_KEY_RSHIFT   54
 #define HM_KEY_LCONTROL 29
 #define HM_KEY_RCONTROL 97
+
 #define HM_KEY_UP       72
 #define HM_KEY_DOWN     80
 #define HM_KEY_LEFT     75
 #define HM_KEY_RIGHT    77
+
 #define HM_KEY_A        30
 #define HM_KEY_B        48
 #define HM_KEY_C        46
@@ -178,6 +196,7 @@ void backend_set_close_button_callback(void (*proc)(void));
 #define HM_KEY_X        45
 #define HM_KEY_Y        21
 #define HM_KEY_Z        44
+
 #define HM_KEY_0        11
 #define HM_KEY_1        2
 #define HM_KEY_2        3
@@ -189,6 +208,7 @@ void backend_set_close_button_callback(void (*proc)(void));
 #define HM_KEY_8        9
 #define HM_KEY_9        10
 
+
 // Drawing modes
 #define HM_DRAW_MODE_SOLID            0
 #define HM_DRAW_MODE_XOR              1
@@ -198,8 +218,8 @@ void backend_set_close_button_callback(void (*proc)(void));
 #define HM_DRAW_MODE_TRANS            5
 
 // Graphics mode
-#define HM_GFX_AUTODETECT_WINDOWED    0
-#define HM_GFX_AUTODETECT_FULLSCREEN  1
+#define HM_GFX_AUTODETECT_WINDOWED    2
+#define HM_GFX_AUTODETECT_FULLSCREEN  3
 
 // Unicode formats
 #define HM_U_ASCII       0

@@ -585,7 +585,7 @@ int main()
 backend_set_uformat(HM_U_UTF8); //permite usar acentuação no jogo (diacríticos)
 backend_init(); backend_install_timer(); backend_install_keyboard(); backend_install_mouse(); backend_set_color_depth(32);
 //backend_set_gfx_mode() é declarado logo abaixo, apos carregar dados do SETUP.INI
-backend_install_sound(HM_DIGI_AUTODETECT, HM_MIDI_AUTODETECT);
+backend_install_sound(HM_DIGI_AUTODETECT, HM_MIDI_AUTODETECT, NULL);
 int ModoFullscreen=0;
 HM_FONT font_debug = backend_load_font("data/system/font_debug.pcx");
 HM_FONT font_10    = backend_load_font("data/system/font_10.pcx"   );
@@ -1233,20 +1233,20 @@ if(salvardados==1){
 salvardados=0;
 //salva dados
 backend_set_config_file("SETUP.ini");
-set_config_string ( "CONFIG", "language", IDIOMA );
-set_config_int ( "CONFIG", "rounds", RoundTotal );
-set_config_int ( "CONFIG", "time", RoundTime/60 );
-set_config_int ( "CONFIG", "P1_Energy", P[1].Energy );
-set_config_int ( "CONFIG", "P2_Energy", P[2].Energy );
-set_config_int ( "CONFIG", "P1_Special", P[1].Special );
-set_config_int ( "CONFIG", "P2_Special", P[2].Special );
-set_config_int ( "CONFIG", "FullScreen", ModoFullscreen );
-set_config_int ( "CONFIG", "draw_shadows", op_desenhar_sombras );
-set_config_int ( "CONFIG", "zoom", op_Zoom );
-set_config_int ( "CONFIG", "show_inputs", Draw_Input );
-set_config_int ( "CONFIG", "window_res_x", WindowResX );
-set_config_int ( "CONFIG", "window_res_y", WindowResY );
-set_config_int ( "CONFIG", "frame_data", op_ShowFrameData );
+backend_set_config_string ( "CONFIG", "language", IDIOMA );
+backend_set_config_int ( "CONFIG", "rounds", RoundTotal );
+backend_set_config_int ( "CONFIG", "time", RoundTime/60 );
+backend_set_config_int ( "CONFIG", "P1_Energy", P[1].Energy );
+backend_set_config_int ( "CONFIG", "P2_Energy", P[2].Energy );
+backend_set_config_int ( "CONFIG", "P1_Special", P[1].Special );
+backend_set_config_int ( "CONFIG", "P2_Special", P[2].Special );
+backend_set_config_int ( "CONFIG", "FullScreen", ModoFullscreen );
+backend_set_config_int ( "CONFIG", "draw_shadows", op_desenhar_sombras );
+backend_set_config_int ( "CONFIG", "zoom", op_Zoom );
+backend_set_config_int ( "CONFIG", "show_inputs", Draw_Input );
+backend_set_config_int ( "CONFIG", "window_res_x", WindowResX );
+backend_set_config_int ( "CONFIG", "window_res_y", WindowResY );
+backend_set_config_int ( "CONFIG", "frame_data", op_ShowFrameData );
 backend_set_volume(op_sfx_volume, op_sound_volume);
 }
 }
@@ -1997,11 +1997,11 @@ if (strcmp( ChoiceP2,"") ==0) { backend_draw_sprite(bufferx, sel_mark_p2, -32+64
 
 //BIG DISPLAYs
 //P1
-masked_backend_stretch_blit(P1BIGDisplay, bufferx, 0, 0, 128, 128,   5, 140, 256, 256);
+backend_masked_backend_stretch_blit(P1BIGDisplay, bufferx, 0, 0, 128, 128,   5, 140, 256, 256);
 //P2
 if (strcmp( ChoiceP2,"-P2CPU-") !=0) {
 backend_clear_to_color(P2BIGDisplayInv, backend_makecol(255, 0, 255)); backend_draw_sprite_h_flip(P2BIGDisplayInv, P2BIGDisplay, 0, 0);
-masked_backend_stretch_blit(P2BIGDisplayInv, bufferx, 0, 0, 128, 128, 379, 140, 256, 256);
+backend_masked_backend_stretch_blit(P2BIGDisplayInv, bufferx, 0, 0, 128, 128, 379, 140, 256, 256);
 }
 //nomes
 backend_textprintf_ex( bufferx, font_10,  12, 382, backend_makecol(000,000,000), -1, "%s", P[1].Name_Display);
@@ -2173,11 +2173,11 @@ backend_draw_sprite(bufferx, spr_ponteiro, MapCenterX+MapPosX-16, MapCenterY+Map
 }
 
 //P1
-masked_backend_stretch_blit(P1BIGDisplay, bufferx, 0, 0, 128, 128,   5, 140, 256, 256);
+backend_masked_backend_stretch_blit(P1BIGDisplay, bufferx, 0, 0, 128, 128,   5, 140, 256, 256);
 //P2
 if (strcmp( ChoiceP2,"-P2CPU-") !=0) {
 backend_clear_to_color(P2BIGDisplayInv, backend_makecol(255, 0, 255)); backend_draw_sprite_h_flip(P2BIGDisplayInv, P2BIGDisplay, 0, 0);
-masked_backend_stretch_blit(P2BIGDisplayInv, bufferx, 0, 0, 128, 128, 379, 140, 256, 256);
+backend_masked_backend_stretch_blit(P2BIGDisplayInv, bufferx, 0, 0, 128, 128, 379, 140, 256, 256);
 }
 
 backend_stretch_blit(bufferx, bufferx, 0, 0, 640, 480, 0, 0, 640, 480);
@@ -2225,10 +2225,10 @@ P[2].Special=backend_get_config_int ( "CONFIG", "P2_Special", 1000 );
 //bg
 backend_draw_sprite(bufferx, VS_SCREEN, 0, 0);
 //P1
-masked_backend_stretch_blit(P1BIGDisplay, bufferx, 0, 0, 128, 128,   5, 140, 256, 256);
+backend_masked_backend_stretch_blit(P1BIGDisplay, bufferx, 0, 0, 128, 128,   5, 140, 256, 256);
 //P2
 backend_clear_to_color(P2BIGDisplayInv, backend_makecol(255, 0, 255)); backend_draw_sprite_h_flip(P2BIGDisplayInv, P2BIGDisplay, 0, 0);
-masked_backend_stretch_blit(P2BIGDisplayInv, bufferx, 0, 0, 128, 128, 379, 140, 256, 256);
+backend_masked_backend_stretch_blit(P2BIGDisplayInv, bufferx, 0, 0, 128, 128, 379, 140, 256, 256);
 //VS
 backend_draw_sprite(bufferx, vs_icon, 195, 20);
 //informacoes
@@ -4493,7 +4493,7 @@ if(P[1].Visible==1){
 if(P[1].Lado== 1){ backend_draw_trans_sprite(bufferx, P1_Sombra_Aux, (P[1].x*2+ShakeTemp1*2)-P[1].XAlign*2, AlturaPiso*2-backend_bitmap_height(P1_Sombra_Aux)+P[1].ConstanteY/3 ); }
 if(P[1].Lado==-1){ backend_draw_trans_sprite(bufferx, P1_Sombra_Aux, ((P[1].x*2+ShakeTemp1*2)-backend_bitmap_width(P[1].Spr))+P[1].XAlign*2, AlturaPiso*2-backend_bitmap_height(P1_Sombra_Aux)+P[1].ConstanteY/3 ); }
 }
-solid_mode();
+backend_solid_mode();
 }
 
 for(int indp=0;indp<=1;indp++){
@@ -4653,7 +4653,7 @@ Fireball[ind].x=-999;
 Fireball[ind].y=-999;
 P[ind].QtdeMagias=0;
 }
-//circlefill (bufferx, Fireball[ind].x*2, Fireball[ind].y*2, 5, backend_makecol(255,000,000)); //debug de posicionamento fireball
+//backend_circlefill(bufferx, Fireball[ind].x*2, Fireball[ind].y*2, 5, backend_makecol(255,000,000)); //debug de posicionamento fireball
 }
 
 if(Fireball[ind].Ativa==2){
@@ -4837,14 +4837,14 @@ backend_drawing_mode(HM_DRAW_MODE_SOLID, 0, 0, 0);
 
 if (Draw_Debug==1) {
 backend_line(bufferx, 0, AlturaPiso*2, backend_bitmap_width(bufferx), AlturaPiso*2, backend_makecol(020,020,020));
-circlefill (bufferx, P[1].x*2, P[1].y*2, 3, backend_makecol(000,000,000));
-circlefill (bufferx, P[1].x*2, P[1].y*2, 1, backend_makecol(255,255,255));
-circlefill (bufferx, P[2].x*2, P[2].y*2, 3, backend_makecol(000,000,000));
-circlefill (bufferx, P[2].x*2, P[2].y*2, 1, backend_makecol(255,255,255));
+backend_circlefill(bufferx, P[1].x*2, P[1].y*2, 3, backend_makecol(000,000,000));
+backend_circlefill(bufferx, P[1].x*2, P[1].y*2, 1, backend_makecol(255,255,255));
+backend_circlefill(bufferx, P[2].x*2, P[2].y*2, 3, backend_makecol(000,000,000));
+backend_circlefill(bufferx, P[2].x*2, P[2].y*2, 1, backend_makecol(255,255,255));
 backend_textprintf_centre_ex(bufferx, font_debug, MeioDaTela*2+1, AlturaPiso*2-20+1, backend_makecol(000,000,000), -1, "%i", abs(P[1].x-P[2].x) );
 backend_textprintf_centre_ex(bufferx, font_debug, MeioDaTela*2, AlturaPiso*2-20, backend_makecol(255,255,255), -1, "%i", abs(P[1].x-P[2].x) );
-circlefill (bufferx, MeioDaTela*2, AlturaPiso*2, 3, backend_makecol(255,000,000));
-circlefill (bufferx, MeioDaTela*2, AlturaPiso*2, 1, backend_makecol(255,255,255));
+backend_circlefill(bufferx, MeioDaTela*2, AlturaPiso*2, 3, backend_makecol(255,000,000));
+backend_circlefill(bufferx, MeioDaTela*2, AlturaPiso*2, 1, backend_makecol(255,255,255));
 }
 
 /*
@@ -4852,8 +4852,8 @@ circlefill (bufferx, MeioDaTela*2, AlturaPiso*2, 1, backend_makecol(255,255,255)
 			if(Qtde_HitBox>0){
 			backend_textprintf_centre_ex(LayerHUD, font_debug, 320,  50, backend_makecol(255,255,255), -1, "HitSpark[1].x: %i", HitSpark[1].x);
 			backend_textprintf_centre_ex(LayerHUD, font_debug, 320,  60, backend_makecol(255,255,255), -1, "HitSpark[1].y: %i", HitSpark[1].y);
-			circlefill (bufferx, HitSpark[1].x, HitSpark[1].y, 5, backend_makecol(000,000,255));
-			circlefill (bufferx, HitSpark[1].x, HitSpark[1].y, 3, backend_makecol(255,255,255));
+			backend_circlefill(bufferx, HitSpark[1].x, HitSpark[1].y, 5, backend_makecol(000,000,255));
+			backend_circlefill(bufferx, HitSpark[1].x, HitSpark[1].y, 3, backend_makecol(255,255,255));
 			backend_rect(bufferx,
 			HitSpark[1].x-HitSpark[1].XAlign*2,
 			HitSpark[1].y-HitSpark[1].YAlign*2,
@@ -5883,7 +5883,7 @@ if(RoundTotal>=4){ backend_draw_trans_sprite(LayerHUDa, spr_mold_results, 5+40*2
 if(RoundTotal>=1){ backend_draw_trans_sprite(LayerHUDa, spr_mold_results, 640-5-40*1-1, 45); }
 if(RoundTotal>=2){ backend_draw_trans_sprite(LayerHUDa, spr_mold_results, 640-5-40*2-2, 45); }
 if(RoundTotal>=4){ backend_draw_trans_sprite(LayerHUDa, spr_mold_results, 640-5-40*3-3, 45); }
-solid_mode();
+backend_solid_mode();
 if(P[1].Round_Wins>=1){ backend_draw_sprite(LayerHUDa, spr_result_win, 5+40*0+0, 45); }
 if(P[1].Round_Wins>=2){ backend_draw_sprite(LayerHUDa, spr_result_win, 5+40*1+1, 45); }
 if(P[1].Round_Wins>=3){ backend_draw_sprite(LayerHUDa, spr_result_win, 5+40*2+2, 45); }
@@ -6437,8 +6437,8 @@ backend_draw_sprite(bufferx, bt_pivot,            5, 420);
 
 //backend_textprintf_centre_ex(bufferx, font_debug, 84, 463, backend_makecol(255,255,000), -1, "FPS[%d] [%d]", Ctrl_FPS, Edtimer);
 backend_textprintf_centre_ex(bufferx, font_debug, 84, 453, backend_makecol(255,255,255), -1, "Mx:%i My:%i", backend_mouse_x-ED_x*2, backend_mouse_y-ED_y*2);
-circlefill (bufferx, ((ED_x-ED_XAlign)*2)+ED_XAlign*2, ((ED_y-ED_YAlign)*2)+ED_YAlign*2, 3, backend_makecol(000,000,000));
-circlefill (bufferx, ((ED_x-ED_XAlign)*2)+ED_XAlign*2, ((ED_y-ED_YAlign)*2)+ED_YAlign*2, 1, backend_makecol(255,255,255));
+backend_circlefill(bufferx, ((ED_x-ED_XAlign)*2)+ED_XAlign*2, ((ED_y-ED_YAlign)*2)+ED_YAlign*2, 3, backend_makecol(000,000,000));
+backend_circlefill(bufferx, ((ED_x-ED_XAlign)*2)+ED_XAlign*2, ((ED_y-ED_YAlign)*2)+ED_YAlign*2, 1, backend_makecol(255,255,255));
 
 backend_rectfill(bufferx, 5,152,163,150+19,backend_makecol(000,000,000));
 backend_rect(bufferx, 5,152,163,150+19,backend_makecol(100,100,100));
@@ -7217,7 +7217,7 @@ AnimTransTimer=-1;
 //////////////////////////////
 if (GamePlayMode==0) { backend_stretch_blit(bufferx, backend_screen, 0, 0, 640, 480, 0, 0, backend_bitmap_width(backend_screen), backend_bitmap_height(backend_screen)); }
 if (GamePlayMode==1) {
-masked_backend_stretch_blit(LayerHUDa, LayerHUDb, 0, 0, backend_bitmap_width(LayerHUDa), backend_bitmap_height(LayerHUDa), 0, 0, backend_bitmap_width(LayerHUDb), backend_bitmap_height(LayerHUDb));
+backend_masked_backend_stretch_blit(LayerHUDa, LayerHUDb, 0, 0, backend_bitmap_width(LayerHUDa), backend_bitmap_height(LayerHUDa), 0, 0, backend_bitmap_width(LayerHUDb), backend_bitmap_height(LayerHUDb));
 backend_stretch_blit(LayerHUDb, backend_screen, 0, 0, backend_bitmap_width(LayerHUDb), backend_bitmap_height(LayerHUDb), 0, 0, backend_bitmap_width(backend_screen), backend_bitmap_height(backend_screen)); //resolucao adaptativa
 //backend_draw_sprite(backend_screen, LayerHUDb, 0, 0); //PS: desativado, resolucao fixa em 640x480, stretch_blit funciona melhor
 }

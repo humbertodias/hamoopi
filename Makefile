@@ -14,8 +14,9 @@ ifeq ($(platform),)
    endif
 endif
 
+BUILD_TYPE=Debug
 build: clean
-	cmake -Bbuild
+	cmake -Bbuild -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 	cmake --build build 
 	cp build/${TARGET}* .
 	

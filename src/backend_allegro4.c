@@ -73,8 +73,8 @@ void backend_clear_keybuf(void) {
 }
 
 // Sound functions
-int backend_install_sound(int digi, int midi) {
-    return install_sound(digi, midi);
+int backend_install_sound(int digi, int midi, char *cfg_path) {
+    return install_sound(digi, midi, cfg_path);
 }
 
 void backend_set_volume(int digi_volume, int midi_volume) {
@@ -155,6 +155,32 @@ void backend_masked_blit(HM_BITMAP source, HM_BITMAP dest, int source_x, int sou
     masked_blit((BITMAP*)source, (BITMAP*)dest, source_x, source_y, dest_x, dest_y, width, height);
 }
 
+void backend_masked_backend_stretch_blit(
+    HM_BITMAP source,
+    HM_BITMAP dest,
+    int source_x,
+    int source_y,
+    int source_width,
+    int source_height,
+    int dest_x,
+    int dest_y,
+    int dest_width,
+    int dest_height
+) {
+    masked_stretch_blit(
+        (BITMAP*)source,
+        (BITMAP*)dest,
+        source_x,
+        source_y,
+        source_width,
+        source_height,
+        dest_x,
+        dest_y,
+        dest_width,
+        dest_height
+    );
+}
+
 void backend_stretch_blit(HM_BITMAP source, HM_BITMAP dest, int source_x, int source_y, int source_width, int source_height, int dest_x, int dest_y, int dest_width, int dest_height) {
     stretch_blit((BITMAP*)source, (BITMAP*)dest, source_x, source_y, source_width, source_height, dest_x, dest_y, dest_width, dest_height);
 }
@@ -218,6 +244,10 @@ void backend_circle(HM_BITMAP bmp, int x, int y, int radius, HM_COLOR color) {
 
 void backend_circlefill(HM_BITMAP bmp, int x, int y, int radius, HM_COLOR color) {
     circlefill((BITMAP*)bmp, x, y, radius, color);
+}
+
+void backend_solid_mode() {
+    solid_mode();
 }
 
 // Color functions
