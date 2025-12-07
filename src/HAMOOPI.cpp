@@ -675,127 +675,127 @@ sprintf(bg_choice, "data/backgrounds/%s/000_00.pcx", Lista_de_Cenarios_Instalado
 bg_hamoopi[ind]= (BITMAP*)gfx->load_bitmap(bg_choice);
 }
 
-BITMAP *bufferx = create_bitmap(2560,1920); //layer do cenario e personagens escalonados
-BITMAP *LayerHUD = create_bitmap(WindowResX,WindowResY); //layer das barras de energia
-BITMAP *LayerHUDa = create_bitmap(640,480); //layer das barras de energia
-BITMAP *LayerHUDb = create_bitmap(WindowResX,WindowResY); //layer das barras de energia
+BITMAP *bufferx = (BITMAP*)gfx->create_bitmap(2560,1920); //layer do cenario e personagens escalonados
+BITMAP *LayerHUD = (BITMAP*)gfx->create_bitmap(WindowResX,WindowResY); //layer das barras de energia
+BITMAP *LayerHUDa = (BITMAP*)gfx->create_bitmap(640,480); //layer das barras de energia
+BITMAP *LayerHUDb = (BITMAP*)gfx->create_bitmap(WindowResX,WindowResY); //layer das barras de energia
 
 for(int ind=0;ind<=500;ind++){
-P[1].SprAtlas[ind]= create_bitmap(480,480); //reserva memoria para sprites dos players
-P[2].SprAtlas[ind]= create_bitmap(480,480); //reserva memoria para sprites dos players
+P[1].SprAtlas[ind]= (BITMAP*)gfx->create_bitmap(480,480); //reserva memoria para sprites dos players
+P[2].SprAtlas[ind]= (BITMAP*)gfx->create_bitmap(480,480); //reserva memoria para sprites dos players
 }
 
-P[1].Spr              = create_bitmap(480,480);
-P[2].Spr              = create_bitmap(480,480);
-Fireball[1].Spr       = create_bitmap(480,480);
-Fireball[2].Spr       = create_bitmap(480,480);
-BITMAP *P1_Sombra     = create_bitmap(480,128);
-BITMAP *P2_Sombra     = create_bitmap(480,128);
-BITMAP *P1_Sombra_Aux = create_bitmap(480,128);
-BITMAP *P2_Sombra_Aux = create_bitmap(480,128);
-BITMAP *P1_energy_flip = create_bitmap(250,40);
-BITMAP *P1_energy_red_flip = create_bitmap(250,40);
-BITMAP *ED_Spr        = create_bitmap(480,480); //Editor
-BITMAP *ED_Mini       = create_bitmap(32,32);
-BITMAP *P1_Spr_Aux    = create_bitmap(480,480); //sprite auxiliar utilizado na funcao de animacao
-BITMAP *P2_Spr_Aux    = create_bitmap(480,480); //sprite auxiliar utilizado na funcao de animacao
-BITMAP *ED_Spr_Aux    = create_bitmap(480,480); //sprite auxiliar utilizado na funcao de animacao
-BITMAP *HitSparkspr   = create_bitmap(260,260);
-BITMAP *HitSpark_Aux  = create_bitmap(130,130);
-BITMAP *P1_Pallete    = create_bitmap(32,10);
-BITMAP *P2_Pallete    = create_bitmap(32,10);
+P[1].Spr              = (BITMAP*)gfx->create_bitmap(480,480);
+P[2].Spr              = (BITMAP*)gfx->create_bitmap(480,480);
+Fireball[1].Spr       = (BITMAP*)gfx->create_bitmap(480,480);
+Fireball[2].Spr       = (BITMAP*)gfx->create_bitmap(480,480);
+BITMAP *P1_Sombra     = (BITMAP*)gfx->create_bitmap(480,128);
+BITMAP *P2_Sombra     = (BITMAP*)gfx->create_bitmap(480,128);
+BITMAP *P1_Sombra_Aux = (BITMAP*)gfx->create_bitmap(480,128);
+BITMAP *P2_Sombra_Aux = (BITMAP*)gfx->create_bitmap(480,128);
+BITMAP *P1_energy_flip = (BITMAP*)gfx->create_bitmap(250,40);
+BITMAP *P1_energy_red_flip = (BITMAP*)gfx->create_bitmap(250,40);
+BITMAP *ED_Spr        = (BITMAP*)gfx->create_bitmap(480,480); //Editor
+BITMAP *ED_Mini       = (BITMAP*)gfx->create_bitmap(32,32);
+BITMAP *P1_Spr_Aux    = (BITMAP*)gfx->create_bitmap(480,480); //sprite auxiliar utilizado na funcao de animacao
+BITMAP *P2_Spr_Aux    = (BITMAP*)gfx->create_bitmap(480,480); //sprite auxiliar utilizado na funcao de animacao
+BITMAP *ED_Spr_Aux    = (BITMAP*)gfx->create_bitmap(480,480); //sprite auxiliar utilizado na funcao de animacao
+BITMAP *HitSparkspr   = (BITMAP*)gfx->create_bitmap(260,260);
+BITMAP *HitSpark_Aux  = (BITMAP*)gfx->create_bitmap(130,130);
+BITMAP *P1_Pallete    = (BITMAP*)gfx->create_bitmap(32,10);
+BITMAP *P2_Pallete    = (BITMAP*)gfx->create_bitmap(32,10);
 clear_to_color(HitSparkspr , makecol(255, 0, 255));
 clear_to_color(HitSpark_Aux, makecol(255, 0, 255));
 clear_to_color(P1_Pallete  , makecol(255, 0, 255));
 clear_to_color(P2_Pallete  , makecol(255, 0, 255));
 
 int HamoopiError=0;
-BITMAP *GAME_logo            = load_bitmap("data/system/GAME_logo.pcx", NULL);            if (!GAME_logo)            { HamoopiError=1; }
-BITMAP *flag_BR              = load_bitmap("data/system/flag_BR.pcx", NULL);              if (!flag_BR)              { HamoopiError=1; }
-BITMAP *sel_mark_p1          = load_bitmap("data/system/sel_mark_p1.pcx", NULL);          if (!sel_mark_p1)          { HamoopiError=1; }
-BITMAP *sel_mark_p2          = load_bitmap("data/system/sel_mark_p2.pcx", NULL);          if (!sel_mark_p2)          { HamoopiError=1; }
-BITMAP *flag_US              = load_bitmap("data/system/flag_US.pcx", NULL);              if (!flag_US)              { HamoopiError=1; }
-BITMAP *SELECT_CHARS         = load_bitmap("data/system/SELECT_CHARS.pcx", NULL);         if (!SELECT_CHARS)         { HamoopiError=1; }
-BITMAP *VS_SCREEN            = load_bitmap("data/system/VS_SCREEN.pcx", NULL);            if (!VS_SCREEN)            { HamoopiError=1; }
-BITMAP *vs_icon              = load_bitmap("data/system/vs_icon.pcx", NULL);              if (!vs_icon)              { HamoopiError=1; }
-BITMAP *SELECT_BG            = load_bitmap("data/system/SELECT_BG.pcx", NULL);            if (!SELECT_BG)            { HamoopiError=1; }
-BITMAP *donation             = load_bitmap("data/system/donation.pcx", NULL);             if (!donation)             { HamoopiError=1; }
-BITMAP *spr_p1_cursor        = load_bitmap("data/system/spr_p1_cursor.pcx", NULL);        if (!spr_p1_cursor)        { HamoopiError=1; }
-BITMAP *spr_p2_cursor        = load_bitmap("data/system/spr_p2_cursor.pcx", NULL);        if (!spr_p2_cursor)        { HamoopiError=1; }
-BITMAP *spr_cursor_historia  = load_bitmap("data/system/spr_cursor_historia.pcx", NULL);  if (!spr_cursor_historia)  { HamoopiError=1; }
-BITMAP *spr_cursor_vazio     = load_bitmap("data/system/spr_cursor_vazio.pcx", NULL);     if (!spr_cursor_vazio)     { HamoopiError=1; }
-BITMAP *spr_ponteiro         = load_bitmap("data/system/spr_ponteiro.pcx", NULL);         if (!spr_ponteiro)         { HamoopiError=1; }
-BITMAP *spr_menu_icon        = load_bitmap("data/system/spr_menu_icon.pcx", NULL);        if (!spr_menu_icon)        { HamoopiError=1; }
-BITMAP *GAME_intro           = load_bitmap("data/system/GAME_intro.pcx", NULL);           if (!GAME_intro)           { HamoopiError=1; }
-BITMAP *GAME_options         = load_bitmap("data/system/GAME_options.pcx", NULL);         if (!GAME_options)         { HamoopiError=1; }
-BITMAP *char_generic         = load_bitmap("data/system/char_generic.pcx", NULL);         if (!char_generic)         { HamoopiError=1; }
-BITMAP *char_generic2x       = load_bitmap("data/system/char_generic2x.pcx", NULL);       if (!char_generic2x)       { HamoopiError=1; }
-BITMAP *spr_mold_results     = load_bitmap("data/system/spr_mold_results.pcx", NULL);     if (!spr_mold_results)     { HamoopiError=1; }
-BITMAP *spr_result_perfect   = load_bitmap("data/system/spr_result_perfect.pcx", NULL);   if (!spr_result_perfect)   { HamoopiError=1; }
-BITMAP *spr_result_win       = load_bitmap("data/system/spr_result_win.pcx", NULL);       if (!spr_result_win)       { HamoopiError=1; }
-BITMAP *spr_splash_round1    = load_bitmap("data/system/spr_splash_round1.pcx", NULL);    if (!spr_splash_round1)    { HamoopiError=1; }
-BITMAP *spr_splash_round2    = load_bitmap("data/system/spr_splash_round2.pcx", NULL);    if (!spr_splash_round2)    { HamoopiError=1; }
-BITMAP *spr_splash_round3    = load_bitmap("data/system/spr_splash_round3.pcx", NULL);    if (!spr_splash_round3)    { HamoopiError=1; }
-BITMAP *spr_splash_round4    = load_bitmap("data/system/spr_splash_round4.pcx", NULL);    if (!spr_splash_round4)    { HamoopiError=1; }
-BITMAP *spr_splash_round5    = load_bitmap("data/system/spr_splash_round5.pcx", NULL);    if (!spr_splash_round5)    { HamoopiError=1; }
-BITMAP *spr_splash_fight     = load_bitmap("data/system/spr_splash_fight.pcx", NULL);     if (!spr_splash_fight)     { HamoopiError=1; }
-BITMAP *spr_splash_youwin    = load_bitmap("data/system/spr_splash_youwin.pcx", NULL);    if (!spr_splash_youwin)    { HamoopiError=1; }
-BITMAP *spr_splash_p1win     = load_bitmap("data/system/spr_splash_p1win.pcx", NULL);     if (!spr_splash_p1win)     { HamoopiError=1; }
-BITMAP *spr_splash_p2win     = load_bitmap("data/system/spr_splash_p2win.pcx", NULL);     if (!spr_splash_p2win)     { HamoopiError=1; }
-BITMAP *spr_splash_youlose   = load_bitmap("data/system/spr_splash_youlose.pcx", NULL);   if (!spr_splash_youlose)   { HamoopiError=1; }
-BITMAP *spr_splash_ko        = load_bitmap("data/system/spr_splash_ko.pcx", NULL);        if (!spr_splash_ko)        { HamoopiError=1; }
-BITMAP *spr_splash_perfect   = load_bitmap("data/system/spr_splash_perfect.pcx", NULL);   if (!spr_splash_perfect)   { HamoopiError=1; }
-BITMAP *spr_splash_draw      = load_bitmap("data/system/spr_splash_draw.pcx", NULL);      if (!spr_splash_draw)      { HamoopiError=1; }
-BITMAP *spr_splash_time_over = load_bitmap("data/system/spr_splash_time_over.pcx", NULL); if (!spr_splash_time_over) { HamoopiError=1; }
-BITMAP *bt_joystick          = load_bitmap("data/system/bt_joystick.pcx", NULL);          if (!bt_joystick)          { HamoopiError=1; }
-BITMAP *ed_mode1_on          = load_bitmap("data/system/ed_mode1_on.pcx", NULL);          if (!ed_mode1_on)          { HamoopiError=1; }
-BITMAP *ed_mode2_on          = load_bitmap("data/system/ed_mode2_on.pcx", NULL);          if (!ed_mode2_on)          { HamoopiError=1; }
-BITMAP *ed_mode1_off         = load_bitmap("data/system/ed_mode1_off.pcx", NULL);         if (!ed_mode1_off)         { HamoopiError=1; }
-BITMAP *ed_mode2_off         = load_bitmap("data/system/ed_mode2_off.pcx", NULL);         if (!ed_mode2_off)         { HamoopiError=1; }
-BITMAP *bt_reset_input       = load_bitmap("data/system/bt_reset_input.pcx", NULL);       if (!bt_reset_input)       { HamoopiError=1; }
-BITMAP *bt_up_1              = load_bitmap("data/system/bt_up_1.pcx", NULL);              if (!bt_up_1)              { HamoopiError=1; }
-BITMAP *bt_up_2              = load_bitmap("data/system/bt_up_2.pcx", NULL);              if (!bt_up_2)              { HamoopiError=1; }
-BITMAP *bt_up_3              = load_bitmap("data/system/bt_up_3.pcx", NULL);              if (!bt_up_3)              { HamoopiError=1; }
-BITMAP *bt_down_1            = load_bitmap("data/system/bt_down_1.pcx", NULL);            if (!bt_down_1)            { HamoopiError=1; }
-BITMAP *bt_down_2            = load_bitmap("data/system/bt_down_2.pcx", NULL);            if (!bt_down_2)            { HamoopiError=1; }
-BITMAP *bt_down_3            = load_bitmap("data/system/bt_down_3.pcx", NULL);            if (!bt_down_3)            { HamoopiError=1; }
-BITMAP *bt_left_1            = load_bitmap("data/system/bt_left_1.pcx", NULL);            if (!bt_left_1)            { HamoopiError=1; }
-BITMAP *bt_left_2            = load_bitmap("data/system/bt_left_2.pcx", NULL);            if (!bt_left_2)            { HamoopiError=1; }
-BITMAP *bt_left_3            = load_bitmap("data/system/bt_left_3.pcx", NULL);            if (!bt_left_3)            { HamoopiError=1; }
-BITMAP *bt_right_1           = load_bitmap("data/system/bt_right_1.pcx", NULL);           if (!bt_right_1)           { HamoopiError=1; }
-BITMAP *bt_right_2           = load_bitmap("data/system/bt_right_2.pcx", NULL);           if (!bt_right_2)           { HamoopiError=1; }
-BITMAP *bt_right_3           = load_bitmap("data/system/bt_right_3.pcx", NULL);           if (!bt_right_3)           { HamoopiError=1; }
-BITMAP *bt_1                 = load_bitmap("data/system/bt_1.pcx", NULL);                 if (!bt_1)                 { HamoopiError=1; }
-BITMAP *bt_2                 = load_bitmap("data/system/bt_2.pcx", NULL);                 if (!bt_2)                 { HamoopiError=1; }
-BITMAP *bt_3                 = load_bitmap("data/system/bt_3.pcx", NULL);                 if (!bt_3)                 { HamoopiError=1; }
-BITMAP *bt_ss_1              = load_bitmap("data/system/bt_ss_1.pcx", NULL);              if (!bt_ss_1)              { HamoopiError=1; }
-BITMAP *bt_ss_2              = load_bitmap("data/system/bt_ss_2.pcx", NULL);              if (!bt_ss_2)              { HamoopiError=1; }
-BITMAP *bt_ss_3              = load_bitmap("data/system/bt_ss_3.pcx", NULL);              if (!bt_ss_3)              { HamoopiError=1; }
-BITMAP *spr_input_0          = load_bitmap("data/system/spr_input_0.pcx", NULL);          if (!spr_input_0)          { HamoopiError=1; }
-BITMAP *spr_input_1          = load_bitmap("data/system/spr_input_1.pcx", NULL);          if (!spr_input_1)          { HamoopiError=1; }
-BITMAP *spr_input_2          = load_bitmap("data/system/spr_input_2.pcx", NULL);          if (!spr_input_2)          { HamoopiError=1; }
-BITMAP *spr_input_3          = load_bitmap("data/system/spr_input_3.pcx", NULL);          if (!spr_input_3)          { HamoopiError=1; }
-BITMAP *spr_input_4          = load_bitmap("data/system/spr_input_4.pcx", NULL);          if (!spr_input_4)          { HamoopiError=1; }
-BITMAP *spr_input_5          = load_bitmap("data/system/spr_input_5.pcx", NULL);          if (!spr_input_5)          { HamoopiError=1; }
-BITMAP *spr_input_6          = load_bitmap("data/system/spr_input_6.pcx", NULL);          if (!spr_input_6)          { HamoopiError=1; }
-BITMAP *spr_input_7          = load_bitmap("data/system/spr_input_7.pcx", NULL);          if (!spr_input_7)          { HamoopiError=1; }
-BITMAP *spr_input_8          = load_bitmap("data/system/spr_input_8.pcx", NULL);          if (!spr_input_8)          { HamoopiError=1; }
-BITMAP *spr_input_9          = load_bitmap("data/system/spr_input_9.pcx", NULL);          if (!spr_input_9)          { HamoopiError=1; }
-BITMAP *spr_input_10         = load_bitmap("data/system/spr_input_10.pcx", NULL);         if (!spr_input_10)         { HamoopiError=1; }
-BITMAP *spr_input_11         = load_bitmap("data/system/spr_input_11.pcx", NULL);         if (!spr_input_11)         { HamoopiError=1; }
-BITMAP *spr_input_12         = load_bitmap("data/system/spr_input_12.pcx", NULL);         if (!spr_input_12)         { HamoopiError=1; }
-BITMAP *spr_input_13         = load_bitmap("data/system/spr_input_13.pcx", NULL);         if (!spr_input_13)         { HamoopiError=1; }
-BITMAP *spr_input_14         = load_bitmap("data/system/spr_input_14.pcx", NULL);         if (!spr_input_14)         { HamoopiError=1; }
-BITMAP *spr_input_15         = load_bitmap("data/system/spr_input_15.pcx", NULL);         if (!spr_input_15)         { HamoopiError=1; }
-BITMAP *spr_input_16         = load_bitmap("data/system/spr_input_16.pcx", NULL);         if (!spr_input_16)         { HamoopiError=1; }
-BITMAP *spr_input_17         = load_bitmap("data/system/spr_input_17.pcx", NULL);         if (!spr_input_17)         { HamoopiError=1; }
-BITMAP *spr_bg_bar           = load_bitmap("data/system/spr_bg_bar.pcx", NULL);           if (!spr_bg_bar)           { HamoopiError=1; }
-BITMAP *spr_energy_bar       = load_bitmap("data/system/spr_energy_bar.pcx", NULL);       if (!spr_energy_bar)       { HamoopiError=1; }
-BITMAP *spr_energy_bar_full  = load_bitmap("data/system/spr_energy_bar_full.pcx", NULL);  if (!spr_energy_bar_full)  { HamoopiError=1; }
-BITMAP *spr_energy_red_bar   = load_bitmap("data/system/spr_energy_red_bar.pcx", NULL);   if (!spr_energy_red_bar)   { HamoopiError=1; }
-BITMAP *spr_energy_red_bar_full = load_bitmap("data/system/spr_energy_red_bar_full.pcx", NULL); if (!spr_energy_red_bar_full) { HamoopiError=1; }
-BITMAP *spr_bg_bar_sp        = load_bitmap("data/system/spr_bg_bar_sp.pcx", NULL);        if (!spr_bg_bar_sp)        { HamoopiError=1; }
-BITMAP *spr_bg_energy_bar_sp = load_bitmap("data/system/spr_bg_energy_bar_sp.pcx", NULL); if (!spr_bg_energy_bar_sp) { HamoopiError=1; }
+BITMAP *GAME_logo            = (BITMAP*)gfx->load_bitmap("data/system/GAME_logo.pcx");            if (!GAME_logo)            { HamoopiError=1; }
+BITMAP *flag_BR              = (BITMAP*)gfx->load_bitmap("data/system/flag_BR.pcx");              if (!flag_BR)              { HamoopiError=1; }
+BITMAP *sel_mark_p1          = (BITMAP*)gfx->load_bitmap("data/system/sel_mark_p1.pcx");          if (!sel_mark_p1)          { HamoopiError=1; }
+BITMAP *sel_mark_p2          = (BITMAP*)gfx->load_bitmap("data/system/sel_mark_p2.pcx");          if (!sel_mark_p2)          { HamoopiError=1; }
+BITMAP *flag_US              = (BITMAP*)gfx->load_bitmap("data/system/flag_US.pcx");              if (!flag_US)              { HamoopiError=1; }
+BITMAP *SELECT_CHARS         = (BITMAP*)gfx->load_bitmap("data/system/SELECT_CHARS.pcx");         if (!SELECT_CHARS)         { HamoopiError=1; }
+BITMAP *VS_SCREEN            = (BITMAP*)gfx->load_bitmap("data/system/VS_SCREEN.pcx");            if (!VS_SCREEN)            { HamoopiError=1; }
+BITMAP *vs_icon              = (BITMAP*)gfx->load_bitmap("data/system/vs_icon.pcx");              if (!vs_icon)              { HamoopiError=1; }
+BITMAP *SELECT_BG            = (BITMAP*)gfx->load_bitmap("data/system/SELECT_BG.pcx");            if (!SELECT_BG)            { HamoopiError=1; }
+BITMAP *donation             = (BITMAP*)gfx->load_bitmap("data/system/donation.pcx");             if (!donation)             { HamoopiError=1; }
+BITMAP *spr_p1_cursor        = (BITMAP*)gfx->load_bitmap("data/system/spr_p1_cursor.pcx");        if (!spr_p1_cursor)        { HamoopiError=1; }
+BITMAP *spr_p2_cursor        = (BITMAP*)gfx->load_bitmap("data/system/spr_p2_cursor.pcx");        if (!spr_p2_cursor)        { HamoopiError=1; }
+BITMAP *spr_cursor_historia  = (BITMAP*)gfx->load_bitmap("data/system/spr_cursor_historia.pcx");  if (!spr_cursor_historia)  { HamoopiError=1; }
+BITMAP *spr_cursor_vazio     = (BITMAP*)gfx->load_bitmap("data/system/spr_cursor_vazio.pcx");     if (!spr_cursor_vazio)     { HamoopiError=1; }
+BITMAP *spr_ponteiro         = (BITMAP*)gfx->load_bitmap("data/system/spr_ponteiro.pcx");         if (!spr_ponteiro)         { HamoopiError=1; }
+BITMAP *spr_menu_icon        = (BITMAP*)gfx->load_bitmap("data/system/spr_menu_icon.pcx");        if (!spr_menu_icon)        { HamoopiError=1; }
+BITMAP *GAME_intro           = (BITMAP*)gfx->load_bitmap("data/system/GAME_intro.pcx");           if (!GAME_intro)           { HamoopiError=1; }
+BITMAP *GAME_options         = (BITMAP*)gfx->load_bitmap("data/system/GAME_options.pcx");         if (!GAME_options)         { HamoopiError=1; }
+BITMAP *char_generic         = (BITMAP*)gfx->load_bitmap("data/system/char_generic.pcx");         if (!char_generic)         { HamoopiError=1; }
+BITMAP *char_generic2x       = (BITMAP*)gfx->load_bitmap("data/system/char_generic2x.pcx");       if (!char_generic2x)       { HamoopiError=1; }
+BITMAP *spr_mold_results     = (BITMAP*)gfx->load_bitmap("data/system/spr_mold_results.pcx");     if (!spr_mold_results)     { HamoopiError=1; }
+BITMAP *spr_result_perfect   = (BITMAP*)gfx->load_bitmap("data/system/spr_result_perfect.pcx");   if (!spr_result_perfect)   { HamoopiError=1; }
+BITMAP *spr_result_win       = (BITMAP*)gfx->load_bitmap("data/system/spr_result_win.pcx");       if (!spr_result_win)       { HamoopiError=1; }
+BITMAP *spr_splash_round1    = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_round1.pcx");    if (!spr_splash_round1)    { HamoopiError=1; }
+BITMAP *spr_splash_round2    = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_round2.pcx");    if (!spr_splash_round2)    { HamoopiError=1; }
+BITMAP *spr_splash_round3    = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_round3.pcx");    if (!spr_splash_round3)    { HamoopiError=1; }
+BITMAP *spr_splash_round4    = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_round4.pcx");    if (!spr_splash_round4)    { HamoopiError=1; }
+BITMAP *spr_splash_round5    = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_round5.pcx");    if (!spr_splash_round5)    { HamoopiError=1; }
+BITMAP *spr_splash_fight     = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_fight.pcx");     if (!spr_splash_fight)     { HamoopiError=1; }
+BITMAP *spr_splash_youwin    = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_youwin.pcx");    if (!spr_splash_youwin)    { HamoopiError=1; }
+BITMAP *spr_splash_p1win     = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_p1win.pcx");     if (!spr_splash_p1win)     { HamoopiError=1; }
+BITMAP *spr_splash_p2win     = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_p2win.pcx");     if (!spr_splash_p2win)     { HamoopiError=1; }
+BITMAP *spr_splash_youlose   = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_youlose.pcx");   if (!spr_splash_youlose)   { HamoopiError=1; }
+BITMAP *spr_splash_ko        = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_ko.pcx");        if (!spr_splash_ko)        { HamoopiError=1; }
+BITMAP *spr_splash_perfect   = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_perfect.pcx");   if (!spr_splash_perfect)   { HamoopiError=1; }
+BITMAP *spr_splash_draw      = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_draw.pcx");      if (!spr_splash_draw)      { HamoopiError=1; }
+BITMAP *spr_splash_time_over = (BITMAP*)gfx->load_bitmap("data/system/spr_splash_time_over.pcx"); if (!spr_splash_time_over) { HamoopiError=1; }
+BITMAP *bt_joystick          = (BITMAP*)gfx->load_bitmap("data/system/bt_joystick.pcx");          if (!bt_joystick)          { HamoopiError=1; }
+BITMAP *ed_mode1_on          = (BITMAP*)gfx->load_bitmap("data/system/ed_mode1_on.pcx");          if (!ed_mode1_on)          { HamoopiError=1; }
+BITMAP *ed_mode2_on          = (BITMAP*)gfx->load_bitmap("data/system/ed_mode2_on.pcx");          if (!ed_mode2_on)          { HamoopiError=1; }
+BITMAP *ed_mode1_off         = (BITMAP*)gfx->load_bitmap("data/system/ed_mode1_off.pcx");         if (!ed_mode1_off)         { HamoopiError=1; }
+BITMAP *ed_mode2_off         = (BITMAP*)gfx->load_bitmap("data/system/ed_mode2_off.pcx");         if (!ed_mode2_off)         { HamoopiError=1; }
+BITMAP *bt_reset_input       = (BITMAP*)gfx->load_bitmap("data/system/bt_reset_input.pcx");       if (!bt_reset_input)       { HamoopiError=1; }
+BITMAP *bt_up_1              = (BITMAP*)gfx->load_bitmap("data/system/bt_up_1.pcx");              if (!bt_up_1)              { HamoopiError=1; }
+BITMAP *bt_up_2              = (BITMAP*)gfx->load_bitmap("data/system/bt_up_2.pcx");              if (!bt_up_2)              { HamoopiError=1; }
+BITMAP *bt_up_3              = (BITMAP*)gfx->load_bitmap("data/system/bt_up_3.pcx");              if (!bt_up_3)              { HamoopiError=1; }
+BITMAP *bt_down_1            = (BITMAP*)gfx->load_bitmap("data/system/bt_down_1.pcx");            if (!bt_down_1)            { HamoopiError=1; }
+BITMAP *bt_down_2            = (BITMAP*)gfx->load_bitmap("data/system/bt_down_2.pcx");            if (!bt_down_2)            { HamoopiError=1; }
+BITMAP *bt_down_3            = (BITMAP*)gfx->load_bitmap("data/system/bt_down_3.pcx");            if (!bt_down_3)            { HamoopiError=1; }
+BITMAP *bt_left_1            = (BITMAP*)gfx->load_bitmap("data/system/bt_left_1.pcx");            if (!bt_left_1)            { HamoopiError=1; }
+BITMAP *bt_left_2            = (BITMAP*)gfx->load_bitmap("data/system/bt_left_2.pcx");            if (!bt_left_2)            { HamoopiError=1; }
+BITMAP *bt_left_3            = (BITMAP*)gfx->load_bitmap("data/system/bt_left_3.pcx");            if (!bt_left_3)            { HamoopiError=1; }
+BITMAP *bt_right_1           = (BITMAP*)gfx->load_bitmap("data/system/bt_right_1.pcx");           if (!bt_right_1)           { HamoopiError=1; }
+BITMAP *bt_right_2           = (BITMAP*)gfx->load_bitmap("data/system/bt_right_2.pcx");           if (!bt_right_2)           { HamoopiError=1; }
+BITMAP *bt_right_3           = (BITMAP*)gfx->load_bitmap("data/system/bt_right_3.pcx");           if (!bt_right_3)           { HamoopiError=1; }
+BITMAP *bt_1                 = (BITMAP*)gfx->load_bitmap("data/system/bt_1.pcx");                 if (!bt_1)                 { HamoopiError=1; }
+BITMAP *bt_2                 = (BITMAP*)gfx->load_bitmap("data/system/bt_2.pcx");                 if (!bt_2)                 { HamoopiError=1; }
+BITMAP *bt_3                 = (BITMAP*)gfx->load_bitmap("data/system/bt_3.pcx");                 if (!bt_3)                 { HamoopiError=1; }
+BITMAP *bt_ss_1              = (BITMAP*)gfx->load_bitmap("data/system/bt_ss_1.pcx");              if (!bt_ss_1)              { HamoopiError=1; }
+BITMAP *bt_ss_2              = (BITMAP*)gfx->load_bitmap("data/system/bt_ss_2.pcx");              if (!bt_ss_2)              { HamoopiError=1; }
+BITMAP *bt_ss_3              = (BITMAP*)gfx->load_bitmap("data/system/bt_ss_3.pcx");              if (!bt_ss_3)              { HamoopiError=1; }
+BITMAP *spr_input_0          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_0.pcx");          if (!spr_input_0)          { HamoopiError=1; }
+BITMAP *spr_input_1          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_1.pcx");          if (!spr_input_1)          { HamoopiError=1; }
+BITMAP *spr_input_2          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_2.pcx");          if (!spr_input_2)          { HamoopiError=1; }
+BITMAP *spr_input_3          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_3.pcx");          if (!spr_input_3)          { HamoopiError=1; }
+BITMAP *spr_input_4          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_4.pcx");          if (!spr_input_4)          { HamoopiError=1; }
+BITMAP *spr_input_5          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_5.pcx");          if (!spr_input_5)          { HamoopiError=1; }
+BITMAP *spr_input_6          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_6.pcx");          if (!spr_input_6)          { HamoopiError=1; }
+BITMAP *spr_input_7          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_7.pcx");          if (!spr_input_7)          { HamoopiError=1; }
+BITMAP *spr_input_8          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_8.pcx");          if (!spr_input_8)          { HamoopiError=1; }
+BITMAP *spr_input_9          = (BITMAP*)gfx->load_bitmap("data/system/spr_input_9.pcx");          if (!spr_input_9)          { HamoopiError=1; }
+BITMAP *spr_input_10         = (BITMAP*)gfx->load_bitmap("data/system/spr_input_10.pcx");         if (!spr_input_10)         { HamoopiError=1; }
+BITMAP *spr_input_11         = (BITMAP*)gfx->load_bitmap("data/system/spr_input_11.pcx");         if (!spr_input_11)         { HamoopiError=1; }
+BITMAP *spr_input_12         = (BITMAP*)gfx->load_bitmap("data/system/spr_input_12.pcx");         if (!spr_input_12)         { HamoopiError=1; }
+BITMAP *spr_input_13         = (BITMAP*)gfx->load_bitmap("data/system/spr_input_13.pcx");         if (!spr_input_13)         { HamoopiError=1; }
+BITMAP *spr_input_14         = (BITMAP*)gfx->load_bitmap("data/system/spr_input_14.pcx");         if (!spr_input_14)         { HamoopiError=1; }
+BITMAP *spr_input_15         = (BITMAP*)gfx->load_bitmap("data/system/spr_input_15.pcx");         if (!spr_input_15)         { HamoopiError=1; }
+BITMAP *spr_input_16         = (BITMAP*)gfx->load_bitmap("data/system/spr_input_16.pcx");         if (!spr_input_16)         { HamoopiError=1; }
+BITMAP *spr_input_17         = (BITMAP*)gfx->load_bitmap("data/system/spr_input_17.pcx");         if (!spr_input_17)         { HamoopiError=1; }
+BITMAP *spr_bg_bar           = (BITMAP*)gfx->load_bitmap("data/system/spr_bg_bar.pcx");           if (!spr_bg_bar)           { HamoopiError=1; }
+BITMAP *spr_energy_bar       = (BITMAP*)gfx->load_bitmap("data/system/spr_energy_bar.pcx");       if (!spr_energy_bar)       { HamoopiError=1; }
+BITMAP *spr_energy_bar_full  = (BITMAP*)gfx->load_bitmap("data/system/spr_energy_bar_full.pcx");  if (!spr_energy_bar_full)  { HamoopiError=1; }
+BITMAP *spr_energy_red_bar   = (BITMAP*)gfx->load_bitmap("data/system/spr_energy_red_bar.pcx");   if (!spr_energy_red_bar)   { HamoopiError=1; }
+BITMAP *spr_energy_red_bar_full = (BITMAP*)gfx->load_bitmap("data/system/spr_energy_red_bar_full.pcx"); if (!spr_energy_red_bar_full) { HamoopiError=1; }
+BITMAP *spr_bg_bar_sp        = (BITMAP*)gfx->load_bitmap("data/system/spr_bg_bar_sp.pcx");        if (!spr_bg_bar_sp)        { HamoopiError=1; }
+BITMAP *spr_bg_energy_bar_sp = (BITMAP*)gfx->load_bitmap("data/system/spr_bg_energy_bar_sp.pcx"); if (!spr_bg_energy_bar_sp) { HamoopiError=1; }
 BITMAP *spr_num[10];
 spr_num[0]=load_bitmap("data/system/spr_num_0.pcx",NULL); if (!spr_num[0]) { HamoopiError=1; }
 spr_num[1]=load_bitmap("data/system/spr_num_1.pcx",NULL); if (!spr_num[1]) { HamoopiError=1; }
@@ -807,140 +807,140 @@ spr_num[6]=load_bitmap("data/system/spr_num_6.pcx",NULL); if (!spr_num[6]) { Ham
 spr_num[7]=load_bitmap("data/system/spr_num_7.pcx",NULL); if (!spr_num[7]) { HamoopiError=1; }
 spr_num[8]=load_bitmap("data/system/spr_num_8.pcx",NULL); if (!spr_num[8]) { HamoopiError=1; }
 spr_num[9]=load_bitmap("data/system/spr_num_9.pcx",NULL); if (!spr_num[9]) { HamoopiError=1; }
-BITMAP *edit_bt_blue         = load_bitmap("data/system/edit_bt_blue.pcx", NULL);         if (!edit_bt_blue)         { HamoopiError=1; }
-BITMAP *edit_bt_red          = load_bitmap("data/system/edit_bt_red.pcx", NULL);          if (!edit_bt_red)          { HamoopiError=1; }
-BITMAP *edit_bt_null         = load_bitmap("data/system/edit_bt_null.pcx", NULL);         if (!edit_bt_null)         { HamoopiError=1; }
-BITMAP *edit_bt_null0        = load_bitmap("data/system/edit_bt_null0.pcx", NULL);        if (!edit_bt_null0)        { HamoopiError=1; }
-BITMAP *edit_prevst          = load_bitmap("data/system/edit_prevst.pcx", NULL);          if (!edit_prevst)          { HamoopiError=1; }
-BITMAP *edit_nextst          = load_bitmap("data/system/edit_nextst.pcx", NULL);          if (!edit_nextst)          { HamoopiError=1; }
-BITMAP *edit_prevchar        = load_bitmap("data/system/edit_prevchar.pcx", NULL);        if (!edit_prevchar)        { HamoopiError=1; }
-BITMAP *edit_nextchar        = load_bitmap("data/system/edit_nextchar.pcx", NULL);        if (!edit_nextchar)        { HamoopiError=1; }
-BITMAP *edit_firstchar       = load_bitmap("data/system/edit_firstchar.pcx", NULL);       if (!edit_firstchar)       { HamoopiError=1; }
-BITMAP *edit_lastchar        = load_bitmap("data/system/edit_lastchar.pcx", NULL);        if (!edit_lastchar)        { HamoopiError=1; }
-BITMAP *spr_nao_implementado = load_bitmap("data/system/spr_nao_implementado.pcx", NULL); if (!spr_nao_implementado) { HamoopiError=1; }
-BITMAP *edit_playback        = load_bitmap("data/system/edit_playback.pcx", NULL);        if (!edit_playback)        { HamoopiError=1; }
-BITMAP *edit_pause           = load_bitmap("data/system/edit_pause.pcx", NULL);           if (!edit_pause)           { HamoopiError=1; }
-BITMAP *edit_bt_FrameTime    = load_bitmap("data/system/edit_bt_FrameTime.pcx", NULL);    if (!edit_bt_FrameTime)    { HamoopiError=1; }
-BITMAP *edit_bt_plus         = load_bitmap("data/system/edit_bt_plus.pcx", NULL);         if (!edit_bt_plus)         { HamoopiError=1; }
-BITMAP *edit_bt_minus        = load_bitmap("data/system/edit_bt_minus.pcx", NULL);        if (!edit_bt_minus)        { HamoopiError=1; }
-BITMAP *mouse                = load_bitmap("data/system/mouse.pcx", NULL);                if (!mouse)                { HamoopiError=1; }
-BITMAP *mouse2               = load_bitmap("data/system/mouse2.pcx", NULL);               if (!mouse2)               { HamoopiError=1; }
-BITMAP *save_file            = load_bitmap("data/system/save_file.pcx", NULL);            if (!save_file)            { HamoopiError=1; }
-BITMAP *bt_pivot             = load_bitmap("data/system/bt_pivot.pcx", NULL);             if (!bt_pivot)             { HamoopiError=1; }
-BITMAP *spr000_00            = load_bitmap("data/system/000_00.pcx", NULL);               if (!spr000_00)            { HamoopiError=1; }
-BITMAP *spr000_01            = load_bitmap("data/system/000_01.pcx", NULL);               if (!spr000_01)            { HamoopiError=1; }
-BITMAP *spr991_00            = load_bitmap("data/system/991_00.pcx", NULL);               if (!spr991_00)            { HamoopiError=1; }
-BITMAP *spr991_01            = load_bitmap("data/system/991_01.pcx", NULL);               if (!spr991_01)            { HamoopiError=1; }
-BITMAP *spr991_02            = load_bitmap("data/system/991_02.pcx", NULL);               if (!spr991_02)            { HamoopiError=1; }
-BITMAP *spr991_03            = load_bitmap("data/system/991_03.pcx", NULL);               if (!spr991_03)            { HamoopiError=1; }
-BITMAP *spr991_04            = load_bitmap("data/system/991_04.pcx", NULL);               if (!spr991_04)            { HamoopiError=1; }
-BITMAP *spr991_05            = load_bitmap("data/system/991_05.pcx", NULL);               if (!spr991_05)            { HamoopiError=1; }
-BITMAP *spr992_00            = load_bitmap("data/system/992_00.pcx", NULL);               if (!spr992_00)            { HamoopiError=1; }
-BITMAP *spr992_01            = load_bitmap("data/system/992_01.pcx", NULL);               if (!spr992_01)            { HamoopiError=1; }
-BITMAP *spr992_02            = load_bitmap("data/system/992_02.pcx", NULL);               if (!spr992_02)            { HamoopiError=1; }
-BITMAP *spr992_03            = load_bitmap("data/system/992_03.pcx", NULL);               if (!spr992_03)            { HamoopiError=1; }
-BITMAP *spr992_04            = load_bitmap("data/system/992_04.pcx", NULL);               if (!spr992_04)            { HamoopiError=1; }
-BITMAP *spr992_05            = load_bitmap("data/system/992_05.pcx", NULL);               if (!spr992_05)            { HamoopiError=1; }
-BITMAP *spr993_00            = load_bitmap("data/system/993_00.pcx", NULL);               if (!spr993_00)            { HamoopiError=1; }
-BITMAP *spr993_01            = load_bitmap("data/system/993_01.pcx", NULL);               if (!spr993_01)            { HamoopiError=1; }
-BITMAP *spr993_02            = load_bitmap("data/system/993_02.pcx", NULL);               if (!spr993_02)            { HamoopiError=1; }
-BITMAP *spr993_03            = load_bitmap("data/system/993_03.pcx", NULL);               if (!spr993_03)            { HamoopiError=1; }
-BITMAP *spr993_04            = load_bitmap("data/system/993_04.pcx", NULL);               if (!spr993_04)            { HamoopiError=1; }
-BITMAP *spr993_05            = load_bitmap("data/system/993_05.pcx", NULL);               if (!spr993_05)            { HamoopiError=1; }
-BITMAP *spr994_00            = load_bitmap("data/system/994_00.pcx", NULL);               if (!spr994_00)            { HamoopiError=1; }
-BITMAP *spr994_01            = load_bitmap("data/system/994_01.pcx", NULL);               if (!spr994_01)            { HamoopiError=1; }
-BITMAP *spr994_02            = load_bitmap("data/system/994_02.pcx", NULL);               if (!spr994_02)            { HamoopiError=1; }
-BITMAP *spr994_03            = load_bitmap("data/system/994_03.pcx", NULL);               if (!spr994_03)            { HamoopiError=1; }
-BITMAP *spr994_04            = load_bitmap("data/system/994_04.pcx", NULL);               if (!spr994_04)            { HamoopiError=1; }
-BITMAP *spr994_05            = load_bitmap("data/system/994_05.pcx", NULL);               if (!spr994_05)            { HamoopiError=1; }
+BITMAP *edit_bt_blue         = (BITMAP*)gfx->load_bitmap("data/system/edit_bt_blue.pcx");         if (!edit_bt_blue)         { HamoopiError=1; }
+BITMAP *edit_bt_red          = (BITMAP*)gfx->load_bitmap("data/system/edit_bt_red.pcx");          if (!edit_bt_red)          { HamoopiError=1; }
+BITMAP *edit_bt_null         = (BITMAP*)gfx->load_bitmap("data/system/edit_bt_null.pcx");         if (!edit_bt_null)         { HamoopiError=1; }
+BITMAP *edit_bt_null0        = (BITMAP*)gfx->load_bitmap("data/system/edit_bt_null0.pcx");        if (!edit_bt_null0)        { HamoopiError=1; }
+BITMAP *edit_prevst          = (BITMAP*)gfx->load_bitmap("data/system/edit_prevst.pcx");          if (!edit_prevst)          { HamoopiError=1; }
+BITMAP *edit_nextst          = (BITMAP*)gfx->load_bitmap("data/system/edit_nextst.pcx");          if (!edit_nextst)          { HamoopiError=1; }
+BITMAP *edit_prevchar        = (BITMAP*)gfx->load_bitmap("data/system/edit_prevchar.pcx");        if (!edit_prevchar)        { HamoopiError=1; }
+BITMAP *edit_nextchar        = (BITMAP*)gfx->load_bitmap("data/system/edit_nextchar.pcx");        if (!edit_nextchar)        { HamoopiError=1; }
+BITMAP *edit_firstchar       = (BITMAP*)gfx->load_bitmap("data/system/edit_firstchar.pcx");       if (!edit_firstchar)       { HamoopiError=1; }
+BITMAP *edit_lastchar        = (BITMAP*)gfx->load_bitmap("data/system/edit_lastchar.pcx");        if (!edit_lastchar)        { HamoopiError=1; }
+BITMAP *spr_nao_implementado = (BITMAP*)gfx->load_bitmap("data/system/spr_nao_implementado.pcx"); if (!spr_nao_implementado) { HamoopiError=1; }
+BITMAP *edit_playback        = (BITMAP*)gfx->load_bitmap("data/system/edit_playback.pcx");        if (!edit_playback)        { HamoopiError=1; }
+BITMAP *edit_pause           = (BITMAP*)gfx->load_bitmap("data/system/edit_pause.pcx");           if (!edit_pause)           { HamoopiError=1; }
+BITMAP *edit_bt_FrameTime    = (BITMAP*)gfx->load_bitmap("data/system/edit_bt_FrameTime.pcx");    if (!edit_bt_FrameTime)    { HamoopiError=1; }
+BITMAP *edit_bt_plus         = (BITMAP*)gfx->load_bitmap("data/system/edit_bt_plus.pcx");         if (!edit_bt_plus)         { HamoopiError=1; }
+BITMAP *edit_bt_minus        = (BITMAP*)gfx->load_bitmap("data/system/edit_bt_minus.pcx");        if (!edit_bt_minus)        { HamoopiError=1; }
+BITMAP *mouse                = (BITMAP*)gfx->load_bitmap("data/system/mouse.pcx");                if (!mouse)                { HamoopiError=1; }
+BITMAP *mouse2               = (BITMAP*)gfx->load_bitmap("data/system/mouse2.pcx");               if (!mouse2)               { HamoopiError=1; }
+BITMAP *save_file            = (BITMAP*)gfx->load_bitmap("data/system/save_file.pcx");            if (!save_file)            { HamoopiError=1; }
+BITMAP *bt_pivot             = (BITMAP*)gfx->load_bitmap("data/system/bt_pivot.pcx");             if (!bt_pivot)             { HamoopiError=1; }
+BITMAP *spr000_00            = (BITMAP*)gfx->load_bitmap("data/system/000_00.pcx");               if (!spr000_00)            { HamoopiError=1; }
+BITMAP *spr000_01            = (BITMAP*)gfx->load_bitmap("data/system/000_01.pcx");               if (!spr000_01)            { HamoopiError=1; }
+BITMAP *spr991_00            = (BITMAP*)gfx->load_bitmap("data/system/991_00.pcx");               if (!spr991_00)            { HamoopiError=1; }
+BITMAP *spr991_01            = (BITMAP*)gfx->load_bitmap("data/system/991_01.pcx");               if (!spr991_01)            { HamoopiError=1; }
+BITMAP *spr991_02            = (BITMAP*)gfx->load_bitmap("data/system/991_02.pcx");               if (!spr991_02)            { HamoopiError=1; }
+BITMAP *spr991_03            = (BITMAP*)gfx->load_bitmap("data/system/991_03.pcx");               if (!spr991_03)            { HamoopiError=1; }
+BITMAP *spr991_04            = (BITMAP*)gfx->load_bitmap("data/system/991_04.pcx");               if (!spr991_04)            { HamoopiError=1; }
+BITMAP *spr991_05            = (BITMAP*)gfx->load_bitmap("data/system/991_05.pcx");               if (!spr991_05)            { HamoopiError=1; }
+BITMAP *spr992_00            = (BITMAP*)gfx->load_bitmap("data/system/992_00.pcx");               if (!spr992_00)            { HamoopiError=1; }
+BITMAP *spr992_01            = (BITMAP*)gfx->load_bitmap("data/system/992_01.pcx");               if (!spr992_01)            { HamoopiError=1; }
+BITMAP *spr992_02            = (BITMAP*)gfx->load_bitmap("data/system/992_02.pcx");               if (!spr992_02)            { HamoopiError=1; }
+BITMAP *spr992_03            = (BITMAP*)gfx->load_bitmap("data/system/992_03.pcx");               if (!spr992_03)            { HamoopiError=1; }
+BITMAP *spr992_04            = (BITMAP*)gfx->load_bitmap("data/system/992_04.pcx");               if (!spr992_04)            { HamoopiError=1; }
+BITMAP *spr992_05            = (BITMAP*)gfx->load_bitmap("data/system/992_05.pcx");               if (!spr992_05)            { HamoopiError=1; }
+BITMAP *spr993_00            = (BITMAP*)gfx->load_bitmap("data/system/993_00.pcx");               if (!spr993_00)            { HamoopiError=1; }
+BITMAP *spr993_01            = (BITMAP*)gfx->load_bitmap("data/system/993_01.pcx");               if (!spr993_01)            { HamoopiError=1; }
+BITMAP *spr993_02            = (BITMAP*)gfx->load_bitmap("data/system/993_02.pcx");               if (!spr993_02)            { HamoopiError=1; }
+BITMAP *spr993_03            = (BITMAP*)gfx->load_bitmap("data/system/993_03.pcx");               if (!spr993_03)            { HamoopiError=1; }
+BITMAP *spr993_04            = (BITMAP*)gfx->load_bitmap("data/system/993_04.pcx");               if (!spr993_04)            { HamoopiError=1; }
+BITMAP *spr993_05            = (BITMAP*)gfx->load_bitmap("data/system/993_05.pcx");               if (!spr993_05)            { HamoopiError=1; }
+BITMAP *spr994_00            = (BITMAP*)gfx->load_bitmap("data/system/994_00.pcx");               if (!spr994_00)            { HamoopiError=1; }
+BITMAP *spr994_01            = (BITMAP*)gfx->load_bitmap("data/system/994_01.pcx");               if (!spr994_01)            { HamoopiError=1; }
+BITMAP *spr994_02            = (BITMAP*)gfx->load_bitmap("data/system/994_02.pcx");               if (!spr994_02)            { HamoopiError=1; }
+BITMAP *spr994_03            = (BITMAP*)gfx->load_bitmap("data/system/994_03.pcx");               if (!spr994_03)            { HamoopiError=1; }
+BITMAP *spr994_04            = (BITMAP*)gfx->load_bitmap("data/system/994_04.pcx");               if (!spr994_04)            { HamoopiError=1; }
+BITMAP *spr994_05            = (BITMAP*)gfx->load_bitmap("data/system/994_05.pcx");               if (!spr994_05)            { HamoopiError=1; }
 //defesa - nao implementada ainda :)
-//BITMAP *spr995_00            = load_bitmap("data/system/995_00.pcx", NULL);               if (!spr995_00)            { HamoopiError=1; }
-//BITMAP *spr995_01            = load_bitmap("data/system/995_01.pcx", NULL);               if (!spr995_01)            { HamoopiError=1; }
-//BITMAP *spr995_02            = load_bitmap("data/system/995_02.pcx", NULL);               if (!spr995_02)            { HamoopiError=1; }
-//BITMAP *spr995_03            = load_bitmap("data/system/995_03.pcx", NULL);               if (!spr995_03)            { HamoopiError=1; }
-//BITMAP *spr995_04            = load_bitmap("data/system/995_04.pcx", NULL);               if (!spr995_04)            { HamoopiError=1; }
-//BITMAP *spr995_05            = load_bitmap("data/system/995_05.pcx", NULL);               if (!spr995_05)            { HamoopiError=1; }
+//BITMAP *spr995_00            = (BITMAP*)gfx->load_bitmap("data/system/995_00.pcx");               if (!spr995_00)            { HamoopiError=1; }
+//BITMAP *spr995_01            = (BITMAP*)gfx->load_bitmap("data/system/995_01.pcx");               if (!spr995_01)            { HamoopiError=1; }
+//BITMAP *spr995_02            = (BITMAP*)gfx->load_bitmap("data/system/995_02.pcx");               if (!spr995_02)            { HamoopiError=1; }
+//BITMAP *spr995_03            = (BITMAP*)gfx->load_bitmap("data/system/995_03.pcx");               if (!spr995_03)            { HamoopiError=1; }
+//BITMAP *spr995_04            = (BITMAP*)gfx->load_bitmap("data/system/995_04.pcx");               if (!spr995_04)            { HamoopiError=1; }
+//BITMAP *spr995_05            = (BITMAP*)gfx->load_bitmap("data/system/995_05.pcx");               if (!spr995_05)            { HamoopiError=1; }
 BITMAP *AnimTrans[30];
-AnimTrans[0]  = load_bitmap("data/system/AnimTrans00.pcx",NULL); if (!AnimTrans[0])  { CtrlAnimTrans[0] =0; } else { CtrlAnimTrans[0] =1; }
-AnimTrans[1]  = load_bitmap("data/system/AnimTrans01.pcx",NULL); if (!AnimTrans[1])  { CtrlAnimTrans[1] =0; } else { CtrlAnimTrans[1] =1; }
-AnimTrans[2]  = load_bitmap("data/system/AnimTrans02.pcx",NULL); if (!AnimTrans[2])  { CtrlAnimTrans[2] =0; } else { CtrlAnimTrans[2] =1; }
-AnimTrans[3]  = load_bitmap("data/system/AnimTrans03.pcx",NULL); if (!AnimTrans[3])  { CtrlAnimTrans[3] =0; } else { CtrlAnimTrans[3] =1; }
-AnimTrans[4]  = load_bitmap("data/system/AnimTrans04.pcx",NULL); if (!AnimTrans[4])  { CtrlAnimTrans[4] =0; } else { CtrlAnimTrans[4] =1; }
-AnimTrans[5]  = load_bitmap("data/system/AnimTrans05.pcx",NULL); if (!AnimTrans[5])  { CtrlAnimTrans[5] =0; } else { CtrlAnimTrans[5] =1; }
-AnimTrans[6]  = load_bitmap("data/system/AnimTrans06.pcx",NULL); if (!AnimTrans[6])  { CtrlAnimTrans[6] =0; } else { CtrlAnimTrans[6] =1; }
-AnimTrans[7]  = load_bitmap("data/system/AnimTrans07.pcx",NULL); if (!AnimTrans[7])  { CtrlAnimTrans[7] =0; } else { CtrlAnimTrans[7] =1; }
-AnimTrans[8]  = load_bitmap("data/system/AnimTrans08.pcx",NULL); if (!AnimTrans[8])  { CtrlAnimTrans[8] =0; } else { CtrlAnimTrans[8] =1; }
-AnimTrans[9]  = load_bitmap("data/system/AnimTrans09.pcx",NULL); if (!AnimTrans[9])  { CtrlAnimTrans[9] =0; } else { CtrlAnimTrans[9] =1; }
-AnimTrans[10] = load_bitmap("data/system/AnimTrans10.pcx",NULL); if (!AnimTrans[10]) { CtrlAnimTrans[10]=0; } else { CtrlAnimTrans[10]=1; }
-AnimTrans[11] = load_bitmap("data/system/AnimTrans11.pcx",NULL); if (!AnimTrans[11]) { CtrlAnimTrans[11]=0; } else { CtrlAnimTrans[11]=1; }
-AnimTrans[12] = load_bitmap("data/system/AnimTrans12.pcx",NULL); if (!AnimTrans[12]) { CtrlAnimTrans[12]=0; } else { CtrlAnimTrans[12]=1; }
-AnimTrans[13] = load_bitmap("data/system/AnimTrans13.pcx",NULL); if (!AnimTrans[13]) { CtrlAnimTrans[13]=0; } else { CtrlAnimTrans[13]=1; }
-AnimTrans[14] = load_bitmap("data/system/AnimTrans14.pcx",NULL); if (!AnimTrans[14]) { CtrlAnimTrans[14]=0; } else { CtrlAnimTrans[14]=1; }
-AnimTrans[15] = load_bitmap("data/system/AnimTrans15.pcx",NULL); if (!AnimTrans[15]) { CtrlAnimTrans[15]=0; } else { CtrlAnimTrans[15]=1; }
-AnimTrans[16] = load_bitmap("data/system/AnimTrans16.pcx",NULL); if (!AnimTrans[16]) { CtrlAnimTrans[16]=0; } else { CtrlAnimTrans[16]=1; }
-AnimTrans[17] = load_bitmap("data/system/AnimTrans17.pcx",NULL); if (!AnimTrans[17]) { CtrlAnimTrans[17]=0; } else { CtrlAnimTrans[17]=1; }
-AnimTrans[18] = load_bitmap("data/system/AnimTrans18.pcx",NULL); if (!AnimTrans[18]) { CtrlAnimTrans[18]=0; } else { CtrlAnimTrans[18]=1; }
-AnimTrans[19] = load_bitmap("data/system/AnimTrans19.pcx",NULL); if (!AnimTrans[19]) { CtrlAnimTrans[19]=0; } else { CtrlAnimTrans[19]=1; }
-AnimTrans[20] = load_bitmap("data/system/AnimTrans20.pcx",NULL); if (!AnimTrans[20]) { CtrlAnimTrans[20]=0; } else { CtrlAnimTrans[20]=1; }
-AnimTrans[21] = load_bitmap("data/system/AnimTrans21.pcx",NULL); if (!AnimTrans[21]) { CtrlAnimTrans[21]=0; } else { CtrlAnimTrans[21]=1; }
-AnimTrans[22] = load_bitmap("data/system/AnimTrans22.pcx",NULL); if (!AnimTrans[22]) { CtrlAnimTrans[22]=0; } else { CtrlAnimTrans[22]=1; }
-AnimTrans[23] = load_bitmap("data/system/AnimTrans23.pcx",NULL); if (!AnimTrans[23]) { CtrlAnimTrans[23]=0; } else { CtrlAnimTrans[23]=1; }
-AnimTrans[24] = load_bitmap("data/system/AnimTrans24.pcx",NULL); if (!AnimTrans[24]) { CtrlAnimTrans[24]=0; } else { CtrlAnimTrans[24]=1; }
-AnimTrans[25] = load_bitmap("data/system/AnimTrans25.pcx",NULL); if (!AnimTrans[25]) { CtrlAnimTrans[25]=0; } else { CtrlAnimTrans[25]=1; }
-AnimTrans[26] = load_bitmap("data/system/AnimTrans26.pcx",NULL); if (!AnimTrans[26]) { CtrlAnimTrans[26]=0; } else { CtrlAnimTrans[26]=1; }
-AnimTrans[27] = load_bitmap("data/system/AnimTrans27.pcx",NULL); if (!AnimTrans[27]) { CtrlAnimTrans[27]=0; } else { CtrlAnimTrans[27]=1; }
-AnimTrans[28] = load_bitmap("data/system/AnimTrans28.pcx",NULL); if (!AnimTrans[28]) { CtrlAnimTrans[28]=0; } else { CtrlAnimTrans[28]=1; }
-AnimTrans[29] = load_bitmap("data/system/AnimTrans29.pcx",NULL); if (!AnimTrans[29]) { CtrlAnimTrans[29]=0; } else { CtrlAnimTrans[29]=1; }
+AnimTrans[0]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans00.pcx"); if (!AnimTrans[0])  { CtrlAnimTrans[0] =0; } else { CtrlAnimTrans[0] =1; }
+AnimTrans[1]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans01.pcx"); if (!AnimTrans[1])  { CtrlAnimTrans[1] =0; } else { CtrlAnimTrans[1] =1; }
+AnimTrans[2]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans02.pcx"); if (!AnimTrans[2])  { CtrlAnimTrans[2] =0; } else { CtrlAnimTrans[2] =1; }
+AnimTrans[3]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans03.pcx"); if (!AnimTrans[3])  { CtrlAnimTrans[3] =0; } else { CtrlAnimTrans[3] =1; }
+AnimTrans[4]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans04.pcx"); if (!AnimTrans[4])  { CtrlAnimTrans[4] =0; } else { CtrlAnimTrans[4] =1; }
+AnimTrans[5]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans05.pcx"); if (!AnimTrans[5])  { CtrlAnimTrans[5] =0; } else { CtrlAnimTrans[5] =1; }
+AnimTrans[6]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans06.pcx"); if (!AnimTrans[6])  { CtrlAnimTrans[6] =0; } else { CtrlAnimTrans[6] =1; }
+AnimTrans[7]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans07.pcx"); if (!AnimTrans[7])  { CtrlAnimTrans[7] =0; } else { CtrlAnimTrans[7] =1; }
+AnimTrans[8]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans08.pcx"); if (!AnimTrans[8])  { CtrlAnimTrans[8] =0; } else { CtrlAnimTrans[8] =1; }
+AnimTrans[9]  = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans09.pcx"); if (!AnimTrans[9])  { CtrlAnimTrans[9] =0; } else { CtrlAnimTrans[9] =1; }
+AnimTrans[10] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans10.pcx"); if (!AnimTrans[10]) { CtrlAnimTrans[10]=0; } else { CtrlAnimTrans[10]=1; }
+AnimTrans[11] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans11.pcx"); if (!AnimTrans[11]) { CtrlAnimTrans[11]=0; } else { CtrlAnimTrans[11]=1; }
+AnimTrans[12] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans12.pcx"); if (!AnimTrans[12]) { CtrlAnimTrans[12]=0; } else { CtrlAnimTrans[12]=1; }
+AnimTrans[13] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans13.pcx"); if (!AnimTrans[13]) { CtrlAnimTrans[13]=0; } else { CtrlAnimTrans[13]=1; }
+AnimTrans[14] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans14.pcx"); if (!AnimTrans[14]) { CtrlAnimTrans[14]=0; } else { CtrlAnimTrans[14]=1; }
+AnimTrans[15] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans15.pcx"); if (!AnimTrans[15]) { CtrlAnimTrans[15]=0; } else { CtrlAnimTrans[15]=1; }
+AnimTrans[16] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans16.pcx"); if (!AnimTrans[16]) { CtrlAnimTrans[16]=0; } else { CtrlAnimTrans[16]=1; }
+AnimTrans[17] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans17.pcx"); if (!AnimTrans[17]) { CtrlAnimTrans[17]=0; } else { CtrlAnimTrans[17]=1; }
+AnimTrans[18] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans18.pcx"); if (!AnimTrans[18]) { CtrlAnimTrans[18]=0; } else { CtrlAnimTrans[18]=1; }
+AnimTrans[19] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans19.pcx"); if (!AnimTrans[19]) { CtrlAnimTrans[19]=0; } else { CtrlAnimTrans[19]=1; }
+AnimTrans[20] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans20.pcx"); if (!AnimTrans[20]) { CtrlAnimTrans[20]=0; } else { CtrlAnimTrans[20]=1; }
+AnimTrans[21] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans21.pcx"); if (!AnimTrans[21]) { CtrlAnimTrans[21]=0; } else { CtrlAnimTrans[21]=1; }
+AnimTrans[22] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans22.pcx"); if (!AnimTrans[22]) { CtrlAnimTrans[22]=0; } else { CtrlAnimTrans[22]=1; }
+AnimTrans[23] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans23.pcx"); if (!AnimTrans[23]) { CtrlAnimTrans[23]=0; } else { CtrlAnimTrans[23]=1; }
+AnimTrans[24] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans24.pcx"); if (!AnimTrans[24]) { CtrlAnimTrans[24]=0; } else { CtrlAnimTrans[24]=1; }
+AnimTrans[25] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans25.pcx"); if (!AnimTrans[25]) { CtrlAnimTrans[25]=0; } else { CtrlAnimTrans[25]=1; }
+AnimTrans[26] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans26.pcx"); if (!AnimTrans[26]) { CtrlAnimTrans[26]=0; } else { CtrlAnimTrans[26]=1; }
+AnimTrans[27] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans27.pcx"); if (!AnimTrans[27]) { CtrlAnimTrans[27]=0; } else { CtrlAnimTrans[27]=1; }
+AnimTrans[28] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans28.pcx"); if (!AnimTrans[28]) { CtrlAnimTrans[28]=0; } else { CtrlAnimTrans[28]=1; }
+AnimTrans[29] = (BITMAP*)gfx->load_bitmap("data/system/AnimTrans29.pcx"); if (!AnimTrans[29]) { CtrlAnimTrans[29]=0; } else { CtrlAnimTrans[29]=1; }
 BITMAP *AnimIntro[16];
-AnimIntro[0]  = load_bitmap("data/system/AnimIntro00.pcx",NULL); if (!AnimIntro[0])  { CtrlAnimIntro[0] =0; } else { CtrlAnimIntro[0] =1; }
-AnimIntro[1]  = load_bitmap("data/system/AnimIntro01.pcx",NULL); if (!AnimIntro[1])  { CtrlAnimIntro[1] =0; } else { CtrlAnimIntro[1] =1; }
-AnimIntro[2]  = load_bitmap("data/system/AnimIntro02.pcx",NULL); if (!AnimIntro[2])  { CtrlAnimIntro[2] =0; } else { CtrlAnimIntro[2] =1; }
-AnimIntro[3]  = load_bitmap("data/system/AnimIntro03.pcx",NULL); if (!AnimIntro[3])  { CtrlAnimIntro[3] =0; } else { CtrlAnimIntro[3] =1; }
-AnimIntro[4]  = load_bitmap("data/system/AnimIntro04.pcx",NULL); if (!AnimIntro[4])  { CtrlAnimIntro[4] =0; } else { CtrlAnimIntro[4] =1; }
-AnimIntro[5]  = load_bitmap("data/system/AnimIntro05.pcx",NULL); if (!AnimIntro[5])  { CtrlAnimIntro[5] =0; } else { CtrlAnimIntro[5] =1; }
-AnimIntro[6]  = load_bitmap("data/system/AnimIntro06.pcx",NULL); if (!AnimIntro[6])  { CtrlAnimIntro[6] =0; } else { CtrlAnimIntro[6] =1; }
-AnimIntro[7]  = load_bitmap("data/system/AnimIntro07.pcx",NULL); if (!AnimIntro[7])  { CtrlAnimIntro[7] =0; } else { CtrlAnimIntro[7] =1; }
-AnimIntro[8]  = load_bitmap("data/system/AnimIntro08.pcx",NULL); if (!AnimIntro[8])  { CtrlAnimIntro[8] =0; } else { CtrlAnimIntro[8] =1; }
-AnimIntro[9]  = load_bitmap("data/system/AnimIntro09.pcx",NULL); if (!AnimIntro[9])  { CtrlAnimIntro[9] =0; } else { CtrlAnimIntro[9] =1; }
-AnimIntro[10] = load_bitmap("data/system/AnimIntro10.pcx",NULL); if (!AnimIntro[10]) { CtrlAnimIntro[10]=0; } else { CtrlAnimIntro[10]=1; }
-AnimIntro[11] = load_bitmap("data/system/AnimIntro11.pcx",NULL); if (!AnimIntro[11]) { CtrlAnimIntro[11]=0; } else { CtrlAnimIntro[11]=1; }
-AnimIntro[12] = load_bitmap("data/system/AnimIntro12.pcx",NULL); if (!AnimIntro[12]) { CtrlAnimIntro[12]=0; } else { CtrlAnimIntro[12]=1; }
-AnimIntro[13] = load_bitmap("data/system/AnimIntro13.pcx",NULL); if (!AnimIntro[13]) { CtrlAnimIntro[13]=0; } else { CtrlAnimIntro[13]=1; }
-AnimIntro[14] = load_bitmap("data/system/AnimIntro14.pcx",NULL); if (!AnimIntro[14]) { CtrlAnimIntro[14]=0; } else { CtrlAnimIntro[14]=1; }
-AnimIntro[15] = load_bitmap("data/system/AnimIntro15.pcx",NULL); if (!AnimIntro[15]) { CtrlAnimIntro[15]=0; } else { CtrlAnimIntro[15]=1; }
+AnimIntro[0]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro00.pcx"); if (!AnimIntro[0])  { CtrlAnimIntro[0] =0; } else { CtrlAnimIntro[0] =1; }
+AnimIntro[1]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro01.pcx"); if (!AnimIntro[1])  { CtrlAnimIntro[1] =0; } else { CtrlAnimIntro[1] =1; }
+AnimIntro[2]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro02.pcx"); if (!AnimIntro[2])  { CtrlAnimIntro[2] =0; } else { CtrlAnimIntro[2] =1; }
+AnimIntro[3]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro03.pcx"); if (!AnimIntro[3])  { CtrlAnimIntro[3] =0; } else { CtrlAnimIntro[3] =1; }
+AnimIntro[4]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro04.pcx"); if (!AnimIntro[4])  { CtrlAnimIntro[4] =0; } else { CtrlAnimIntro[4] =1; }
+AnimIntro[5]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro05.pcx"); if (!AnimIntro[5])  { CtrlAnimIntro[5] =0; } else { CtrlAnimIntro[5] =1; }
+AnimIntro[6]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro06.pcx"); if (!AnimIntro[6])  { CtrlAnimIntro[6] =0; } else { CtrlAnimIntro[6] =1; }
+AnimIntro[7]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro07.pcx"); if (!AnimIntro[7])  { CtrlAnimIntro[7] =0; } else { CtrlAnimIntro[7] =1; }
+AnimIntro[8]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro08.pcx"); if (!AnimIntro[8])  { CtrlAnimIntro[8] =0; } else { CtrlAnimIntro[8] =1; }
+AnimIntro[9]  = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro09.pcx"); if (!AnimIntro[9])  { CtrlAnimIntro[9] =0; } else { CtrlAnimIntro[9] =1; }
+AnimIntro[10] = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro10.pcx"); if (!AnimIntro[10]) { CtrlAnimIntro[10]=0; } else { CtrlAnimIntro[10]=1; }
+AnimIntro[11] = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro11.pcx"); if (!AnimIntro[11]) { CtrlAnimIntro[11]=0; } else { CtrlAnimIntro[11]=1; }
+AnimIntro[12] = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro12.pcx"); if (!AnimIntro[12]) { CtrlAnimIntro[12]=0; } else { CtrlAnimIntro[12]=1; }
+AnimIntro[13] = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro13.pcx"); if (!AnimIntro[13]) { CtrlAnimIntro[13]=0; } else { CtrlAnimIntro[13]=1; }
+AnimIntro[14] = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro14.pcx"); if (!AnimIntro[14]) { CtrlAnimIntro[14]=0; } else { CtrlAnimIntro[14]=1; }
+AnimIntro[15] = (BITMAP*)gfx->load_bitmap("data/system/AnimIntro15.pcx"); if (!AnimIntro[15]) { CtrlAnimIntro[15]=0; } else { CtrlAnimIntro[15]=1; }
 BITMAP *MINIspr[9];
-MINIspr[0] = load_bitmap("data/system/000_01.pcx", NULL); if (!MINIspr[0]) { HamoopiError=1; }
-MINIspr[1] = create_bitmap(32,32);
-MINIspr[2] = create_bitmap(32,32);
-MINIspr[3] = create_bitmap(32,32);
-MINIspr[4] = create_bitmap(32,32);
-MINIspr[5] = create_bitmap(32,32);
-MINIspr[6] = create_bitmap(32,32);
-MINIspr[7] = create_bitmap(32,32);
-MINIspr[8] = create_bitmap(32,32);
+MINIspr[0] = (BITMAP*)gfx->load_bitmap("data/system/000_01.pcx"); if (!MINIspr[0]) { HamoopiError=1; }
+MINIspr[1] = (BITMAP*)gfx->create_bitmap(32,32);
+MINIspr[2] = (BITMAP*)gfx->create_bitmap(32,32);
+MINIspr[3] = (BITMAP*)gfx->create_bitmap(32,32);
+MINIspr[4] = (BITMAP*)gfx->create_bitmap(32,32);
+MINIspr[5] = (BITMAP*)gfx->create_bitmap(32,32);
+MINIspr[6] = (BITMAP*)gfx->create_bitmap(32,32);
+MINIspr[7] = (BITMAP*)gfx->create_bitmap(32,32);
+MINIspr[8] = (BITMAP*)gfx->create_bitmap(32,32);
 BITMAP *MINIsprDisplay[9];
-MINIsprDisplay[0] = create_bitmap(64,64);
-MINIsprDisplay[1] = create_bitmap(64,64);
-MINIsprDisplay[2] = create_bitmap(64,64);
-MINIsprDisplay[3] = create_bitmap(64,64);
-MINIsprDisplay[4] = create_bitmap(64,64);
-MINIsprDisplay[5] = create_bitmap(64,64);
-MINIsprDisplay[6] = create_bitmap(64,64);
-MINIsprDisplay[7] = create_bitmap(64,64);
-MINIsprDisplay[8] = create_bitmap(64,64);
+MINIsprDisplay[0] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplay[1] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplay[2] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplay[3] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplay[4] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplay[5] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplay[6] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplay[7] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplay[8] = (BITMAP*)gfx->create_bitmap(64,64);
 BITMAP *MINIsprDisplayArcadeMode[9];
-MINIsprDisplayArcadeMode[0] = create_bitmap(64,64);
-MINIsprDisplayArcadeMode[1] = create_bitmap(64,64);
-MINIsprDisplayArcadeMode[2] = create_bitmap(64,64);
-MINIsprDisplayArcadeMode[3] = create_bitmap(64,64);
-MINIsprDisplayArcadeMode[4] = create_bitmap(64,64);
-MINIsprDisplayArcadeMode[5] = create_bitmap(64,64);
-MINIsprDisplayArcadeMode[6] = create_bitmap(64,64);
-MINIsprDisplayArcadeMode[7] = create_bitmap(64,64);
-MINIsprDisplayArcadeMode[8] = create_bitmap(64,64);
-BITMAP *P1BIGDisplay = create_bitmap(128,128);
-BITMAP *P2BIGDisplay = create_bitmap(128,128);
-BITMAP *P2BIGDisplayInv = create_bitmap(128,128);
+MINIsprDisplayArcadeMode[0] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplayArcadeMode[1] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplayArcadeMode[2] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplayArcadeMode[3] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplayArcadeMode[4] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplayArcadeMode[5] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplayArcadeMode[6] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplayArcadeMode[7] = (BITMAP*)gfx->create_bitmap(64,64);
+MINIsprDisplayArcadeMode[8] = (BITMAP*)gfx->create_bitmap(64,64);
+BITMAP *P1BIGDisplay = (BITMAP*)gfx->create_bitmap(128,128);
+BITMAP *P2BIGDisplay = (BITMAP*)gfx->create_bitmap(128,128);
+BITMAP *P2BIGDisplayInv = (BITMAP*)gfx->create_bitmap(128,128);
 
 //idioma do jogo
 strcpy(IDIOMA, (char *)sys->get_config_string("CONFIG", "language", "BR"));
@@ -991,7 +991,7 @@ int SelectBGID=1;
 for(int ind=1;ind<=MAX_CHARS;ind++){
 if (Qtde_Personagens_Instalados>=ind) {
 char MINIstring[99]=""; sprintf(MINIstring, "data/data/chars/%s/000_01.pcx", Lista_de_Personagens_Instalados[ind]);
-MINIspr[ind] = load_bitmap(MINIstring, NULL);
+MINIspr[ind] = (BITMAP*)gfx->load_bitmap(MINIstring);
 if (!MINIspr[ind]) { MINIspr[ind]=load_bitmap("data/system/000_01.pcx", NULL); }
 stretch_blit(MINIspr[ind], MINIsprDisplay[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0, MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
 destroy_bitmap(MINIspr[ind]);
@@ -1002,7 +1002,7 @@ destroy_bitmap(MINIspr[ind]);
 for(int ind=1;ind<=8;ind++){
 if (Qtde_Personagens_Instalados>=ind) {
 char MINIstring[99]=""; sprintf(MINIstring, "data/data/chars/%s/000_01.pcx", Lista_de_Personagens_ArcadeMode[ind]);
-MINIspr[ind] = load_bitmap(MINIstring, NULL);
+MINIspr[ind] = (BITMAP*)gfx->load_bitmap(MINIstring);
 if (!MINIspr[ind]) { MINIspr[ind]=load_bitmap("data/system/000_01.pcx", NULL); }
 stretch_blit(MINIspr[ind], MINIsprDisplayArcadeMode[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0, MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
 destroy_bitmap(MINIspr[ind]);
@@ -1013,13 +1013,13 @@ destroy_bitmap(MINIspr[ind]);
 strcpy(P[1].Name, (char *)sys->get_config_string("CHARS", "char1", ""));
 char P1_1s[25]="";
 sprintf(P1_1s, "data/data/chars/%s/000_01.pcx", P[1].Name);
-BITMAP *P1_1 = load_bitmap(P1_1s, NULL);
+BITMAP *P1_1 = (BITMAP*)gfx->load_bitmap(P1_1s);
 if (!P1_1) { P1_1=load_bitmap("data/system/000_01.pcx", NULL); }
 //P2 miniatura da foto ingame
 strcpy(P[2].Name, (char *)sys->get_config_string("CHARS", "char2", ""));
 char P2_1s[25]="";
 sprintf(P2_1s, "data/chars/%s/000_01.pcx", P[2].Name);
-BITMAP *P2_1 = load_bitmap(P2_1s, NULL);
+BITMAP *P2_1 = (BITMAP*)gfx->load_bitmap(P2_1s);
 if (!P2_1) { P2_1=load_bitmap("data/system/000_01.pcx", NULL); }
 
 //propriedades de round
@@ -1058,27 +1058,27 @@ P[1].DefineCorDaPaleta=0;
 P[2].DefineCorDaPaleta=0;
 
 //musicas e efeitos
-SAMPLE *intro   = load_sample("data/sounds/intro.wav");
-SAMPLE *round1  = load_sample("data/sounds/round1.wav");
-SAMPLE *round2  = load_sample("data/sounds/round2.wav");
-SAMPLE *round3  = load_sample("data/sounds/round3.wav");
-SAMPLE *fight   = load_sample("data/sounds/fight.wav");
-SAMPLE *ko      = load_sample("data/sounds/ko.wav");
-SAMPLE *perfect = load_sample("data/sounds/perfect.wav");
-SAMPLE *back    = load_sample("data/sounds/back.wav");
-SAMPLE *choice  = load_sample("data/sounds/choice.wav");
-SAMPLE *confirm = load_sample("data/sounds/confirm.wav");
-SAMPLE *cursor  = load_sample("data/sounds/cursor.wav");
-SAMPLE *attacklvl1 = load_sample("data/sounds/attacklvl1.wav");
-SAMPLE *attacklvl2 = load_sample("data/sounds/attacklvl2.wav");
-SAMPLE *attacklvl3 = load_sample("data/sounds/attacklvl3.wav");
-SAMPLE *hitlvl1 = load_sample("data/sounds/hitlvl1.wav");
-SAMPLE *hitlvl2 = load_sample("data/sounds/hitlvl2.wav");
-SAMPLE *hitlvl3 = load_sample("data/sounds/hitlvl3.wav");
-MIDI *bgm_apresentacao  = load_midi("data/sounds/bgm_apresentacao.mid");
-MIDI *bgm_continue      = load_midi("data/sounds/bgm_continue.mid");
-MIDI *bgm_select_screen = load_midi("data/sounds/bgm_select_screen.mid");
-MIDI *bgm_versus_mode   = load_midi("data/sounds/bgm_versus_mode.mid");
+SAMPLE *intro   = (SAMPLE*)audio->load_sample("data/sounds/intro.wav");
+SAMPLE *round1  = (SAMPLE*)audio->load_sample("data/sounds/round1.wav");
+SAMPLE *round2  = (SAMPLE*)audio->load_sample("data/sounds/round2.wav");
+SAMPLE *round3  = (SAMPLE*)audio->load_sample("data/sounds/round3.wav");
+SAMPLE *fight   = (SAMPLE*)audio->load_sample("data/sounds/fight.wav");
+SAMPLE *ko      = (SAMPLE*)audio->load_sample("data/sounds/ko.wav");
+SAMPLE *perfect = (SAMPLE*)audio->load_sample("data/sounds/perfect.wav");
+SAMPLE *back    = (SAMPLE*)audio->load_sample("data/sounds/back.wav");
+SAMPLE *choice  = (SAMPLE*)audio->load_sample("data/sounds/choice.wav");
+SAMPLE *confirm = (SAMPLE*)audio->load_sample("data/sounds/confirm.wav");
+SAMPLE *cursor  = (SAMPLE*)audio->load_sample("data/sounds/cursor.wav");
+SAMPLE *attacklvl1 = (SAMPLE*)audio->load_sample("data/sounds/attacklvl1.wav");
+SAMPLE *attacklvl2 = (SAMPLE*)audio->load_sample("data/sounds/attacklvl2.wav");
+SAMPLE *attacklvl3 = (SAMPLE*)audio->load_sample("data/sounds/attacklvl3.wav");
+SAMPLE *hitlvl1 = (SAMPLE*)audio->load_sample("data/sounds/hitlvl1.wav");
+SAMPLE *hitlvl2 = (SAMPLE*)audio->load_sample("data/sounds/hitlvl2.wav");
+SAMPLE *hitlvl3 = (SAMPLE*)audio->load_sample("data/sounds/hitlvl3.wav");
+MIDI *bgm_apresentacao  = (MIDI*)audio->load_midi("data/sounds/bgm_apresentacao.mid");
+MIDI *bgm_continue      = (MIDI*)audio->load_midi("data/sounds/bgm_continue.mid");
+MIDI *bgm_select_screen = (MIDI*)audio->load_midi("data/sounds/bgm_select_screen.mid");
+MIDI *bgm_versus_mode   = (MIDI*)audio->load_midi("data/sounds/bgm_versus_mode.mid");
 
 set_window_title(versao);
 
@@ -1522,7 +1522,7 @@ SelectCharP2ID=Qtde_Personagens_Instalados;
 if (ModoHistoria==1) { strcpy(ChoiceP2,"-P2CPU-"); strcpy(P[2].Name,"-P2CPU-"); NumPersonagensEscolhidos=1; }
 //BIG P1
 sprintf(P1BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[1]);
-P1BIGDisplay = load_bitmap(P1BIGDisplaystring, NULL);
+P1BIGDisplay = (BITMAP*)gfx->load_bitmap(P1BIGDisplaystring);
 if (!P1BIGDisplay) { P1BIGDisplay=load_bitmap("data/system/000_00.pcx", NULL); }
 //BIG P2
 if (strcmp( ChoiceP2,"-P2CPU-") !=0) {
@@ -1534,7 +1534,7 @@ if (SelectCharP2ID==5){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", 
 if (SelectCharP2ID==6){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[6]); }
 if (SelectCharP2ID==7){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[7]); }
 if (SelectCharP2ID==8){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[8]); }
-P2BIGDisplay = load_bitmap(P2BIGDisplaystring, NULL);
+P2BIGDisplay = (BITMAP*)gfx->load_bitmap(P2BIGDisplaystring);
 if (!P2BIGDisplay) { P2BIGDisplay=load_bitmap("data/system/000_00.pcx", NULL); }
 }
 }
@@ -1564,7 +1564,7 @@ if (SelectCharP1ID==5){ sprintf(P1BIGDisplaystring, "data/chars/%s/000_00.pcx", 
 if (SelectCharP1ID==6){ sprintf(P1BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[6]);	}
 if (SelectCharP1ID==7){ sprintf(P1BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[7]);	}
 if (SelectCharP1ID==8){ sprintf(P1BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[8]);	}
-P1BIGDisplay = load_bitmap(P1BIGDisplaystring, NULL);
+P1BIGDisplay = (BITMAP*)gfx->load_bitmap(P1BIGDisplaystring);
 if (!P1BIGDisplay) { P1BIGDisplay=load_bitmap("data/system/000_00.pcx", NULL); }
 }
 if (P[1].key_LEFT_pressed ==1 && (strcmp( ChoiceP1,"") ==0)) {
@@ -1578,7 +1578,7 @@ if (SelectCharP1ID==4){ sprintf(P1BIGDisplaystring, "data/chars/%s/000_00.pcx", 
 if (SelectCharP1ID==3){ sprintf(P1BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[3]);	}
 if (SelectCharP1ID==2){ sprintf(P1BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[2]);	}
 if (SelectCharP1ID==1){ sprintf(P1BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[1]);	}
-P1BIGDisplay = load_bitmap(P1BIGDisplaystring, NULL);
+P1BIGDisplay = (BITMAP*)gfx->load_bitmap(P1BIGDisplaystring);
 if (!P1BIGDisplay) { P1BIGDisplay=load_bitmap("data/system/000_00.pcx", NULL); }
 }
 
@@ -1596,7 +1596,7 @@ if (SelectCharP2ID==5){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", 
 if (SelectCharP2ID==6){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[6]); }
 if (SelectCharP2ID==7){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[7]); }
 if (SelectCharP2ID==8){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[8]); }
-P2BIGDisplay = load_bitmap(P2BIGDisplaystring, NULL);
+P2BIGDisplay = (BITMAP*)gfx->load_bitmap(P2BIGDisplaystring);
 if (!P2BIGDisplay) { P2BIGDisplay=load_bitmap("data/system/000_00.pcx", NULL); }
 }
 if (P[2].key_LEFT_pressed ==1 && (strcmp( ChoiceP2,"") ==0)) {
@@ -1610,7 +1610,7 @@ if (SelectCharP2ID==4){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", 
 if (SelectCharP2ID==3){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[3]); }
 if (SelectCharP2ID==2){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[2]); }
 if (SelectCharP2ID==1){ sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", Lista_de_Personagens_Instalados[1]); }
-P2BIGDisplay = load_bitmap(P2BIGDisplaystring, NULL);
+P2BIGDisplay = (BITMAP*)gfx->load_bitmap(P2BIGDisplaystring);
 if (!P2BIGDisplay) { P2BIGDisplay=load_bitmap("data/system/000_00.pcx", NULL); }
 }
 }
@@ -1726,7 +1726,7 @@ sprintf(SelectCharP1Caminho, "data/chars/%s/char.ini", ChoiceP1);
 sys->set_config_file(SelectCharP1Caminho); P[1].Type=sys->get_config_int("Info", "Type", 1);
 //verifica se o personagem possui paleta de cores
 sprintf(P1_Pallete_string, "data/chars/%s/pallete.pcx", ChoiceP1);
-P1_Pallete = load_bitmap(P1_Pallete_string, NULL);
+P1_Pallete = (BITMAP*)gfx->load_bitmap(P1_Pallete_string);
 if (!P1_Pallete) { P[1].PossuiPaletaDeCor=0; } else { P[1].PossuiPaletaDeCor=1; }
 //define a cor do personagem, se ele tiver paleta de cores
 if(P[1].PossuiPaletaDeCor==1){
@@ -1861,7 +1861,7 @@ sprintf(SelectCharP2Caminho, "data/chars/%s/char.ini", ChoiceP2);
 sys->set_config_file(SelectCharP2Caminho); P[2].Type=sys->get_config_int("Info", "Type", 1);
 //verifica se o personagem possui paleta de cores
 sprintf(P2_Pallete_string, "data/chars/%s/pallete.pcx", ChoiceP2);
-P2_Pallete = load_bitmap(P2_Pallete_string, NULL);
+P2_Pallete = (BITMAP*)gfx->load_bitmap(P2_Pallete_string);
 if (!P2_Pallete) { P[2].PossuiPaletaDeCor=0; } else { P[2].PossuiPaletaDeCor=1; }
 //define a cor do personagem, se ele tiver paleta de cores
 if(P[2].PossuiPaletaDeCor==1){
@@ -2150,7 +2150,7 @@ ModoMapaTimerAnim++; if (ModoMapaTimerAnim>5) { ModoMapaTimerAnim=0; } //usado p
 
 //define qual imagem mostrar para o P2
 sprintf(P2BIGDisplaystring, "data/chars/%s/000_00.pcx", P[2].Name);
-P2BIGDisplay = load_bitmap(P2BIGDisplaystring, NULL);
+P2BIGDisplay = (BITMAP*)gfx->load_bitmap(P2BIGDisplaystring);
 if (!P2BIGDisplay) { P2BIGDisplay=load_bitmap("data/system/000_00.pcx", NULL); }
 
 draw_sprite(bufferx, SELECT_CHARS, 0, 0); //bg
@@ -2292,12 +2292,12 @@ desabilita_players=1; FadeCtr=255; FadeIN=0; FadeOUT=1;
 //P1 miniatura da foto ingame
 char P1_1s[25]="";
 sprintf(P1_1s, "data/chars/%s/000_01.pcx", P[1].Name);
-P1_1 = load_bitmap(P1_1s, NULL);
+P1_1 = (BITMAP*)gfx->load_bitmap(P1_1s);
 if (!P1_1) { P1_1=load_bitmap("data/system/000_01.pcx", NULL); }
 //P2 miniatura da foto ingame
 char P2_1s[25]="";
 sprintf(P2_1s, "data/chars/%s/000_01.pcx", P[2].Name);
-P2_1 = load_bitmap(P2_1s, NULL);
+P2_1 = (BITMAP*)gfx->load_bitmap(P2_1s);
 if (!P2_1) { P2_1=load_bitmap("data/system/000_01.pcx", NULL); }
 }
 
@@ -2658,7 +2658,7 @@ for(int iii=700; iii<=890; iii+=10){
 char txtaudio[50]="";
 if(P[ind].State==iii && P[ind].TotalDeFramesMov[P[ind].State]>0){
 sprintf(txtaudio, "data/chars/%s/%i.wav", P[ind].Name, P[ind].State);
-SAMPLE *snd   = load_sample(txtaudio);
+SAMPLE *snd   = (SAMPLE*)audio->load_sample(txtaudio);
 if (snd){ play_sample(snd, 255, 128, 1000, 0); }
 AtivadorDeMagia=0;
 //destroy_sample(snd);
@@ -5978,8 +5978,8 @@ if (EditModeTime==0)
 ED_inicializar();
 char ED_Caminho[99];
 sprintf(ED_Caminho, "data/chars/%s/000_01.pcx", P[1].Name);
-ED_Mini = load_bitmap(ED_Caminho, NULL);
-if(!ED_Mini){ ED_Mini = load_bitmap("data/system/000_01.pcx", NULL); }
+ED_Mini = (BITMAP*)gfx->load_bitmap(ED_Caminho);
+if(!ED_Mini){ ED_Mini = (BITMAP*)gfx->load_bitmap("data/system/000_01.pcx"); }
 }
 
 //botoes para alterar os STATES
@@ -6361,7 +6361,7 @@ if (ED_State==603  || ED_State==605) { sprintf(txt2, "data/chars/%s/604_%i.pcx",
 
 //if (Edtimer-ED_StartFrame==0) { //Atualiza o sprite SOMENTE no primeiro frame de animacao
 clear(ED_Spr);
-ED_Spr_Aux = load_bitmap(txt2, NULL);
+ED_Spr_Aux = (BITMAP*)gfx->load_bitmap(txt2);
 if (!ED_Spr_Aux){ ED_Spr_Aux=char_generic; } //se falhar o carregamento, usar imagem generica
 if(ED_Tipo==1) {
 ED_Spr->w = ED_Spr_Aux->w*2; ED_Spr->h = ED_Spr_Aux->h*2;
@@ -7153,8 +7153,8 @@ if(deveinicializar==1){
 ED_inicializar();
 char ED_Caminho[99];
 sprintf(ED_Caminho, "data/chars/%s/000_01.pcx", P[1].Name);
-ED_Mini = load_bitmap(ED_Caminho, NULL);
-if(!ED_Mini){ ED_Mini = load_bitmap("data/system/000_01.pcx", NULL); }
+ED_Mini = (BITMAP*)gfx->load_bitmap(ED_Caminho);
+if(!ED_Mini){ ED_Mini = (BITMAP*)gfx->load_bitmap("data/system/000_01.pcx"); }
 }
 
 textprintf_ex(bufferx, font_debug, 13,  8-2, makecol(000,000,000), -1, "HAMOOPI EDITOR");
@@ -7980,20 +7980,20 @@ P[indPlayer].TotalDeFramesMov[indState]++; //contagem de numero de frames de cad
 P[indPlayer].TotalDeImagensUtilizadas++; //contagem total da quantidade de frames deste personagem
 
 /*COLOCA A IMAGENS NA MEMORIA*/
-BITMAP *Spr_Aux = create_bitmap(480,480);
-Spr_Aux = load_bitmap(txt, NULL);
+BITMAP *Spr_Aux = (BITMAP*)gfx->create_bitmap(480,480);
+Spr_Aux = (BITMAP*)gfx->load_bitmap(txt);
 P[indPlayer].SprAtlas[P[indPlayer].TotalDeImagensUtilizadas]->w = Spr_Aux->w;
 P[indPlayer].SprAtlas[P[indPlayer].TotalDeImagensUtilizadas]->h = Spr_Aux->h;
 
 //--!	PALETA DE COR
-BITMAP *P1_Pallete = create_bitmap(32,10);
-BITMAP *P2_Pallete = create_bitmap(32,10);
+BITMAP *P1_Pallete = (BITMAP*)gfx->create_bitmap(32,10);
+BITMAP *P2_Pallete = (BITMAP*)gfx->create_bitmap(32,10);
 clear_to_color(P1_Pallete, makecol(255, 0, 255));
 clear_to_color(P2_Pallete, makecol(255, 0, 255));
 sprintf(P1_Pallete_string, "data/chars/%s/pallete.pcx", P[1].Name);
-P1_Pallete = load_bitmap(P1_Pallete_string, NULL);
+P1_Pallete = (BITMAP*)gfx->load_bitmap(P1_Pallete_string);
 sprintf(P2_Pallete_string, "data/chars/%s/pallete.pcx", P[2].Name);
-P2_Pallete = load_bitmap(P2_Pallete_string, NULL);
+P2_Pallete = (BITMAP*)gfx->load_bitmap(P2_Pallete_string);
 
 if(indPlayer==1){
 /*P1 PALETA DE COR*/
@@ -8110,8 +8110,8 @@ if (indPlayer==2) { PLAYER_STATE(2, 100, 0, P[indPlayer].QtdeFrames); }
 for(int ind=1; ind<=2; ind++){
 if(P[ind].TotalDeImagensUtilizadas==-1){
 P[ind].TotalDeImagensUtilizadas=0;
-BITMAP *Spr_Aux = create_bitmap(480,480);
-Spr_Aux = load_bitmap("data/system/char_generic2x.pcx", NULL);
+BITMAP *Spr_Aux = (BITMAP*)gfx->create_bitmap(480,480);
+Spr_Aux = (BITMAP*)gfx->load_bitmap("data/system/char_generic2x.pcx");
 P[ind].SprAtlas[0]->w=Spr_Aux->w;
 P[ind].SprAtlas[0]->h=Spr_Aux->h;
 blit(Spr_Aux, P[ind].SprAtlas[0], 0, 0, 0, 0, Spr_Aux->w, Spr_Aux->h);
