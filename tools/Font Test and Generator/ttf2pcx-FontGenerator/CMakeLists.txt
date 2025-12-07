@@ -40,3 +40,10 @@ target_link_libraries(ttf2pcx-qt
 install(TARGETS ttf2pcx-qt
     RUNTIME DESTINATION bin
 )
+
+# Optional: Build test executable
+option(BUILD_TESTS "Build test executables" ON)
+if(BUILD_TESTS)
+    add_executable(test_core test_core.cpp character_qt.cpp)
+    target_link_libraries(test_core Qt6::Core Qt6::Gui Qt6::Widgets)
+endif()
