@@ -240,6 +240,8 @@ int platform_set_gfx_mode(int mode, int width, int height, int v_width, int v_he
         if (g_screen->surface) {
             SDL_Surface *surf = (SDL_Surface*)g_screen->surface;
             SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, 255, 0, 255));
+            // Disable blending on screen surface - we want direct pixel replacement
+            SDL_SetSurfaceBlendMode(surf, SDL_BLENDMODE_NONE);
         }
     }
     
@@ -1246,9 +1248,4 @@ void platform_present_screen(void) {
     
     // Present renderer (show on screen)
     SDL_RenderPresent(g_renderer);
-    
-    // Clear the screen surface for next frame to prevent ghosting
-    // In Allegro 4, the screen is typically overwritten each frame by stretch_blit
-    // but we need to clear it explicitly in SDL2 to prevent sprite trails
-    SDL_FillRect(surf, NULL, 0);
 }
