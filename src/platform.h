@@ -373,3 +373,50 @@ void platform_set_config_string(const char *section, const char *key, const char
 #define PLATFORM_BPS_TO_TIMER(x) ((long)(1000000.0 / (x)))
 
 #endif // PLATFORM_H
+
+// ============================================================================
+// COLOR UTILITIES
+// ============================================================================
+
+// Extract red component from color
+int platform_getr(PlatformColor color);
+
+// Extract green component from color
+int platform_getg(PlatformColor color);
+
+// Extract blue component from color
+int platform_getb(PlatformColor color);
+
+// ============================================================================
+// TIMING UTILITIES
+// ============================================================================
+
+// Rest/sleep for specified milliseconds
+void platform_rest(int milliseconds);
+
+
+// Set drawing mode
+void platform_drawing_mode(int mode, void *pattern, int x_anchor, int y_anchor);
+
+// Masked stretch blit
+void platform_masked_stretch_blit(PlatformBitmap *src, PlatformBitmap *dest,
+                                  int src_x, int src_y, int src_w, int src_h,
+                                  int dest_x, int dest_y, int dest_w, int dest_h);
+
+// Clear screen
+void platform_clear(PlatformBitmap *bitmap);
+
+// Clear keyboard buffer
+void platform_clear_keybuf(void);
+
+void platform_set_trans_blender(int r, int g, int b, int a);
+void platform_textprintf_right_ex(PlatformBitmap *bitmap, PlatformFont *font, int x, int y, PlatformColor color, PlatformColor bg, const char *format, ...);
+
+// Display alert message
+void platform_alert_message(const char *format, ...);
+
+// Stretch sprite
+void platform_stretch_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y, int w, int h);
+
+void platform_solid_mode(void);
+void platform_draw_trans_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y);

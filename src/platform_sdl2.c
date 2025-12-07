@@ -940,3 +940,88 @@ float platform_get_config_float(const char *section, const char *key, float defa
     }
     return default_value;
 }
+
+int platform_getr(PlatformColor color) {
+    return (color >> 16) & 0xFF;
+}
+
+int platform_getg(PlatformColor color) {
+    return (color >> 8) & 0xFF;
+}
+
+int platform_getb(PlatformColor color) {
+    return color & 0xFF;
+}
+
+void platform_rest(int milliseconds) {
+    SDL_Delay(milliseconds);
+}
+
+static int g_drawing_mode = PDRAW_MODE_SOLID;
+
+void platform_drawing_mode(int mode, void *pattern, int x_anchor, int y_anchor) {
+    g_drawing_mode = mode;
+    // Note: SDL2 doesn't have direct equivalent, would need custom implementation
+}
+
+void platform_masked_stretch_blit(PlatformBitmap *src, PlatformBitmap *dest,
+                                  int src_x, int src_y, int src_w, int src_h,
+                                  int dest_x, int dest_y, int dest_w, int dest_h) {
+    // SDL2 blit is already masked
+    platform_stretch_blit(src, dest, src_x, src_y, src_w, src_h, dest_x, dest_y, dest_w, dest_h);
+}
+
+void platform_clear(PlatformBitmap *bitmap) {
+    platform_clear_bitmap(bitmap);
+}
+
+void platform_clear_keybuf(void) {
+    // SDL2 event queue is cleared automatically
+    SDL_FlushEvents(SDL_KEYDOWN, SDL_KEYUP);
+}
+
+void platform_set_trans_blender(int r, int g, int b, int a) {
+    // SDL2 uses alpha in textures automatically
+}
+
+void platform_textprintf_right_ex(PlatformBitmap *bitmap, PlatformFont *font,
+                                  int x, int y, PlatformColor color, PlatformColor bg,
+                                  const char *format, ...) {
+    if (bitmap && font) {
+        va_list args;
+        va_start(args, format);
+        char buffer[1024];
+        int written = vsnprintf(buffer, sizeof(buffer), format, args);
+        va_end(args);
+        if (written >= (int)sizeof(buffer)) {
+            buffer[sizeof(buffer) - 1] = '\0';
+        }
+        
+        // Calculate width and draw right-aligned
+        int w, h;
+        if (TTF_SizeText((TTF_Font*)font->font, buffer, &w, &h) == 0) {
+            platform_textout_ex(bitmap, font, buffer, x - w, y, color, bg);
+        }
+    }
+}
+
+void platform_alert_message(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    char buffer[1024];
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    
+    fprintf(stderr, "ALERT: %s\n", buffer);
+    if (g_window) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "HAMOOPI", buffer, g_window);
+    }
+}
+
+void platform_stretch_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y, int w, int h) {
+    if (dest && src) {
+        platform_stretch_blit(src, dest, 0, 0, src->w, src->h, x, y, w, h);
+    }
+}
+void platform_solid_mode(void) { g_drawing_mode = PDRAW_MODE_SOLID; }
+void platform_draw_trans_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) { platform_draw_sprite(dest, src, x, y); }

@@ -371,3 +371,78 @@ float platform_get_config_float(const char *section, const char *key, float defa
     }
     return default_value;
 }
+
+int platform_getr(PlatformColor color) {
+    return getr(color);
+}
+
+int platform_getg(PlatformColor color) {
+    return getg(color);
+}
+
+int platform_getb(PlatformColor color) {
+    return getb(color);
+}
+
+void platform_rest(int milliseconds) {
+    rest(milliseconds);
+}
+
+void platform_drawing_mode(int mode, void *pattern, int x_anchor, int y_anchor) {
+    drawing_mode(mode, pattern, x_anchor, y_anchor);
+}
+
+void platform_masked_stretch_blit(PlatformBitmap *src, PlatformBitmap *dest,
+                                  int src_x, int src_y, int src_w, int src_h,
+                                  int dest_x, int dest_y, int dest_w, int dest_h) {
+    if (src && dest) {
+        masked_stretch_blit(src, dest, src_x, src_y, src_w, src_h, dest_x, dest_y, dest_w, dest_h);
+    }
+}
+
+void platform_clear(PlatformBitmap *bitmap) {
+    if (bitmap) {
+        clear(bitmap);
+    }
+}
+
+void platform_clear_keybuf(void) {
+    clear_keybuf();
+}
+
+void platform_set_trans_blender(int r, int g, int b, int a) {
+    set_trans_blender(r, g, b, a);
+}
+
+void platform_textprintf_right_ex(PlatformBitmap *bitmap, PlatformFont *font,
+                                  int x, int y, PlatformColor color, PlatformColor bg,
+                                  const char *format, ...) {
+    if (bitmap && font) {
+        va_list args;
+        va_start(args, format);
+        char buffer[1024];
+        int written = vsnprintf(buffer, sizeof(buffer), format, args);
+        va_end(args);
+        if (written >= (int)sizeof(buffer)) {
+            buffer[sizeof(buffer) - 1] = '\0';
+        }
+        textprintf_right_ex(bitmap, font, x, y, color, bg, "%s", buffer);
+    }
+}
+
+void platform_alert_message(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    char buffer[1024];
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    allegro_message("%s", buffer);
+}
+
+void platform_stretch_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y, int w, int h) {
+    if (dest && src) {
+        stretch_sprite(dest, src, x, y, w, h);
+    }
+}
+void platform_solid_mode(void) { solid_mode(); }
+void platform_draw_trans_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) { if (dest && src) draw_trans_sprite(dest, src, x, y); }

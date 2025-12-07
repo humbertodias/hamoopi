@@ -222,8 +222,39 @@
 #define set_config_int(sec, key, val) platform_set_config_int(sec, key, val)
 #define set_config_string(sec, key, val) platform_set_config_string(sec, key, val)
 
+// Color utilities
+#define getr(c) platform_getr(c)
+#define getg(c) platform_getg(c)
+#define getb(c) platform_getb(c)
+
+// Timing
+#define rest(ms) platform_rest(ms)
+
 // File utilities
 #define exists(filename) platform_file_exists(filename)
+
+// Drawing mode
+#define drawing_mode(mode, pattern, x, y) platform_drawing_mode(mode, pattern, x, y)
+#define solid_mode() platform_solid_mode()
+
+// Additional blits and drawing
+#define masked_stretch_blit(src, dest, sx, sy, sw, sh, dx, dy, dw, dh) \
+    platform_masked_stretch_blit(src, dest, sx, sy, sw, sh, dx, dy, dw, dh)
+#define stretch_sprite(dest, src, x, y, w, h) platform_stretch_sprite(dest, src, x, y, w, h)
+#define draw_trans_sprite(dest, src, x, y) platform_draw_trans_sprite(dest, src, x, y)
+
+// Clear functions
+#define clear(bmp) platform_clear(bmp)
+#define clear_keybuf() platform_clear_keybuf()
+
+// Blending
+#define set_trans_blender(r, g, b, a) platform_set_trans_blender(r, g, b, a)
+
+// Text (right-aligned)
+#define textprintf_right_ex platform_textprintf_right_ex
+
+// Alert
+#define allegro_message platform_alert_message
 
 #endif // !USE_ALLEGRO4
 
