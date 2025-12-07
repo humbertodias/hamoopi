@@ -928,57 +928,191 @@ int platform_get_config_int(const char *section, const char *key, int default_va
     return default_value;
 }
 
-const char* platform_get_config_string(const char *section, const char *key, const char *default_value) {
+const char* platform_get_config_string(const char *section,
+                                       const char *key,
+                                       const char *default_value)
+{
     FILE *f = fopen(config_file, "r");
     if (!f) return default_value;
-    
+
     char line[256];
     int in_section = 0;
-    
+
     while (fgets(line, sizeof(line), f)) {
+
         // Remove newline
         line[strcspn(line, "\r\n")] = 0;
-        
-        // Check for section
+
+        // Skip empty lines
+        if (line[0] == '\0')
+            continue;
+
+        // Skip comments
+        if (line[0] == ';' || line[0] == '#')
+            continue;
+
+        // Detect section
         if (line[0] == '[') {
             char *end = strchr(line, ']');
             if (end) {
-                *end = 0;
+                *end = '\0';
+
+                // Compare section names
                 in_section = (strcmp(line + 1, section) == 0);
             }
-        } else if (in_section) {
-            // Check for key
+            continue;
+        }
+
+        // Look for key inside the correct section
+        if (in_section) {
+
             char *eq = strchr(line, '=');
-            if (eq) {
-                *eq = 0;
-                char *k = line;
-                char *v = eq + 1;
-                
-                // Trim whitespace
-                while (*k == ' ') k++;
-                while (*v == ' ') v++;
-                
-                if (strcmp(k, key) == 0) {
-                    fclose(f);
-                    strncpy(config_buffer, v, sizeof(config_buffer) - 1);
-                    config_buffer[sizeof(config_buffer) - 1] = '\0';
-                    return config_buffer;
-                }
+            if (!eq)
+                continue;
+
+            *eq = '\0';
+
+            // Left = key, right = value
+            char *k = line;
+            char *v = eq + 1;
+
+            // Trim leading spaces
+            while (*k == ' ' || *k == '\t') k++;
+            while (*v == ' ' || *v == '\t') v++;
+
+            // Trim trailing spaces (key)
+            char *kend = k + strlen(k) - 1;
+            while (kend > k && (*kend == ' ' || *kend == '\t')) {
+                *kend-- = '\0';
+            }
+
+            // Trim trailing spaces (value)
+            char *vend = v + strlen(v) - 1;
+            while (vend > v && (*vend == ' ' || *vend == '\t')) {
+                *vend-- = '\0';
+            }
+
+            // Compare key
+            if (strcmp(k, key) == 0) {
+                fclose(f);
+
+                // Copy safely into your global buffer
+                strncpy(config_buffer, v, sizeof(config_buffer) - 1);
+                config_buffer[sizeof(config_buffer) - 1] = '\0';
+
+                return config_buffer;
             }
         }
     }
-    
+
     fclose(f);
     return default_value;
 }
 
+
+static void platform_set_config_value(const char *section,
+                                      const char *key,
+                                      const char *value)
+{
+    FILE *f = fopen(config_file, "r");
+
+    char temp_path[512];
+    char line[512];
+    int in_section = 0, section_found = 0, key_written = 0;
+
+    snprintf(temp_path, sizeof(temp_path), "%s.tmp", config_file);
+    FILE *out = fopen(temp_path, "w");
+
+    // If file does not exist, create minimal config
+    if (!f) {
+        if (out) {
+            fprintf(out, "[%s]\n%s=%s\n", section, key, value);
+            fclose(out);
+            rename(temp_path, config_file);
+        }
+        return;
+    }
+
+    if (!out) {
+        fclose(f);
+        return;
+    }
+
+    while (fgets(line, sizeof(line), f)) {
+        char original[512];
+        strcpy(original, line);
+
+        line[strcspn(line, "\r\n")] = 0;
+
+        // Check section
+        if (line[0] == '[') {
+
+            if (in_section && !key_written) {
+                fprintf(out, "%s=%s\n", key, value);
+                key_written = 1;
+            }
+
+            char *end = strchr(line, ']');
+            if (end) {
+                *end = 0;
+                in_section = (strcmp(line + 1, section) == 0);
+                if (in_section)
+                    section_found = 1;
+            }
+
+            fprintf(out, "%s", original);
+            continue;
+        }
+
+        // Inside target section?
+        if (in_section) {
+            char *eq = strchr(line, '=');
+            if (eq) {
+                *eq = 0;
+                char *k = line;
+
+                // Trim spaces
+                while (*k == ' ' || *k == '\t') k++;
+
+                if (strcmp(k, key) == 0) {
+                    fprintf(out, "%s=%s\n", k, value);
+                    key_written = 1;
+                    continue;
+                }
+            }
+        }
+
+        fprintf(out, "%s", original);
+    }
+
+    // Append section or key
+    if (!section_found) {
+        fprintf(out, "\n[%s]\n%s=%s\n", section, key, value);
+    } else if (!key_written) {
+        fprintf(out, "%s=%s\n", key, value);
+    }
+
+    fclose(f);
+    fclose(out);
+
+    remove(config_file);
+    rename(temp_path, config_file);
+}
+
+
+// ---------------------------------------------
+// PUBLIC API
+// ---------------------------------------------
 void platform_set_config_int(const char *section, const char *key, int value) {
-    // Not implemented for now
+    char buf[64];
+    snprintf(buf, sizeof(buf), "%d", value);
+    platform_set_config_value(section, key, buf);
 }
 
 void platform_set_config_string(const char *section, const char *key, const char *value) {
-    // Not implemented for now
+    platform_set_config_value(section, key, value);
 }
+
 
 
 int platform_file_exists(const char *filename) {
