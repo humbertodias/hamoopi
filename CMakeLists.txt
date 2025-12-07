@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 project(HAMOOPI)
-add_executable(HAMOOPI src/HAMOOPI.c)
+add_executable(HAMOOPI src/HAMOOPI.c src/platform_allegro.c)
 
 # Find Allegro
 find_package(Alleg4 4)
