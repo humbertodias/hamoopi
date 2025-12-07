@@ -12,7 +12,7 @@
 static SDL_Window *g_window = NULL;
 static SDL_Renderer *g_renderer = NULL;
 static PlatformBitmap *g_screen = NULL;
-static volatile Uint8 *g_key_state = NULL;
+static volatile Uint8 *g_sdl_key_state = NULL;
 static int g_key_state_size = 0;
 static void (*g_close_callback)(void) = NULL;
 static SDL_TimerID g_timer_id = 0;
@@ -25,6 +25,9 @@ volatile int platform_mouse_b = 0;
 
 // Key mapping from platform keys to SDL scancodes
 static SDL_Scancode platform_to_sdl_key[256];
+
+// Translated key state array (Allegro-indexed to SDL state)
+static volatile char g_translated_key_state[256];
 
 // Initialize key mapping
 static void init_key_mapping(void) {
@@ -140,7 +143,11 @@ int platform_install_timer(void) {
 
 int platform_install_keyboard(void) {
     // SDL2 keyboard is initialized with SDL_Init
-    g_key_state = SDL_GetKeyboardState(&g_key_state_size);
+    g_sdl_key_state = SDL_GetKeyboardState(&g_key_state_size);
+    
+    // Initialize translated key state array
+    memset((void*)g_translated_key_state, 0, sizeof(g_translated_key_state));
+    
     return 0;
 }
 
@@ -241,7 +248,19 @@ volatile char* platform_get_key_state(void) {
         }
     }
     
-    return (volatile char*)g_key_state;
+    // Translate SDL keyboard state to Allegro key indices
+    // Clear the translated state first
+    memset((void*)g_translated_key_state, 0, sizeof(g_translated_key_state));
+    
+    // Map each platform key to SDL scancode and check if it's pressed
+    for (int i = 0; i < 256; i++) {
+        SDL_Scancode scancode = platform_to_sdl_key[i];
+        if (scancode != 0 && scancode < g_key_state_size) {
+            g_translated_key_state[i] = g_sdl_key_state[scancode];
+        }
+    }
+    
+    return g_translated_key_state;
 }
 
 PlatformBitmap* platform_get_screen(void) {
