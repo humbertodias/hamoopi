@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(HAMOOPI)
+project(HAMOOPI C)
 
 # Option to choose backend
 option(USE_STB_BACKEND "Use STB backend instead of Allegro" OFF)
@@ -10,8 +10,7 @@ if(USE_STB_BACKEND)
     # Add STB backend sources
     add_executable(HAMOOPI 
         src/HAMOOPI.cpp 
-        src/stb_backend_full.c
-        src/stb_backend_init.c
+        src/hamoopi_c_backend_stb.c
     )
     
     # Add STB-specific definitions
@@ -23,11 +22,10 @@ if(USE_STB_BACKEND)
 else()
     message(STATUS "Building with Allegro backend (default)")
     
-    # Add Allegro backend sources
+    # Add Allegro backend sources - now using unified C backend
     add_executable(HAMOOPI 
         src/HAMOOPI.cpp 
-        src/backend_init.cpp 
-        src/backend_manager.cpp
+        src/hamoopi_c_backend_allegro.c
     )
     
     # Find Allegro
@@ -42,3 +40,6 @@ endif()
 
 # Common include directories
 target_include_directories(HAMOOPI PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
+# Use C compiler for .cpp files (actually pure C)
+set_source_files_properties(src/HAMOOPI.cpp PROPERTIES LANGUAGE C)
