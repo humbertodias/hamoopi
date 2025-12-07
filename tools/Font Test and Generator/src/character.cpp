@@ -1,4 +1,4 @@
-#include "character_qt.h"
+#include "character.h"
 #include <QPainter>
 #include <QFontMetrics>
 

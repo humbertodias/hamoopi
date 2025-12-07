@@ -16,13 +16,13 @@ set(CMAKE_AUTORCC ON)
 set(SOURCES
     src/main.cpp
     src/mainwindow.cpp
-    src/character_qt.cpp
+    src/character.cpp
     src/previewwidget.cpp
 )
 
 set(HEADERS
     src/mainwindow.h
-    src/character_qt.h
+    src/character.h
     src/previewwidget.h
 )
 

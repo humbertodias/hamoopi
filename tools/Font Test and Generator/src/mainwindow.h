@@ -7,7 +7,7 @@
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QPushButton>
-#include "character_qt.h"
+#include "character.h"
 #include "previewwidget.h"
 
 class MainWindow : public QMainWindow

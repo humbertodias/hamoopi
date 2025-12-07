@@ -89,7 +89,7 @@ ttf2pcx-FontGenerator/
 ├── src/                    # Source files
 │   ├── main.cpp           # Application entry point
 │   ├── mainwindow.cpp/h   # Main UI and logic
-│   ├── character_qt.cpp/h # Character rendering
+│   ├── character.cpp/h # Character rendering
 │   └── previewwidget.cpp/h # Font preview widget
 ├── tests/                  # Test suite
 │   ├── test_core.cpp      # Core functionality tests
@@ -127,7 +127,7 @@ To use antialiased fonts in Allegro:
 This tool is built with Qt6 for cross-platform compatibility. All source files are organized in the `src/` directory:
 
 - **src/mainwindow.cpp/h**: Main UI and application logic
-- **src/character_qt.cpp/h**: Platform-agnostic character rendering using Qt
+- **src/character.cpp/h**: Platform-agnostic character rendering using Qt
 - **src/previewwidget.cpp/h**: Font preview widget
 - **src/main.cpp**: Application entry point
 
