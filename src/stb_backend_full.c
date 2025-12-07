@@ -377,14 +377,15 @@ static void stb_get_font_metrics(HamoopiFont* font, FontMetrics* metrics) {
 }
 
 static int stb_get_text_width(HamoopiFont* font, const char* text) {
-    if (!font || !text) return 0;
+    if (!font || !text || !font->atlas) return 0;
     
     float x = 0;
+    float y = 0;
     while (*text) {
         if (*text >= FIRST_CHAR && *text < FIRST_CHAR + NUM_CHARS) {
             stbtt_aligned_quad q;
             stbtt_GetBakedQuad(font->cdata, font->atlas_width, font->atlas_height,
-                             *text - FIRST_CHAR, &x, NULL, &q, 1);
+                             *text - FIRST_CHAR, &x, &y, &q, 1);
         }
         text++;
     }
@@ -398,7 +399,7 @@ static int stb_get_text_height(HamoopiFont* font) {
 
 static void stb_draw_text(HamoopiImage* image, HamoopiFont* font,
                           const char* text, int x, int y, unsigned int color) {
-    if (!image || !font || !text) return;
+    if (!image || !font || !text || !font->atlas) return;
     
     float fx = (float)x;
     float fy = (float)y;
@@ -406,30 +407,36 @@ static void stb_draw_text(HamoopiImage* image, HamoopiFont* font,
     while (*text) {
         if (*text >= FIRST_CHAR && *text < FIRST_CHAR + NUM_CHARS) {
             stbtt_aligned_quad q;
+            float start_y = fy;
             stbtt_GetBakedQuad(font->cdata, font->atlas_width, font->atlas_height,
-                             *text - FIRST_CHAR, &fx, &fy, &q, 1);
+                             *text - FIRST_CHAR, &fx, &start_y, &q, 1);
             
             /* Draw glyph from atlas */
             int gx0 = (int)q.x0;
-            int gy0 = (int)q.y0;
+            int gy0 = (int)(q.y0 + y);
             int gx1 = (int)q.x1;
-            int gy1 = (int)q.y1;
+            int gy1 = (int)(q.y1 + y);
             
             int s0 = (int)(q.s0 * font->atlas_width);
             int t0 = (int)(q.t0 * font->atlas_height);
-            int s1 = (int)(q.s1 * font->atlas_width);
-            int t1 = (int)(q.t1 * font->atlas_height);
+            int sw = (int)((q.s1 - q.s0) * font->atlas_width);
+            int sh = (int)((q.t1 - q.t0) * font->atlas_height);
             
-            for (int gy = gy0; gy < gy1; gy++) {
-                for (int gx = gx0; gx < gx1; gx++) {
-                    int sx = s0 + (gx - gx0);
-                    int sy = t0 + (gy - gy0);
+            for (int gy = 0; gy < sh && (gy0 + gy) < image->height; gy++) {
+                for (int gx = 0; gx < sw && (gx0 + gx) < image->width; gx++) {
+                    int sx = s0 + gx;
+                    int sy = t0 + gy;
                     
-                    if (sx >= 0 && sx < font->atlas_width && sy >= 0 && sy < font->atlas_height) {
+                    if (sx >= 0 && sx < font->atlas_width && sy >= 0 && sy < font->atlas_height &&
+                        (gx0 + gx) >= 0 && (gy0 + gy) >= 0) {
                         unsigned char alpha = font->atlas[sy * font->atlas_width + sx];
                         if (alpha > 0) {
-                            unsigned int pixel_color = (color & 0x00FFFFFF) | (alpha << 24);
-                            stb_draw_pixel(image, gx, gy, pixel_color);
+                            /* Alpha blend */
+                            unsigned int r = (color >> 16) & 0xFF;
+                            unsigned int g = (color >> 8) & 0xFF;
+                            unsigned int b = color & 0xFF;
+                            unsigned int pixel_color = (alpha << 24) | (r << 16) | (g << 8) | b;
+                            stb_draw_pixel(image, gx0 + gx, gy0 + gy, pixel_color);
                         }
                     }
                 }

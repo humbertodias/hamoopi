@@ -1,0 +1,28 @@
+# Makefile for STB Backend Test
+
+CC = gcc
+CFLAGS = -Wall -O2 -I.
+LDFLAGS = -lm
+
+# STB backend test program
+stb_test: stb_backend_test.o stb_backend_full.o
+	$(CC) -o stb_test stb_backend_test.o stb_backend_full.o $(LDFLAGS)
+	@echo "STB backend test built successfully!"
+	@echo "Run with: ./stb_test"
+
+stb_backend_test.o: stb_backend_test.c hamoopi_image.h hamoopi_font.h
+	$(CC) $(CFLAGS) -c stb_backend_test.c
+
+stb_backend_full.o: stb_backend_full.c hamoopi_image.h hamoopi_font.h stb_image.h stb_image_write.h stb_truetype.h
+	$(CC) $(CFLAGS) -c stb_backend_full.c
+
+clean:
+	rm -f *.o stb_test output.png output_with_text.png
+
+test: stb_test
+	@echo "Running STB backend test..."
+	./stb_test
+	@echo ""
+	@echo "Test complete! Check output.png and output_with_text.png"
+
+.PHONY: clean test
