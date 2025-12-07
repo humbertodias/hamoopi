@@ -16,8 +16,7 @@ endif
 
 build: clean
 	cmake -Bbuild
-	cmake --build build 
-	cp build/${TARGET}* .
+	cmake --build build
 	
 clean:
 	rm -rf ${TARGET} *.exe *.o  *.so build

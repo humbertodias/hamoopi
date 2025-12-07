@@ -10,3 +10,9 @@ target_include_directories(HAMOOPI PRIVATE ${ALLEGRO_INCLUDE_DIR})
 
 # Link with dependencies
 target_link_libraries(HAMOOPI alleg m)
+
+# Copy executable to parent folder after build
+add_custom_command(TARGET HAMOOPI POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:HAMOOPI> ${CMAKE_SOURCE_DIR}
+    COMMENT "Copying executable to parent folder..."
+)
