@@ -446,3 +446,8 @@ void platform_stretch_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, i
 }
 void platform_solid_mode(void) { solid_mode(); }
 void platform_draw_trans_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) { if (dest && src) draw_trans_sprite(dest, src, x, y); }
+
+void platform_present_screen(void) {
+    // Allegro 4 doesn't need explicit screen presentation
+    // The screen buffer is automatically displayed
+}

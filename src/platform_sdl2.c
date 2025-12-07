@@ -1025,3 +1025,22 @@ void platform_stretch_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, i
 }
 void platform_solid_mode(void) { g_drawing_mode = PDRAW_MODE_SOLID; }
 void platform_draw_trans_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) { platform_draw_sprite(dest, src, x, y); }
+
+void platform_present_screen(void) {
+    if (!g_screen || !g_renderer || !g_screen->surface || !g_screen->texture) {
+        return;
+    }
+    
+    // Update texture with surface data
+    SDL_Surface *surf = (SDL_Surface*)g_screen->surface;
+    SDL_UpdateTexture((SDL_Texture*)g_screen->texture, NULL, surf->pixels, surf->pitch);
+    
+    // Clear renderer
+    SDL_RenderClear(g_renderer);
+    
+    // Copy texture to renderer
+    SDL_RenderCopy(g_renderer, (SDL_Texture*)g_screen->texture, NULL, NULL);
+    
+    // Present renderer (show on screen)
+    SDL_RenderPresent(g_renderer);
+}

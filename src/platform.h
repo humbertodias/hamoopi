@@ -186,6 +186,9 @@ volatile char* platform_get_key_state(void);
 // Get screen bitmap for drawing
 PlatformBitmap* platform_get_screen(void);
 
+// Present/flip screen (updates display with drawn content)
+void platform_present_screen(void);
+
 // ============================================================================
 // GRAPHICS - BITMAP OPERATIONS
 // ============================================================================

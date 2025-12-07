@@ -7224,6 +7224,10 @@ stretch_blit(LayerHUDb, screen, 0, 0, LayerHUDb->w, LayerHUDb->h, 0, 0, screen->
 //draw_sprite(screen, LayerHUDb, 0, 0); //PS: desativado, resolucao fixa em 640x480, stretch_blit funciona melhor
 }
 //show_mouse(screen);
+
+// Present screen (SDL2 needs this to display the rendered content)
+platform_present_screen();
+
 while(timer==delay){}
 clear(LayerHUD);
 clear_to_color(LayerHUD, makecol(255, 0, 255));
