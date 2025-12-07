@@ -15,7 +15,7 @@ ifeq ($(platform),)
 endif
 
 build: clean
-	cmake -Bbuild
+	cmake -Bbuild -DUSE_SDL2=1
 	cmake --build build
 	
 clean:

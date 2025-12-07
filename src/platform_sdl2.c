@@ -576,6 +576,24 @@ int platform_bitmap_height(PlatformBitmap *bitmap) {
     return bitmap ? bitmap->h : 0;
 }
 
+
+char* replace_pcx_with_png(const char* filename) {
+    if (!filename) return NULL;
+
+    // Allocate new string
+    char *new_filename = malloc(strlen(filename) + 1);
+    if (!new_filename) return NULL;
+    strcpy(new_filename, filename);
+
+    // Find last dot
+    char *ext = strrchr(new_filename, '.');
+    if (ext && strcmp(ext, ".pcx") == 0) {
+        strcpy(ext, ".png");  // replace extension
+    }
+
+    return new_filename;
+}
+
 // ============================================================================
 // GRAPHICS - TEXT
 // ============================================================================
@@ -583,8 +601,8 @@ int platform_bitmap_height(PlatformBitmap *bitmap) {
 PlatformFont* platform_load_font(const char *filename, void *palette, void *param) {
     // Try to load as TTF, with fallback size
     int size = 16;  // Default size
-    
-    TTF_Font *font = TTF_OpenFont(filename, size);
+
+    TTF_Font *font = TTF_OpenFont(replace_pcx_with_png(filename), size);
     if (!font) {
         // Try alternate extension
         char alt_filename[512];
