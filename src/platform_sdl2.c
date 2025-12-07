@@ -236,11 +236,10 @@ int platform_set_gfx_mode(int mode, int width, int height, int v_width, int v_he
         g_screen->w = width;
         g_screen->h = height;
         
-        // Set magenta as transparent for the screen surface too
+        // Don't set color key on screen surface - it's the final composite
+        // Screen surface should have blending disabled for direct pixel writes
         if (g_screen->surface) {
             SDL_Surface *surf = (SDL_Surface*)g_screen->surface;
-            SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, 255, 0, 255));
-            // Disable blending on screen surface - we want direct pixel replacement
             SDL_SetSurfaceBlendMode(surf, SDL_BLENDMODE_NONE);
         }
     }
