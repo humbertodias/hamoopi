@@ -1168,8 +1168,12 @@ void platform_present_screen(void) {
         return;
     }
     
+    // Clear the window surface to black before blitting to avoid ghosting
+    SDL_FillRect(window_surface, NULL, SDL_MapRGB(window_surface->format, 0, 0, 0));
+    
     // Blit the screen surface to the window surface
-    SDL_BlitSurface(screen_surface, NULL, window_surface, NULL);
+    // Use SDL_BlitScaled to ensure proper copying without color key issues
+    SDL_BlitScaled(screen_surface, NULL, window_surface, NULL);
     
     // Update the window to display the changes
     SDL_UpdateWindowSurface(g_window);
