@@ -379,11 +379,21 @@ void platform_clear_bitmap(PlatformBitmap *bitmap) {
 void platform_clear_to_color(PlatformBitmap *bitmap, PlatformColor color) {
     if (bitmap && bitmap->surface) {
         SDL_Surface *surf = (SDL_Surface*)bitmap->surface;
-        SDL_FillRect(surf, NULL, color);
+        
+        // Convert the color to the surface's pixel format
+        // Extract RGB components from the color (assuming ARGB8888 format from makecol)
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+        
+        // Map to surface's native format
+        Uint32 mapped_color = SDL_MapRGB(surf->format, r, g, b);
+        
+        SDL_FillRect(surf, NULL, mapped_color);
         
         // If clearing to magenta (255, 0, 255), set it as the color key for transparency
         // This is the standard Allegro transparency color
-        if ((color & 0x00FFFFFF) == 0x00FF00FF) {  // Check if RGB is 255, 0, 255
+        if (r == 255 && g == 0 && b == 255) {
             SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, 255, 0, 255));
         }
     }
@@ -632,7 +642,9 @@ void platform_circlefill(PlatformBitmap *bitmap, int x, int y, int radius, Platf
 }
 
 PlatformColor platform_makecol(int r, int g, int b) {
-    return SDL_MapRGB(SDL_AllocFormat(SDL_PIXELFORMAT_ARGB8888), r, g, b);
+    // Return color in ARGB8888 format (what we use internally)
+    // Alpha is 0xFF (fully opaque), then RGB
+    return 0xFF000000 | (r << 16) | (g << 8) | b;
 }
 
 int platform_bitmap_width(PlatformBitmap *bitmap) {
