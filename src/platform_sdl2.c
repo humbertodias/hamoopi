@@ -12,7 +12,6 @@
 
 // Global state
 static SDL_Window *g_window = NULL;
-static SDL_Renderer *g_renderer = NULL;
 static PlatformBitmap *g_screen = NULL;
 static volatile Uint8 *g_sdl_key_state = NULL;
 static int g_key_state_size = 0;
@@ -197,15 +196,8 @@ int platform_set_gfx_mode(int mode, int width, int height, int v_width, int v_he
         if (g_screen->surface) {
             SDL_FreeSurface((SDL_Surface*)g_screen->surface);
         }
-        if (g_screen->texture) {
-            SDL_DestroyTexture((SDL_Texture*)g_screen->texture);
-        }
         free(g_screen);
         g_screen = NULL;
-    }
-    if (g_renderer) {
-        SDL_DestroyRenderer(g_renderer);
-        g_renderer = NULL;
     }
     if (g_window) {
         SDL_DestroyWindow(g_window);
@@ -223,24 +215,11 @@ int platform_set_gfx_mode(int mode, int width, int height, int v_width, int v_he
         return -1;
     }
     
-    g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
-    if (!g_renderer) {
-        fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
-        SDL_DestroyWindow(g_window);
-        return -1;
-    }
-    
-    // Set logical size to match requested resolution
-    // This ensures correct scaling on high-DPI displays
-    SDL_RenderSetLogicalSize(g_renderer, width, height);
-    
-    // Create screen surface
+    // Create screen surface (no renderer/texture - direct blitting like Allegro)
     g_screen = (PlatformBitmap*)malloc(sizeof(PlatformBitmap));
     if (g_screen) {
         g_screen->surface = SDL_CreateRGBSurface(0, width, height, 32,
                                                   0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-        g_screen->texture = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_ARGB8888,
-                                              SDL_TEXTUREACCESS_STREAMING, width, height);
         g_screen->w = width;
         g_screen->h = height;
         
@@ -326,7 +305,6 @@ PlatformBitmap* platform_create_bitmap(int width, int height) {
     if (pb) {
         pb->surface = SDL_CreateRGBSurface(0, width, height, 32,
                                            0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-        pb->texture = NULL;  // Created on demand
         pb->w = width;
         pb->h = height;
         
@@ -346,9 +324,6 @@ void platform_destroy_bitmap(PlatformBitmap *bitmap) {
     if (bitmap) {
         if (bitmap->surface) {
             SDL_FreeSurface(bitmap->surface);
-        }
-        if (bitmap->texture) {
-            SDL_DestroyTexture(bitmap->texture);
         }
         free(bitmap);
     }
@@ -385,7 +360,6 @@ PlatformBitmap* platform_load_bitmap(const char *filename, void *palette) {
     }
 
     pb->surface = surface;
-    pb->texture = NULL;
     pb->w = surface->w;
     pb->h = surface->h;
 
@@ -1178,17 +1152,20 @@ void platform_solid_mode(void) { g_drawing_mode = PDRAW_MODE_SOLID; }
 void platform_draw_trans_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) { platform_draw_sprite(dest, src, x, y); }
 
 void platform_present_screen(void) {
-    if (!g_screen || !g_renderer || !g_screen->surface || !g_screen->texture) {
+    if (!g_screen || !g_window || !g_screen->surface) {
         return;
     }
     
-    // Use SDL_UpdateTexture for simplicity - it's actually well-optimized internally
-    SDL_Surface *surf = (SDL_Surface*)g_screen->surface;
-    SDL_UpdateTexture((SDL_Texture*)g_screen->texture, NULL, surf->pixels, surf->pitch);
+    // Get window surface for direct blitting (like Allegro)
+    SDL_Surface *window_surf = SDL_GetWindowSurface(g_window);
+    if (!window_surf) {
+        return;
+    }
     
-    // Copy texture to renderer
-    SDL_RenderCopy(g_renderer, (SDL_Texture*)g_screen->texture, NULL, NULL);
+    // Blit screen surface to window surface (handles scaling if needed)
+    SDL_Surface *screen_surf = (SDL_Surface*)g_screen->surface;
+    SDL_BlitScaled(screen_surf, NULL, window_surf, NULL);
     
-    // Present renderer (show on screen)
-    SDL_RenderPresent(g_renderer);
+    // Update window (like Allegro's vsync)
+    SDL_UpdateWindowSurface(g_window);
 }
