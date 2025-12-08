@@ -419,6 +419,13 @@ void platform_stretch_blit(PlatformBitmap *src, PlatformBitmap *dest,
 void platform_blit(PlatformBitmap *src, PlatformBitmap *dest,
                   int src_x, int src_y, int dest_x, int dest_y, int w, int h) {
     if (src && src->surface && dest && dest->surface) {
+        // Clear destination surface if blitting to the top-left corner (0,0)
+        // This prevents artifacts when reusing sprite buffers across frames
+        if (dest_x == 0 && dest_y == 0 && src_x == 0 && src_y == 0) {
+            SDL_FillRect((SDL_Surface*)dest->surface, NULL, 
+                         SDL_MapRGBA(((SDL_Surface*)dest->surface)->format, 0, 0, 0, 0));
+        }
+
         SDL_Rect src_rect = { src_x, src_y, w, h };
         SDL_Rect dest_rect = { dest_x, dest_y, w, h };
         SDL_BlitSurface((SDL_Surface*)src->surface, &src_rect, (SDL_Surface*)dest->surface, &dest_rect);
