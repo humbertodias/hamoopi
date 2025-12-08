@@ -3,8 +3,26 @@ project(HAMOOPI)
 
 # Option to choose backend
 option(USE_SDL2 "Use SDL2 backend instead of Allegro 4" OFF)
+option(USE_LIBRETRO "Build as a libretro core for RetroArch" OFF)
 
-if(USE_SDL2)
+if(USE_LIBRETRO)
+    # Libretro Core
+    add_definitions(-DUSE_LIBRETRO)
+    add_library(hamoopi_libretro SHARED src/HAMOOPI.c src/platform_libretro.c)
+    
+    # Set output name
+    set_target_properties(hamoopi_libretro PROPERTIES PREFIX "")
+    set_target_properties(hamoopi_libretro PROPERTIES OUTPUT_NAME "hamoopi_libretro")
+    
+    # Link with math library
+    target_link_libraries(hamoopi_libretro m)
+    
+    # Copy library to parent folder after build
+    add_custom_command(TARGET hamoopi_libretro POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hamoopi_libretro> ${CMAKE_SOURCE_DIR}
+        COMMENT "Copying libretro core to parent folder..."
+    )
+elseif(USE_SDL2)
     # SDL2 Backend
     add_definitions(-DUSE_SDL2)
     add_executable(HAMOOPI src/HAMOOPI.c src/platform_sdl2.c)

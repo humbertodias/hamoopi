@@ -51,6 +51,31 @@ typedef struct PlatformBitmap PlatformBitmap;
 typedef struct PlatformFont PlatformFont;
 typedef struct PlatformSample PlatformSample;
 typedef struct PlatformMidi PlatformMidi;
+#elif defined(USE_LIBRETRO)
+// Libretro structures with exposed w,h for compatibility
+struct PlatformBitmap {
+    void *surface;  // uint32_t* framebuffer
+    int w, h;       // Exposed for Allegro compatibility
+};
+
+struct PlatformFont {
+    void *font;     // Custom font data
+    int size;
+};
+
+struct PlatformSample {
+    void *data;     // Audio sample data
+    int length;
+};
+
+struct PlatformMidi {
+    void *data;     // MIDI/music data
+};
+
+typedef struct PlatformBitmap PlatformBitmap;
+typedef struct PlatformFont PlatformFont;
+typedef struct PlatformSample PlatformSample;
+typedef struct PlatformMidi PlatformMidi;
 #else
 // Forward declarations for opaque types (for future implementations)
 typedef struct PlatformBitmap PlatformBitmap;

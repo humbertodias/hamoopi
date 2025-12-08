@@ -1,0 +1,110 @@
+# Makefile.libretro - Build HAMOOPI as a libretro core
+
+# Target name
+TARGET_NAME := hamoopi
+
+# Platform detection
+ifeq ($(platform),)
+	platform = unix
+	ifeq ($(shell uname -s),)
+		platform = win
+	else ifneq ($(findstring MINGW,$(shell uname -s)),)
+		platform = win
+	else ifneq ($(findstring Darwin,$(shell uname -s)),)
+		platform = osx
+	else ifneq ($(findstring win,$(shell uname -s)),)
+		platform = win
+	endif
+endif
+
+# System platform
+system_platform = unix
+ifeq ($(shell uname -s),)
+	EXE_EXT = .exe
+	system_platform = win
+else ifneq ($(findstring Darwin,$(shell uname -s)),)
+	system_platform = osx
+else ifneq ($(findstring MINGW,$(shell uname -s)),)
+	system_platform = win
+endif
+
+# Toolchain setup
+CC ?= gcc
+CXX ?= g++
+AR ?= ar
+
+# Flags
+CFLAGS := -O2 -fPIC -DUSE_LIBRETRO
+CXXFLAGS := $(CFLAGS)
+LDFLAGS := -lm -shared
+
+# Source files
+SOURCES := src/HAMOOPI.c src/platform_libretro.c
+
+# Platform-specific settings
+ifeq ($(platform), unix)
+	TARGET := $(TARGET_NAME)_libretro.so
+	fpic := -fPIC
+	SHARED := -shared -Wl,--version-script=link.T
+	LDFLAGS += -Wl,--no-undefined
+else ifeq ($(platform), linux-portable)
+	TARGET := $(TARGET_NAME)_libretro.so
+	fpic := -fPIC -nostdlib
+	SHARED := -shared -Wl,--version-script=link.T
+	LDFLAGS += -Wl,--no-undefined
+else ifeq ($(platform), osx)
+	TARGET := $(TARGET_NAME)_libretro.dylib
+	fpic := -fPIC
+	SHARED := -dynamiclib
+else ifeq ($(platform), ios)
+	TARGET := $(TARGET_NAME)_libretro_ios.dylib
+	fpic := -fPIC
+	SHARED := -dynamiclib
+	CC = clang -arch armv7 -isysroot $(IOSSDK)
+	CXX = clang++ -arch armv7 -isysroot $(IOSSDK)
+else ifeq ($(platform), android)
+	TARGET := $(TARGET_NAME)_libretro_android.so
+	fpic := -fPIC
+	SHARED := -shared -Wl,--version-script=link.T
+	CC = arm-linux-androideabi-gcc
+	CXX = arm-linux-androideabi-g++
+else ifeq ($(platform), win)
+	TARGET := $(TARGET_NAME)_libretro.dll
+	CC = gcc
+	CXX = g++
+	SHARED := -shared -static-libgcc -static-libstdc++ -Wl,--no-undefined -Wl,--version-script=link.T
+	LDFLAGS += -lws2_32 -lwinmm
+else ifeq ($(platform), mingw)
+	TARGET := $(TARGET_NAME)_libretro.dll
+	CC = x86_64-w64-mingw32-gcc
+	CXX = x86_64-w64-mingw32-g++
+	SHARED := -shared -static-libgcc -static-libstdc++ -Wl,--no-undefined
+	LDFLAGS += -lws2_32 -lwinmm
+endif
+
+CFLAGS += $(fpic)
+CXXFLAGS += $(fpic)
+
+# Objects
+OBJECTS := $(SOURCES:.c=.o)
+
+# Rules
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	@echo "Linking $@..."
+	$(CC) $(fpic) $(SHARED) -o $@ $(OBJECTS) $(LDFLAGS)
+	@echo "Build complete: $@"
+
+%.o: %.c
+	@echo "Compiling $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean:
+	rm -f $(OBJECTS) $(TARGET)
+
+install: $(TARGET)
+	mkdir -p ~/.config/retroarch/cores
+	cp $(TARGET) ~/.config/retroarch/cores/
+
+.PHONY: all clean install

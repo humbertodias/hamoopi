@@ -1,0 +1,33 @@
+# Software Information
+display_name = "HAMOOPI - Free Fighting Game Engine"
+authors = "Daniel Moura"
+supported_extensions = "ham|bin"
+corename = "HAMOOPI"
+license = "GPLv2"
+permissions = ""
+display_version = "0.001A"
+categories = "Game"
+
+# Hardware Information
+manufacturer = "N/A"
+systemname = "HAMOOPI Engine"
+systemid = "hamoopi"
+
+# Libretro Features
+supports_no_game = "true"
+database = "HAMOOPI"
+savestate = "false"
+cheats = "false"
+input_descriptors = "true"
+memory_descriptors = "false"
+libretro_saves = "false"
+core_options = "false"
+load_subsystem = "false"
+hw_render = "false"
+disk_control = "false"
+notes = "HAMOOPI is a Free Fighting Game Engine made in C. Run without content to start the game."
+
+# Firmware
+firmware_count = 0
+
+description = "HAMOOPI (Half-Moon Punch) is an open source fighting game engine that allows you to create and play 2D fighting games. The engine supports multiple characters, special moves, combos, and includes a character editor. This libretro core enables running HAMOOPI games in RetroArch and other libretro frontends."
