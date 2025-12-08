@@ -1,4 +1,4 @@
-
+#/bin/bash
 
 find . -name "*.pcx" -exec sh -c '
 for f; do
