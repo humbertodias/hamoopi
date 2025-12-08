@@ -1175,89 +1175,189 @@ while (sair==0)
         draw_sprite(bufferx, GAME_intro, 0, 0);
         stretch_blit(bufferx, bufferx, 0, 0, 640, 480, 0, 0, 640, 480);
     }
-
-/////////////////////////////////////////////////////////////////////////////
-// DONATION SCREEN ----------------------------------------------------------
-/////////////////////////////////////////////////////////////////////////////
-
-if (DonationScreen==1){
-if(timermenus==0) {
-FadeIN=0; FadeOUT=1;
-}
-
-IntroTimer++;
-
-if (timermenus==15){
-if (key[KEY_ESC]) {sair=1;}
-if (key[KEY_ALT] && key[KEY_F4]) {sair=1;}
-if (P[1].key_START_pressed==1) { timermenus=0; FadeCtr=255; FadeIN=0; FadeOUT=1; DonationScreen=0; ApresentacaoMode=1; }
-}
-
-if (IntroTimer==300-30){ FadeIN=1; FadeOUT=0; }
-if (IntroTimer>=300){ timermenus=0; DonationScreen=0; ApresentacaoMode=1; }
-draw_sprite(bufferx, donation, 0, 0);
-
-rectfill(bufferx, 160,  20, 600, 150, makecol(255,255,255));
-rectfill(bufferx, 100, 370, 600, 460, makecol(255,255,255));
-
-if (strcmp (IDIOMA,"US")==0){
-textprintf_centre_ex(bufferx, font_19, 380, 40+15, makecol(000,000,000), -1, "Please donate any amount of" );
-textprintf_centre_ex(bufferx, font_19, 380, 65+15, makecol(000,000,000), -1, "   to keep project alive" );
-textprintf_centre_ex(bufferx, font_19, 380, 65+15, makecol(000,140,010), -1, "   BTC                        " );
-textprintf_centre_ex(bufferx, font_19, 320,   400, makecol(000,000,000), -1, "Thanks, Hamoopi Team" );
-}
-if (strcmp (IDIOMA,"BR")==0){
-textprintf_centre_ex(bufferx, font_19, 380, 30+10, makecol(000,000,000), -1, "Por favor considere fazer uma" );
-textprintf_centre_ex(bufferx, font_19, 380, 55+10, makecol(000,000,000), -1, "doação de qualquer quantia de" );
-textprintf_centre_ex(bufferx, font_19, 380, 80+10, makecol(000,000,000), -1, "   para manter o projeto vivo" );
-textprintf_centre_ex(bufferx, font_19, 380, 80+10, makecol(000,140,010), -1, "   BTC                            " );
-textprintf_centre_ex(bufferx, font_19, 320,   400, makecol(000,000,000), -1, "Obrigado, Equipe Hamoopi" );
-}
-
-stretch_blit(bufferx, bufferx, 0, 0, 640, 480, 0, 0, 640, 480);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// APRESENTACAO -------------------------------------------------------------
-/////////////////////////////////////////////////////////////////////////////
-
-if (ApresentacaoMode==1){
-if(timermenus==0) { play_midi(bgm_apresentacao, 1); FadeIN=0; FadeOUT=1; } //bgm
-draw_sprite(bufferx, GAME_logo, 0, 0);
-
-// atencao! modo Arcade desativado no momento!!! //
-/*temporario*/ if (timermenus==0){ menu_op=2; } if(menu_op==1){ menu_op=2; } /*temporario*/
-
-if (timermenus==15){
-if (P[1].key_UP_pressed  ==1) { menu_op--; play_sample(cursor, 255, 128, 1000, 0); if (menu_op<1) { menu_op=5; }}
-if (P[1].key_DOWN_pressed==1) { menu_op++; play_sample(cursor, 255, 128, 1000, 0); if (menu_op>5) { menu_op=1; }}
-//if (P[1].key_START_pressed==1 && menu_op==1) { play_sample(confirm, 255, 128, 1000, 0); timermenus=0; FadeCtr=255; FadeIN=0; FadeOUT=1; menu_op=1; ApresentacaoMode=0; SelectCharMode=1; ModoHistoria=1; }
-if (P[1].key_START_pressed==1 && menu_op==2) { play_sample(confirm, 255, 128, 1000, 0); timermenus=0; FadeCtr=255; FadeIN=0; FadeOUT=1; menu_op=1; ApresentacaoMode=0; SelectCharMode=1; strcpy(ChoiceP2,""); strcpy(P[2].Name,""); }
-if (P[1].key_START_pressed==1 && menu_op==3) { play_sample(confirm, 255, 128, 1000, 0); timermenus=0; FadeCtr=255; FadeIN=0; FadeOUT=1; menu_op=1; ApresentacaoMode=0; EditMode=1; }
-if (P[1].key_START_pressed==1 && menu_op==4) { play_sample(confirm, 255, 128, 1000, 0); timermenus=0; FadeCtr=255; FadeIN=0; FadeOUT=1; menu_op=1; ApresentacaoMode=0; OptionsMode=1; options_op=1; }
-if (P[1].key_START_pressed==1 && menu_op==5) { sair=1; }
-if (key[KEY_ALT] && key[KEY_F4]) {sair=1;}
-if (key[KEY_ESC]) {sair=1;}
-}
-strcpy(ChoiceP1,""); strcpy(ChoiceP2,""); strcpy(ChoiceBG,"");
-int espacamento=30;
-if (menu_op==1){ draw_sprite(bufferx, spr_menu_icon, 180, 225+(espacamento*0)); }
-if (menu_op==2){ draw_sprite(bufferx, spr_menu_icon, 180, 225+(espacamento*1)); }
-if (menu_op==3){ draw_sprite(bufferx, spr_menu_icon, 180, 225+(espacamento*2)); }
-if (menu_op==4){ draw_sprite(bufferx, spr_menu_icon, 180, 225+(espacamento*3)); }
-if (menu_op==5){ draw_sprite(bufferx, spr_menu_icon, 180, 225+(espacamento*4)); }
-
-if (strcmp (IDIOMA,"US")==0){
-textprintf_centre_ex(bufferx, font_30, 322, 227+30*0, makecol(000,000,000), -1, "ARCADE" );
-textprintf_centre_ex(bufferx, font_30, 322, 227+30*1, makecol(000,000,000), -1, "VERSUS" );
-textprintf_centre_ex(bufferx, font_30, 322, 227+30*2, makecol(000,000,000), -1, "EDITOR" );
-textprintf_centre_ex(bufferx, font_30, 322, 227+30*3, makecol(000,000,000), -1, "OPTIONS" );
-textprintf_centre_ex(bufferx, font_30, 322, 227+30*4, makecol(000,000,000), -1, "EXIT" );
-textprintf_centre_ex(bufferx, font_30, 320, 225+30*0, makecol(155,155,155), -1, "ARCADE" );
-textprintf_centre_ex(bufferx, font_30, 320, 225+30*1, makecol(255,255,255), -1, "VERSUS" );
-textprintf_centre_ex(bufferx, font_30, 320, 225+30*2, makecol(255,255,255), -1, "EDITOR" );
-textprintf_centre_ex(bufferx, font_30, 320, 225+30*3, makecol(255,255,255), -1, "OPTIONS" );
-textprintf_centre_ex(bufferx, font_30, 320, 225+30*4, makecol(255,010,005), -1, "EXIT" );
+    
+    // ========================================================================
+    // ESTADO: DONATION SCREEN - Tela de doação
+    // ========================================================================
+    
+    if (DonationScreen == 1) {
+        // Inicialização do estado
+        if (timermenus == 0) {
+            FadeIN = 0; 
+            FadeOUT = 1;
+        }
+        
+        IntroTimer++;
+        
+        // Processar input do jogador
+        if (timermenus == 15) {
+            if (key[KEY_ESC]) {
+                sair = 1;
+            }
+            if (key[KEY_ALT] && key[KEY_F4]) {
+                sair = 1;
+            }
+            if (P[1].key_START_pressed == 1) { 
+                timermenus = 0; 
+                FadeCtr = 255; 
+                FadeIN = 0; 
+                FadeOUT = 1; 
+                DonationScreen = 0; 
+                ApresentacaoMode = 1; 
+            }
+        }
+        
+        // Gerenciar transição automática
+        if (IntroTimer == 300 - 30) { 
+            FadeIN = 1; 
+            FadeOUT = 0; 
+        }
+        if (IntroTimer >= 300) { 
+            timermenus = 0; 
+            DonationScreen = 0; 
+            ApresentacaoMode = 1; 
+        }
+        
+        // Renderizar
+        draw_sprite(bufferx, donation, 0, 0);
+        rectfill(bufferx, 160,  20, 600, 150, makecol(255,255,255));
+        rectfill(bufferx, 100, 370, 600, 460, makecol(255,255,255));
+        
+        if (strcmp(IDIOMA, "US") == 0) {
+            textprintf_centre_ex(bufferx, font_19, 380, 40+15, makecol(000,000,000), -1, "Please donate any amount of");
+            textprintf_centre_ex(bufferx, font_19, 380, 65+15, makecol(000,000,000), -1, "   to keep project alive");
+            textprintf_centre_ex(bufferx, font_19, 380, 65+15, makecol(000,140,010), -1, "   BTC                        ");
+            textprintf_centre_ex(bufferx, font_19, 320, 400, makecol(000,000,000), -1, "Thanks, Hamoopi Team");
+        }
+        if (strcmp(IDIOMA, "BR") == 0) {
+            textprintf_centre_ex(bufferx, font_19, 380, 30+10, makecol(000,000,000), -1, "Por favor considere fazer uma");
+            textprintf_centre_ex(bufferx, font_19, 380, 55+10, makecol(000,000,000), -1, "doação de qualquer quantia de");
+            textprintf_centre_ex(bufferx, font_19, 380, 80+10, makecol(000,000,000), -1, "   para manter o projeto vivo");
+            textprintf_centre_ex(bufferx, font_19, 380, 80+10, makecol(000,140,010), -1, "   BTC                            ");
+            textprintf_centre_ex(bufferx, font_19, 320, 400, makecol(000,000,000), -1, "Obrigado, Equipe Hamoopi");
+        }
+        
+        stretch_blit(bufferx, bufferx, 0, 0, 640, 480, 0, 0, 640, 480);
+    }
+    
+    // ========================================================================
+    // ESTADO: APRESENTACAO - Menu principal do jogo
+    // ========================================================================
+    
+    if (ApresentacaoMode == 1) {
+        // Inicialização do estado
+        if (timermenus == 0) { 
+            play_midi(bgm_apresentacao, 1); 
+            FadeIN = 0; 
+            FadeOUT = 1; 
+        }
+        
+        draw_sprite(bufferx, GAME_logo, 0, 0);
+        
+        // NOTA: Modo Arcade temporariamente desativado
+        if (timermenus == 0) { 
+            menu_op = 2; 
+        } 
+        if (menu_op == 1) { 
+            menu_op = 2; 
+        }
+        
+        // Processar input do jogador (navegação no menu)
+        if (timermenus == 15) {
+            if (P[1].key_UP_pressed == 1) { 
+                menu_op--; 
+                play_sample(cursor, 255, 128, 1000, 0); 
+                if (menu_op < 1) { 
+                    menu_op = 5; 
+                }
+            }
+            if (P[1].key_DOWN_pressed == 1) { 
+                menu_op++; 
+                play_sample(cursor, 255, 128, 1000, 0); 
+                if (menu_op > 5) { 
+                    menu_op = 1; 
+                }
+            }
+            
+            // Arcade Mode (desativado)
+            // if (P[1].key_START_pressed==1 && menu_op==1) { ... }
+            
+            // Versus Mode
+            if (P[1].key_START_pressed == 1 && menu_op == 2) { 
+                play_sample(confirm, 255, 128, 1000, 0); 
+                timermenus = 0; 
+                FadeCtr = 255; 
+                FadeIN = 0; 
+                FadeOUT = 1; 
+                menu_op = 1; 
+                ApresentacaoMode = 0; 
+                SelectCharMode = 1; 
+                strcpy(ChoiceP2, ""); 
+                strcpy(P[2].Name, ""); 
+            }
+            
+            // Editor Mode
+            if (P[1].key_START_pressed == 1 && menu_op == 3) { 
+                play_sample(confirm, 255, 128, 1000, 0); 
+                timermenus = 0; 
+                FadeCtr = 255; 
+                FadeIN = 0; 
+                FadeOUT = 1; 
+                menu_op = 1; 
+                ApresentacaoMode = 0; 
+                EditMode = 1; 
+            }
+            
+            // Options
+            if (P[1].key_START_pressed == 1 && menu_op == 4) { 
+                play_sample(confirm, 255, 128, 1000, 0); 
+                timermenus = 0; 
+                FadeCtr = 255; 
+                FadeIN = 0; 
+                FadeOUT = 1; 
+                menu_op = 1; 
+                ApresentacaoMode = 0; 
+                OptionsMode = 1; 
+                options_op = 1; 
+            }
+            
+            // Exit
+            if (P[1].key_START_pressed == 1 && menu_op == 5) { 
+                sair = 1; 
+            }
+            if (key[KEY_ALT] && key[KEY_F4]) {
+                sair = 1;
+            }
+            if (key[KEY_ESC]) {
+                sair = 1;
+            }
+        }
+        
+        // Limpar escolhas
+        strcpy(ChoiceP1, ""); 
+        strcpy(ChoiceP2, ""); 
+        strcpy(ChoiceBG, "");
+        
+        // Desenhar cursor do menu
+        int espacamento = 30;
+        if (menu_op == 1) { draw_sprite(bufferx, spr_menu_icon, 180, 225 + (espacamento * 0)); }
+        if (menu_op == 2) { draw_sprite(bufferx, spr_menu_icon, 180, 225 + (espacamento * 1)); }
+        if (menu_op == 3) { draw_sprite(bufferx, spr_menu_icon, 180, 225 + (espacamento * 2)); }
+        if (menu_op == 4) { draw_sprite(bufferx, spr_menu_icon, 180, 225 + (espacamento * 3)); }
+        if (menu_op == 5) { draw_sprite(bufferx, spr_menu_icon, 180, 225 + (espacamento * 4)); }
+        
+        // Desenhar texto do menu (inglês)
+        if (strcmp(IDIOMA, "US") == 0) {
+            textprintf_centre_ex(bufferx, font_30, 322, 227+30*0, makecol(000,000,000), -1, "ARCADE");
+            textprintf_centre_ex(bufferx, font_30, 322, 227+30*1, makecol(000,000,000), -1, "VERSUS");
+            textprintf_centre_ex(bufferx, font_30, 322, 227+30*2, makecol(000,000,000), -1, "EDITOR");
+            textprintf_centre_ex(bufferx, font_30, 322, 227+30*3, makecol(000,000,000), -1, "OPTIONS");
+            textprintf_centre_ex(bufferx, font_30, 322, 227+30*4, makecol(000,000,000), -1, "EXIT");
+            textprintf_centre_ex(bufferx, font_30, 320, 225+30*0, makecol(155,155,155), -1, "ARCADE");
+            textprintf_centre_ex(bufferx, font_30, 320, 225+30*1, makecol(255,255,255), -1, "VERSUS");
+            textprintf_centre_ex(bufferx, font_30, 320, 225+30*2, makecol(255,255,255), -1, "EDITOR");
+            textprintf_centre_ex(bufferx, font_30, 320, 225+30*3, makecol(255,255,255), -1, "OPTIONS");
+            textprintf_centre_ex(bufferx, font_30, 320, 225+30*4, makecol(255,010,005), -1, "EXIT");
 if (menu_op==1) textprintf_centre_ex(bufferx, font_30, 320, 225+30*0, makecol(255,170,000), -1, "ARCADE" );
 if (menu_op==2) textprintf_centre_ex(bufferx, font_30, 320, 225+30*1, makecol(255,170,000), -1, "VERSUS" );
 if (menu_op==3) textprintf_centre_ex(bufferx, font_30, 320, 225+30*2, makecol(255,170,000), -1, "EDITOR" );
