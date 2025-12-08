@@ -7217,6 +7217,9 @@ AnimTransTimer=-1;
 //////////////////////////////
 //BLIT de BUFFERX em SCREEN!//
 //////////////////////////////
+// Clear screen buffer to prevent ghosting (needed for SDL2)
+clear_to_color(screen, makecol(0, 0, 0));
+
 if (GamePlayMode==0) { stretch_blit(bufferx, screen, 0, 0, 640, 480, 0, 0, screen->w, screen->h); }
 if (GamePlayMode==1) {
 masked_stretch_blit(LayerHUDa, LayerHUDb, 0, 0, LayerHUDa->w, LayerHUDa->h, 0, 0, LayerHUDb->w, LayerHUDb->h);
