@@ -403,16 +403,6 @@ void platform_stretch_blit(PlatformBitmap *src, PlatformBitmap *dest,
         SDL_Rect src_rect = { src_x, src_y, src_w, src_h };
         SDL_Rect dest_rect = { dest_x, dest_y, dest_w, dest_h };
         SDL_BlitScaled((SDL_Surface*)src->surface, &src_rect, (SDL_Surface*)dest->surface, &dest_rect);
-        
-        // Auto-update window if blitting to screen (like Allegro 4)
-        if (dest == g_screen && g_window) {
-            SDL_Surface *window_surf = SDL_GetWindowSurface(g_window);
-            if (window_surf) {
-                SDL_Surface *screen_surf = (SDL_Surface*)dest->surface;
-                SDL_BlitScaled(screen_surf, NULL, window_surf, NULL);
-                SDL_UpdateWindowSurface(g_window);
-            }
-        }
     }
 }
 
@@ -1169,6 +1159,8 @@ void platform_present_screen(void) {
         return;
     }
     
+    SDL_Surface *screen_surface = (SDL_Surface*)g_screen->surface;
+    
     // Get the window surface
     SDL_Surface *window_surface = SDL_GetWindowSurface(g_window);
     if (!window_surface) {
@@ -1177,7 +1169,7 @@ void platform_present_screen(void) {
     }
     
     // Blit the screen surface to the window surface
-    SDL_BlitSurface((SDL_Surface*)g_screen->surface, NULL, window_surface, NULL);
+    SDL_BlitSurface(screen_surface, NULL, window_surface, NULL);
     
     // Update the window to display the changes
     SDL_UpdateWindowSurface(g_window);
