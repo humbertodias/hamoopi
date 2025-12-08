@@ -4435,10 +4435,13 @@ carga=P[indx].TableAtlas[ind][2];
 if(carga!=0) break;
 }
 //depois, pega a imagem SprAtlas correspondente ao indexador, e a coloca em P[n].Spr
-//clear the sprite first to prevent ghosting (needed for SDL2)
-clear_to_color(P[indx].Spr, makecol(255, 0, 255));
-blit(P[indx].SprAtlas[carga], P[indx].Spr, 0, 0, 0, 0, P[indx].SprAtlas[carga]->w, P[indx].SprAtlas[carga]->h);
-P[indx].Spr->w  = P[indx].SprAtlas[carga]->w;
+//clear only the sprite area (not the entire 480x480) to prevent ghosting (needed for SDL2)
+int sprite_w = P[indx].SprAtlas[carga]->w;
+int sprite_h = P[indx].SprAtlas[carga]->h;
+// Clear only the rectangle that will be used
+rectfill(P[indx].Spr, 0, 0, sprite_w-1, sprite_h-1, makecol(255, 0, 255));
+blit(P[indx].SprAtlas[carga], P[indx].Spr, 0, 0, 0, 0, sprite_w, sprite_h);
+P[indx].Spr->w  = sprite_w;
 P[indx].Spr->h  = P[indx].SprAtlas[carga]->h;
 P[indx].Altura  = P[indx].Spr->h;
 P[indx].Largura = P[indx].Spr->w;
