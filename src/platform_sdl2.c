@@ -391,6 +391,10 @@ void platform_clear_to_color(PlatformBitmap *bitmap, PlatformColor color) {
 
 void platform_draw_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) {
     if (dest && dest->surface && src && ((SDL_Surface*)src->surface)) {
+        // Clear destination area before blitting to prevent artifacts from previous frames
+        SDL_Rect clear_rect = { x, y, src->w, src->h };
+        SDL_FillRect((SDL_Surface*)dest->surface, &clear_rect, SDL_MapRGB(((SDL_Surface*)dest->surface)->format, 255, 0, 255));
+        
         SDL_Rect dest_rect = { x, y, src->w, src->h };
         SDL_BlitSurface(((SDL_Surface*)src->surface), NULL, dest->surface, &dest_rect);
     }
@@ -419,6 +423,10 @@ void platform_stretch_blit(PlatformBitmap *src, PlatformBitmap *dest,
 void platform_blit(PlatformBitmap *src, PlatformBitmap *dest,
                   int src_x, int src_y, int dest_x, int dest_y, int w, int h) {
     if (src && src->surface && dest && dest->surface) {
+        // Clear destination area before blitting to prevent artifacts from previous frames
+        SDL_Rect clear_rect = { dest_x, dest_y, w, h };
+        SDL_FillRect((SDL_Surface*)dest->surface, &clear_rect, SDL_MapRGB(((SDL_Surface*)dest->surface)->format, 255, 0, 255));
+        
         SDL_Rect src_rect = { src_x, src_y, w, h };
         SDL_Rect dest_rect = { dest_x, dest_y, w, h };
         SDL_BlitSurface((SDL_Surface*)src->surface, &src_rect, (SDL_Surface*)dest->surface, &dest_rect);
@@ -433,6 +441,10 @@ void platform_masked_blit(PlatformBitmap *src, PlatformBitmap *dest,
 
 void platform_draw_sprite_h_flip(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) {
     if (dest && dest->surface && src && ((SDL_Surface*)src->surface)) {
+        // Clear destination area before blitting to prevent artifacts from previous frames
+        SDL_Rect clear_rect = { x, y, src->w, src->h };
+        SDL_FillRect((SDL_Surface*)dest->surface, &clear_rect, SDL_MapRGB(((SDL_Surface*)dest->surface)->format, 255, 0, 255));
+        
         // Create flipped surface
         SDL_Surface *flipped = SDL_CreateRGBSurface(0, src->w, src->h, 32,
                                                      0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
