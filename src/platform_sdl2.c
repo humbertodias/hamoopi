@@ -864,11 +864,7 @@ void platform_textprintf_centre_ex(PlatformBitmap *bitmap, PlatformFont *font,
 // ============================================================================
 
 int platform_install_sound(int digi, int midi, const char *cfg) {
-    if (TTF_Init() < 0) {
-        fprintf(stderr, "TTF_Init failed: %s\n", TTF_GetError());
-        return -1;
-    }
-    
+
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         fprintf(stderr, "Mix_OpenAudio failed: %s\n", Mix_GetError());
         return -1;
