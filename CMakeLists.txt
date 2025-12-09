@@ -57,7 +57,13 @@ if(USE_SDL2)
 else()
     # Allegro 4 Backend (default)
     add_definitions(-DUSE_ALLEGRO4)
-    add_executable(HAMOOPI src/HAMOOPI.c src/platform_allegro.c)
+    
+    # On Windows, Allegro 4 requires WIN32 executable type
+    if(WIN32)
+        add_executable(HAMOOPI WIN32 src/HAMOOPI.c src/platform_allegro.c)
+    else()
+        add_executable(HAMOOPI src/HAMOOPI.c src/platform_allegro.c)
+    endif()
     
     # Find Allegro 4 using custom Find module
     find_package(Allegro4 REQUIRED)
