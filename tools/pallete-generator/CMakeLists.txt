@@ -9,20 +9,13 @@ if(USE_SDL2)
     add_definitions(-DUSE_SDL2)
     add_executable(PALLETEGEN PalleteGenerator_SDL2.c ../../src/platform_sdl2.c)
     
-    # Find SDL2 packages
-    find_package(SDL2 REQUIRED)
-    find_package(SDL2_image REQUIRED)
-    find_package(SDL2_mixer REQUIRED)
-    find_package(SDL2_ttf REQUIRED)
-
-    # inih - configuration library
-    # Try custom Find module first, fallback to pkg-config
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
-    find_package(INIH QUIET)
-    if(NOT INIH_FOUND)
-        find_package(PkgConfig REQUIRED)
-        pkg_check_modules(INIH REQUIRED inih)
-    endif()
+    # Use pkg-config to find SDL2 and related libraries
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(SDL2 REQUIRED sdl2)
+    pkg_check_modules(SDL2_IMAGE REQUIRED SDL2_image)
+    pkg_check_modules(SDL2_MIXER REQUIRED SDL2_mixer)
+    pkg_check_modules(SDL2_TTF REQUIRED SDL2_ttf)
+    pkg_check_modules(INIH REQUIRED inih)
 
     # Include directories for SDL2
     target_include_directories(PALLETEGEN PRIVATE 
