@@ -80,36 +80,22 @@ jobs:
           vcpkg install sdl2:x64-windows sdl2-image:x64-windows sdl2-mixer:x64-windows sdl2-ttf:x64-windows inih:x64-windows
         shell: bash
 
-      - name: Cache vcpkg packages (Windows - Allegro)
-        if: matrix.os == 'windows-latest' && matrix.backend == 'allegro'
-        uses: actions/cache@v4
-        with:
-          path: |
-            C:/vcpkg/installed
-            C:/vcpkg/packages
-          key: ${{ runner.os }}-vcpkg-allegro-${{ hashFiles('.github/workflows/build.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-allegro-
-            ${{ runner.os }}-vcpkg-
-
-      - name: Setup vcpkg (Windows - Allegro)
+      - name: Install Allegro 4 manually (Windows)
         if: matrix.os == 'windows-latest' && matrix.backend == 'allegro'
         run: |
-          vcpkg integrate install
-          # Note: Using allegro5 as allegro4 may not be available in vcpkg
-          # The build may require code adjustments for Allegro 5 compatibility
-          vcpkg install allegro5:x64-windows
+          # Download Allegro 4.4.3.1 binary for MinGW
+          curl -L https://github.com/liballeg/allegro5/releases/download/4.4.3.1/allegro-4.4.3.1-mingw-4.7.0.zip -o allegro.zip
+          7z x allegro.zip -oC:/allegro
+          # Set environment variables for CMake to find Allegro
+          echo "ALLEGRO_ROOT=C:/allegro" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=C:/allegro" >> $GITHUB_ENV
         shell: bash
 
       # Build with Allegro
       - name: Build (Allegro)
         if: matrix.backend == 'allegro'
         run: |
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            cmake -B build -DUSE_SDL2=OFF -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
-          else
-            cmake -B build -DUSE_SDL2=OFF
-          fi
+          cmake -B build -DUSE_SDL2=OFF
           cmake --build build --config Release
         shell: bash
 
