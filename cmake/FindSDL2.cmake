@@ -34,6 +34,10 @@ if(WIN32)
     find_library(SDL2MAIN_LIBRARY
         NAMES SDL2main
         PATHS
+            /usr/local/lib
+            /usr/lib
+            /opt/homebrew/lib
+            /usr/local/opt/sdl2/lib
             $ENV{SDL2DIR}/lib
             $ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib
     )
@@ -41,7 +45,7 @@ endif()
 
 # Handle the QUIETLY and REQUIRED arguments
 include(FindPackageHandleStandardArgs)
-if(WIN32 AND SDL2MAIN_LIBRARY)
+if(WIN32)
     find_package_handle_standard_args(SDL2
         REQUIRED_VARS SDL2_LIBRARY SDL2MAIN_LIBRARY SDL2_INCLUDE_DIR
     )
@@ -53,7 +57,7 @@ endif()
 
 if(SDL2_FOUND)
     # Set libraries - include SDL2main on Windows
-    if(WIN32 AND SDL2MAIN_LIBRARY)
+    if(WIN32)
         set(SDL2_LIBRARIES ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY})
     else()
         set(SDL2_LIBRARIES ${SDL2_LIBRARY})
