@@ -259,9 +259,9 @@ int platform_set_gfx_mode(int mode, int width, int height, int v_width, int v_he
         return -1;
     }
 
-    // Create static texture for better performance (we update entire texture each frame)
+    // Create streaming texture for the screen (optimized for frequent updates)
     g_screen_texture = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_ARGB8888,
-                                         SDL_TEXTUREACCESS_STATIC, width, height);
+                                         SDL_TEXTUREACCESS_STREAMING, width, height);
     if (!g_screen_texture) {
         fprintf(stderr, "SDL_CreateTexture failed: %s\n", SDL_GetError());
         SDL_DestroyRenderer(g_renderer);
