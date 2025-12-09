@@ -304,7 +304,7 @@ int p1_start, p2_start;
 
 int op_sound_volume=255;
 int op_sfx_volume=255;
-char IDIOMA[2];
+char IDIOMA[3];
 int IntroMode=1; int IntroTimer=0;
 float AnimIntroTimer=0; //animacao de intro timer
 float AnimTransTimer=-1; //animacao de transicao timer
@@ -917,8 +917,7 @@ BITMAP *P2BIGDisplay = create_bitmap(128,128);
 BITMAP *P2BIGDisplayInv = create_bitmap(128,128);
 
 //idioma do jogo
-const char *lang = get_config_string("CONFIG", "language", "BR");
-snprintf(IDIOMA, sizeof(IDIOMA), "%s", lang);
+snprintf(IDIOMA, sizeof(IDIOMA), "%s", (char *) get_config_string("CONFIG", "language", "BR"));
 if (strcmp (IDIOMA,"BR")==0){ if (HamoopiError==1) allegro_message("ARQUIVOS OU DIRETORIOS NAO ENCONTRADOS."); }
 if (strcmp (IDIOMA,"US")==0){ if (HamoopiError==1) allegro_message("FILES OR DIRECTORIES NOT FOUND."); }
 
@@ -6321,7 +6320,7 @@ drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
 
 //draw char -ED-
 {
-char txt[3];
+char txt[5];
 char txt2[20];
 if (ED_IndexAnim<10) { sprintf(txt, "%i_0%i", ED_State, ED_IndexAnim); }  // <10
 else { sprintf(txt,  "%i_%i", ED_State, ED_IndexAnim); } //>=10
@@ -11651,13 +11650,13 @@ ED_Largura_100=0;
 //abastece MovPossiveis - Verifica a existencia de Movimentos (imgs nnn_00.pcx) na pasta do personagem
 int i=0; char txt[50]="";
 for(int ind=100;ind<=999; ind++){
-char indINTtoCHAR[3]="";
+char indINTtoCHAR[4]="";
 sprintf(indINTtoCHAR, "%d", ind);
 sprintf(txt, "data/chars/%s/%s_00.pcx", ED_Name, indINTtoCHAR ); if ( exists(txt)) { MovPossiveis[i]=ind; i++; }
 }
 
 //faz o carregamento inicial do char.ini
-char ED_State_s[3];
+char ED_State_s[4];
 char ED_Caminho[99];
 
 sprintf(ED_State_s, "%i", ED_State);
