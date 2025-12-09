@@ -779,13 +779,37 @@ PlatformBitmap* platform_render_text(PlatformFont *font, const char *text, Platf
 void platform_textout_ex(PlatformBitmap *dest, PlatformFont *font,
                              const char *text, int x, int y, PlatformColor color, PlatformColor bg)
     {
-        PlatformBitmap *txt = platform_render_text(font, text, color);
 
-        if (!txt) return;
+    if (!dest || !dest->texture || !font || !text || !g_renderer)
+        return;
 
-        platform_draw_sprite(dest, txt, x, y);
-        platform_destroy_bitmap(txt);
-    }
+    Uint8 r, g, b, a;
+    extract_rgba(color, &r, &g, &b, &a);
+
+    SDL_Color sdl_color = { r, g, b, a };
+
+    // Render TTF to a surface
+    SDL_Surface *surf = TTF_RenderUTF8_Blended(font->font, text, sdl_color);
+    if (!surf) return;
+
+    // Convert surface to texture
+    SDL_Texture *tex = SDL_CreateTextureFromSurface(g_renderer, surf);
+    SDL_FreeSurface(surf);
+    if (!tex) return;
+
+    // Must set blend mode or alpha won't work
+    SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+
+    SDL_Rect dst = { x, y, 0, 0 };
+    SDL_QueryTexture(tex, NULL, NULL, &dst.w, &dst.h);
+
+    // Draw to the destination bitmap
+    SDL_SetRenderTarget(g_renderer, (SDL_Texture*)dest->texture);
+    SDL_RenderCopy(g_renderer, tex, NULL, &dst);
+    SDL_SetRenderTarget(g_renderer, NULL);
+
+    SDL_DestroyTexture(tex);
+}
 
 
 void platform_textout_centre_ex(PlatformBitmap *bitmap, PlatformFont *font,
