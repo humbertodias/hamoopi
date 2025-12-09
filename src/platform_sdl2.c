@@ -12,6 +12,8 @@
 
 // Global state
 static SDL_Window *g_window = NULL;
+static SDL_Renderer *g_renderer = NULL;
+static SDL_Texture *g_screen_texture = NULL;
 static PlatformBitmap *g_screen = NULL;
 static volatile Uint8 *g_sdl_key_state = NULL;
 static int g_key_state_size = 0;
@@ -196,6 +198,14 @@ int platform_set_gfx_mode(int mode, int width, int height, int v_width, int v_he
     }
     
     // Destroy existing resources if they exist
+    if (g_screen_texture) {
+        SDL_DestroyTexture(g_screen_texture);
+        g_screen_texture = NULL;
+    }
+    if (g_renderer) {
+        SDL_DestroyRenderer(g_renderer);
+        g_renderer = NULL;
+    }
     if (g_screen) {
         if (g_screen->surface) {
             SDL_FreeSurface((SDL_Surface*)g_screen->surface);
@@ -219,7 +229,28 @@ int platform_set_gfx_mode(int mode, int width, int height, int v_width, int v_he
         return -1;
     }
     
-    // Create screen surface (no renderer/texture - direct blitting like Allegro)
+    // Create renderer with hardware acceleration for better macOS compatibility
+    g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!g_renderer) {
+        fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
+        SDL_DestroyWindow(g_window);
+        g_window = NULL;
+        return -1;
+    }
+    
+    // Create streaming texture for the screen
+    g_screen_texture = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_ARGB8888,
+                                         SDL_TEXTUREACCESS_STREAMING, width, height);
+    if (!g_screen_texture) {
+        fprintf(stderr, "SDL_CreateTexture failed: %s\n", SDL_GetError());
+        SDL_DestroyRenderer(g_renderer);
+        SDL_DestroyWindow(g_window);
+        g_renderer = NULL;
+        g_window = NULL;
+        return -1;
+    }
+    
+    // Create screen surface (for drawing operations)
     g_screen = (PlatformBitmap*)malloc(sizeof(PlatformBitmap));
     if (g_screen) {
         g_screen->surface = SDL_CreateRGBSurface(0, width, height, 32,
@@ -408,14 +439,21 @@ void platform_stretch_blit(PlatformBitmap *src, PlatformBitmap *dest,
         SDL_Rect dest_rect = { dest_x, dest_y, dest_w, dest_h };
         SDL_BlitScaled((SDL_Surface*)src->surface, &src_rect, (SDL_Surface*)dest->surface, &dest_rect);
         
-        // Auto-update window if blitting to screen (like Allegro 4)
-        if (dest == g_screen && g_window) {
-            SDL_Surface *window_surf = SDL_GetWindowSurface(g_window);
-            if (window_surf) {
-                SDL_Surface *screen_surf = (SDL_Surface*)dest->surface;
-                SDL_BlitScaled(screen_surf, NULL, window_surf, NULL);
-                SDL_UpdateWindowSurface(g_window);
-            }
+        // Auto-update window if blitting to screen using renderer and texture
+        if (dest == g_screen && g_renderer && g_screen_texture) {
+            // Update texture with screen surface data
+            SDL_UpdateTexture(g_screen_texture, NULL, 
+                            ((SDL_Surface*)dest->surface)->pixels, 
+                            ((SDL_Surface*)dest->surface)->pitch);
+            
+            // Clear renderer
+            SDL_RenderClear(g_renderer);
+            
+            // Copy texture to renderer
+            SDL_RenderCopy(g_renderer, g_screen_texture, NULL, NULL);
+            
+            // Present renderer
+            SDL_RenderPresent(g_renderer);
         }
     }
 }
@@ -1211,6 +1249,20 @@ void platform_solid_mode(void) { g_drawing_mode = PDRAW_MODE_SOLID; }
 void platform_draw_trans_sprite(PlatformBitmap *dest, PlatformBitmap *src, int x, int y) { platform_draw_sprite(dest, src, x, y); }
 
 void platform_present_screen(void) {
-    // No-op: Screen updates automatically when blitting to screen surface
-    // This function kept for API compatibility but does nothing
+    // Update the screen with renderer and texture
+    if (g_screen && g_screen->surface && g_renderer && g_screen_texture) {
+        // Update texture with screen surface data
+        SDL_UpdateTexture(g_screen_texture, NULL, 
+                        ((SDL_Surface*)g_screen->surface)->pixels, 
+                        ((SDL_Surface*)g_screen->surface)->pitch);
+        
+        // Clear renderer
+        SDL_RenderClear(g_renderer);
+        
+        // Copy texture to renderer
+        SDL_RenderCopy(g_renderer, g_screen_texture, NULL, NULL);
+        
+        // Present renderer
+        SDL_RenderPresent(g_renderer);
+    }
 }
