@@ -594,14 +594,6 @@ install_int_ex(tempo, BPS_TO_TIMER(60)); //60fps
 set_window_title("HAMOOPI is Loading... Please wait :) ");
 set_close_button_callback( sair_allegro );
 
-//Valores de Referencia:
-//Genesis [320x224]
-//Snes [256x224]
-//CapcomCPS1 [384x224]
-//NeoGeo [320x224]
-BITMAP *bg_test = create_bitmap(1280,960); //tamanho max do cenario
-BITMAP *bg_hamoopi[9];
-
 //carrega os dados do setup.ini
 set_config_file("SETUP.ini");
 
@@ -631,6 +623,15 @@ ModoFullscreen = get_config_int ( "CONFIG" , "FullScreen",  0 ) ;
 //ajusta a tela com as novas configuracoes
 if(ModoFullscreen==1) { set_gfx_mode(GFX_AUTODETECT_FULLSCREEN, WindowResX, WindowResY, 0, 0); }
 if(ModoFullscreen==0) { set_gfx_mode(GFX_AUTODETECT_WINDOWED, WindowResX, WindowResY, 0, 0); }
+
+//Valores de Referencia:
+//Genesis [320x224]
+//Snes [256x224]
+//CapcomCPS1 [384x224]
+//NeoGeo [320x224]
+BITMAP *bg_test = create_bitmap(1280,960); //tamanho max do cenario
+BITMAP *bg_hamoopi[9];
+
 //opcao de framedata
 op_ShowFrameData = get_config_int ( "CONFIG" , "frame_data",  0 ) ;
 
