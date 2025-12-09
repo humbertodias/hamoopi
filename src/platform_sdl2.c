@@ -7,8 +7,20 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 #include "ini.h"
 
+// Portable case-insensitive string comparison
+static int portable_strcasecmp(const char *s1, const char *s2) {
+    while (*s1 && *s2) {
+        int c1 = tolower((unsigned char)*s1);
+        int c2 = tolower((unsigned char)*s2);
+        if (c1 != c2) return c1 - c2;
+        s1++;
+        s2++;
+    }
+    return tolower((unsigned char)*s1) - tolower((unsigned char)*s2);
+}
 
 // Global state
 static SDL_Window *g_window = NULL;
@@ -426,7 +438,7 @@ int platform_save_bitmap(const char *filename, PlatformBitmap *bitmap, void *pal
     
     // Convert .pcx to .png for SDL2
     char *outfile = NULL;
-    if (strcasecmp(ext, ".pcx") == 0) {
+    if (portable_strcasecmp(ext, ".pcx") == 0) {
         // Replace .pcx with .png
         size_t len = strlen(filename);
         outfile = malloc(len + 2);  // +1 for potential extra char, +1 for null
