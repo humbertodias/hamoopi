@@ -78,6 +78,7 @@ else()
     # Allegro 4 was compiled without SAFESEH support
     if(WIN32 AND MSVC)
         target_link_options(HAMOOPI PRIVATE /SAFESEH:NO)
+        set_target_properties(HAMOOPI PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
     endif()
     
     # Link math library on Unix-like systems (not needed on Windows)
