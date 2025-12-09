@@ -49,3 +49,4 @@ if(INIH_FOUND)
 endif()
 
 mark_as_advanced(INIH_INCLUDE_DIR INIH_LIBRARY)
+
