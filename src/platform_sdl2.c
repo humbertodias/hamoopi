@@ -24,6 +24,15 @@ static void (*g_timer_callback)(void) = NULL;
 static int g_drawing_mode = PDRAW_MODE_SOLID;
 static int g_trans_alpha = 255;
 
+// Helper to extract RGBA from PlatformColor and default alpha to 255 if not set
+static inline void extract_rgba(PlatformColor color, Uint8 *r, Uint8 *g, Uint8 *b, Uint8 *a) {
+    *r = (color >> 16) & 0xFF;
+    *g = (color >> 8) & 0xFF;
+    *b = color & 0xFF;
+    *a = (color >> 24) & 0xFF;
+    if (*a == 0) *a = 255;  // Default to opaque if no alpha
+}
+
 // Mouse state (exported for compatibility)
 volatile int platform_mouse_x = 0;
 volatile int platform_mouse_y = 0;
@@ -529,6 +538,8 @@ void platform_pivot_sprite(PlatformBitmap *dest, PlatformBitmap *src,
 }
 
 PlatformColor platform_getpixel(PlatformBitmap *bitmap, int x, int y) {
+    // Note: Reading pixels from GPU texture is slow and causes GPU/CPU synchronization.
+    // Use sparingly in performance-critical code.
     if (bitmap && bitmap->texture && x >= 0 && x < bitmap->w && y >= 0 && y < bitmap->h && g_renderer) {
         Uint32 pixel = 0;
         SDL_Rect rect = { x, y, 1, 1 };
@@ -544,11 +555,8 @@ PlatformColor platform_getpixel(PlatformBitmap *bitmap, int x, int y) {
 
 void platform_putpixel(PlatformBitmap *bitmap, int x, int y, PlatformColor color) {
     if (bitmap && bitmap->texture && x >= 0 && x < bitmap->w && y >= 0 && y < bitmap->h && g_renderer) {
-        Uint8 r = (color >> 16) & 0xFF;
-        Uint8 g = (color >> 8) & 0xFF;
-        Uint8 b = color & 0xFF;
-        Uint8 a = (color >> 24) & 0xFF;
-        if (a == 0) a = 255;  // Default to opaque if no alpha
+        Uint8 r, g, b, a;
+        extract_rgba(color, &r, &g, &b, &a);
         
         SDL_SetRenderTarget(g_renderer, (SDL_Texture*)bitmap->texture);
         SDL_SetRenderDrawColor(g_renderer, r, g, b, a);
@@ -563,11 +571,8 @@ void platform_putpixel(PlatformBitmap *bitmap, int x, int y, PlatformColor color
 
 void platform_line(PlatformBitmap *bitmap, int x1, int y1, int x2, int y2, PlatformColor color) {
     if (bitmap && bitmap->texture && g_renderer) {
-        Uint8 r = (color >> 16) & 0xFF;
-        Uint8 g = (color >> 8) & 0xFF;
-        Uint8 b = color & 0xFF;
-        Uint8 a = (color >> 24) & 0xFF;
-        if (a == 0) a = 255;
+        Uint8 r, g, b, a;
+        extract_rgba(color, &r, &g, &b, &a);
         
         SDL_SetRenderTarget(g_renderer, (SDL_Texture*)bitmap->texture);
         SDL_SetRenderDrawColor(g_renderer, r, g, b, a);
@@ -578,11 +583,8 @@ void platform_line(PlatformBitmap *bitmap, int x1, int y1, int x2, int y2, Platf
 
 void platform_rect(PlatformBitmap *bitmap, int x1, int y1, int x2, int y2, PlatformColor color) {
     if (bitmap && bitmap->texture && g_renderer) {
-        Uint8 r = (color >> 16) & 0xFF;
-        Uint8 g = (color >> 8) & 0xFF;
-        Uint8 b = color & 0xFF;
-        Uint8 a = (color >> 24) & 0xFF;
-        if (a == 0) a = 255;
+        Uint8 r, g, b, a;
+        extract_rgba(color, &r, &g, &b, &a);
         
         SDL_Rect rect = { x1, y1, x2 - x1 + 1, y2 - y1 + 1 };
         SDL_SetRenderTarget(g_renderer, (SDL_Texture*)bitmap->texture);
@@ -617,11 +619,8 @@ void platform_rectfill(PlatformBitmap *bitmap, int x1, int y1, int x2, int y2, P
 
 void platform_circle(PlatformBitmap *bitmap, int x, int y, int radius, PlatformColor color) {
     if (bitmap && bitmap->texture && g_renderer) {
-        Uint8 r = (color >> 16) & 0xFF;
-        Uint8 g = (color >> 8) & 0xFF;
-        Uint8 b = color & 0xFF;
-        Uint8 a = (color >> 24) & 0xFF;
-        if (a == 0) a = 255;
+        Uint8 r, g, b, a;
+        extract_rgba(color, &r, &g, &b, &a);
         
         SDL_SetRenderTarget(g_renderer, (SDL_Texture*)bitmap->texture);
         SDL_SetRenderDrawColor(g_renderer, r, g, b, a);
@@ -658,15 +657,14 @@ void platform_circle(PlatformBitmap *bitmap, int x, int y, int radius, PlatformC
 
 void platform_circlefill(PlatformBitmap *bitmap, int x, int y, int radius, PlatformColor color) {
     if (bitmap && bitmap->texture && g_renderer) {
-        Uint8 r = (color >> 16) & 0xFF;
-        Uint8 g = (color >> 8) & 0xFF;
-        Uint8 b = color & 0xFF;
-        Uint8 a = (color >> 24) & 0xFF;
-        if (a == 0) a = 255;
+        Uint8 r, g, b, a;
+        extract_rgba(color, &r, &g, &b, &a);
         
         SDL_SetRenderTarget(g_renderer, (SDL_Texture*)bitmap->texture);
         SDL_SetRenderDrawColor(g_renderer, r, g, b, a);
         
+        // Note: This uses nested loops with individual points, which is simple but not optimal.
+        // For better performance, could draw horizontal lines instead.
         for (int i = -radius; i <= radius; i++) {
             for (int j = -radius; j <= radius; j++) {
                 if (i * i + j * j <= radius * radius) {
