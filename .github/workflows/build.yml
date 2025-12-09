@@ -63,7 +63,7 @@ jobs:
         if: matrix.os == 'windows-latest' && matrix.backend == 'sdl2'
         run: |
           vcpkg integrate install
-          vcpkg install sdl2:x64-windows sdl2-image:x64-windows sdl2-mixer:x64-windows sdl2-ttf:x64-windows
+          vcpkg install sdl2:x64-windows sdl2-image:x64-windows sdl2-mixer:x64-windows sdl2-ttf:x64-windows inih:x64-windows
         shell: bash
 
       # Build with Allegro
