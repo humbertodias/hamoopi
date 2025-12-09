@@ -126,21 +126,30 @@ static Uint32 timer_callback_wrapper(Uint32 interval, void *param) {
     return interval;
 }
 
-char* replace_pcx_with_png(const char* filename) {
-    if (!filename) return NULL;
+char* replace_ext(const char* filename, const char* from, const char* to) {
+    if (!filename || !from || !to) return NULL;
 
-    // Allocate new string
-    char *new_filename = malloc(strlen(filename) + 1);
-    if (!new_filename) return NULL;
-    strcpy(new_filename, filename);
+    size_t len_filename = strlen(filename);
+    size_t len_from = strlen(from);
 
-    // Find last dot
-    char *ext = strrchr(new_filename, '.');
-    if (ext && strcmp(ext, ".pcx") == 0) {
-        strcpy(ext, ".png");  // replace extension
+    // Must end with `from` extension
+    if (len_filename < len_from) return NULL;
+    if (strcmp(filename + (len_filename - len_from), from) != 0) {
+        return NULL;
     }
 
-    return new_filename;
+    // Allocate final buffer: original length - from + to
+    size_t out_len = len_filename - len_from + strlen(to);
+    char *out = malloc(out_len + 1);
+    if (!out) return NULL;
+
+    // Copy base name
+    memcpy(out, filename, len_filename - len_from);
+
+    // Append new extension
+    strcpy(out + (len_filename - len_from), to);
+
+    return out;
 }
 
 // ============================================================================
@@ -153,7 +162,7 @@ int platform_init(void) {
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // Nearest neighbor (faster)
     SDL_SetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION, "1");  // Enable if available
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d,opengl,opengles2,software");  // Prefer hardware
-    
+
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
         fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
         return -1;
@@ -165,6 +174,11 @@ int platform_init(void) {
     int img_flags = IMG_INIT_PNG | IMG_INIT_JPG;
     if (!(IMG_Init(img_flags) & img_flags)) {
         fprintf(stderr, "IMG_Init failed: %s\n", IMG_GetError());
+    }
+
+    if (TTF_Init() == -1) {
+        fprintf(stderr, "TTF_Init failed: %s\n", TTF_GetError());
+        return -1;
     }
     
     return 0;
@@ -341,22 +355,22 @@ PlatformBitmap* platform_get_screen(void) {
 
 PlatformBitmap* platform_create_bitmap(int width, int height) {
     if (!g_renderer) return NULL;
-    
+
     PlatformBitmap *pb = (PlatformBitmap*)malloc(sizeof(PlatformBitmap));
     if (pb) {
         pb->texture = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_ARGB8888,
                                         SDL_TEXTUREACCESS_TARGET, width, height);
         pb->w = width;
         pb->h = height;
-        
+
         if (!pb->texture) {
             free(pb);
             return NULL;
         }
-        
+
         // Set texture blend mode for transparency
         SDL_SetTextureBlendMode((SDL_Texture*)pb->texture, SDL_BLENDMODE_BLEND);
-        
+
         // Clear texture to transparent
         SDL_SetRenderTarget(g_renderer, (SDL_Texture*)pb->texture);
         SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 0);
@@ -378,7 +392,7 @@ void platform_destroy_bitmap(PlatformBitmap *bitmap) {
 PlatformBitmap* platform_load_bitmap(const char *filename, void *palette) {
     if (!g_renderer) return NULL;
 
-    char *realfile = replace_pcx_with_png(filename);  // allocate new name
+    char *realfile = replace_ext(filename, ".pcx", ".png");  // allocate new name
     if (!realfile) return NULL;
 
     SDL_Surface *loaded = IMG_Load(realfile);
@@ -694,67 +708,85 @@ int platform_bitmap_height(PlatformBitmap *bitmap) {
 // ============================================================================
 
 PlatformFont* platform_load_font(const char *filename, void *palette, void *param) {
-    // Try to load as TTF, with fallback size
-    int size = 16;  // Default size
 
-    TTF_Font *font = TTF_OpenFont(replace_pcx_with_png(filename), size);
-    if (!font) {
-        // Try alternate extension
-        char alt_filename[512];
-        strncpy(alt_filename, filename, sizeof(alt_filename) - 5);
-        alt_filename[sizeof(alt_filename) - 5] = '\0';
-        
-        char *ext = strrchr(alt_filename, '.');
-        if (ext) {
-            strcpy(ext, ".ttf");
-            font = TTF_OpenFont(alt_filename, size);
-        }
-    }
-    
-    if (!font) {
+    char *realfile = replace_ext(filename, ".pcx", ".ttf");
+
+    int ptsize = 19;  // Default size
+    PlatformFont *pf = malloc(sizeof(PlatformFont));
+    if (!pf) return NULL;
+
+    pf->size = ptsize;
+    pf->font = TTF_OpenFont(realfile, ptsize);
+
+    if (!pf->font) {
+        fprintf(stderr, "TTF_OpenFont failed: %s\n", TTF_GetError());
+        free(pf);
         return NULL;
     }
-    
-    PlatformFont *pf = (PlatformFont*)malloc(sizeof(PlatformFont));
-    if (pf) {
-        pf->font = font;
-        pf->size = size;
-    } else {
-        TTF_CloseFont(font);
-    }
-    
+
+    // habilitar kerning (igual Allegro)
+    TTF_SetFontKerning((TTF_Font*)pf->font, 1);
+
     return pf;
 }
 
 void platform_destroy_font(PlatformFont *font) {
-    if (font) {
-        if (font->font) {
-            TTF_CloseFont(font->font);
-        }
-        free(font);
+    if (!font) return;
+
+    if (font->font) {
+        TTF_CloseFont((TTF_Font*)font->font);
     }
+
+    free(font);
 }
 
-void platform_textout_ex(PlatformBitmap *bitmap, PlatformFont *font,
-                        const char *text, int x, int y,
-                        PlatformColor color, PlatformColor bg) {
-    if (bitmap && bitmap->texture && font && font->font && text && g_renderer) {
-        SDL_Color fg = { (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 255 };
-        SDL_Surface *text_surface = TTF_RenderUTF8_Blended((TTF_Font*)font->font, text, fg);
-        
-        if (text_surface) {
-            SDL_Texture *text_texture = SDL_CreateTextureFromSurface(g_renderer, text_surface);
-            if (text_texture) {
-                SDL_Rect dest_rect = { x, y, text_surface->w, text_surface->h };
-                SDL_SetRenderTarget(g_renderer, (SDL_Texture*)bitmap->texture);
-                SDL_RenderCopy(g_renderer, text_texture, NULL, &dest_rect);
-                SDL_SetRenderTarget(g_renderer, NULL);
-                SDL_DestroyTexture(text_texture);
-            }
-            SDL_FreeSurface(text_surface);
-        }
+PlatformBitmap* platform_render_text(PlatformFont *font, const char *text, PlatformColor color) {
+    if (!font || !font->font || !text) return NULL;
+
+    Uint8 r = (color >> 16) & 0xFF;
+    Uint8 g = (color >> 8) & 0xFF;
+    Uint8 b = color & 0xFF;
+    Uint8 a = (color >> 24) & 0xFF;
+    if (a == 0) a = 255;
+
+    SDL_Color sdl_color = { r, g, b, a };
+
+    SDL_Surface *surf = TTF_RenderUTF8_Blended((TTF_Font*)font->font, text, sdl_color);
+    if (!surf) {
+        fprintf(stderr, "TTF_RenderUTF8_Blended failed: %s\n", TTF_GetError());
+        return NULL;
     }
+
+    SDL_Texture *tex = SDL_CreateTextureFromSurface(g_renderer, surf);
+    SDL_FreeSurface(surf);
+
+    if (!tex) {
+        fprintf(stderr, "SDL_CreateTextureFromSurface failed: %s\n", SDL_GetError());
+        return NULL;
+    }
+
+    SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+
+    PlatformBitmap *pb = malloc(sizeof(PlatformBitmap));
+    pb->texture = tex;
+    pb->w = surf->w;
+    pb->h = surf->h;
+
+    return pb;
 }
+
+
+void platform_textout_ex(PlatformBitmap *dest, PlatformFont *font,
+                             const char *text, int x, int y, PlatformColor color, PlatformColor bg)
+    {
+        PlatformBitmap *txt = platform_render_text(font, text, color);
+
+        if (!txt) return;
+
+        platform_draw_sprite(dest, txt, x, y);
+        platform_destroy_bitmap(txt);
+    }
+
 
 void platform_textout_centre_ex(PlatformBitmap *bitmap, PlatformFont *font,
                                const char *text, int x, int y,
