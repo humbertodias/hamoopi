@@ -207,7 +207,7 @@ int Round_Wins;
 int x;
 int y;
 int State;
-char State_s[3];
+char State_s[16];
 char State_chs[99];
 int TotalStates;
 int IndexAnim;
@@ -645,7 +645,7 @@ strcpy(Lista_de_Cenarios_Instalados[ind], (char *)get_config_string("BACKGROUNDS
 char bg_choice[40]="";
 for(int ind=1;ind<=8;ind++)
 {
-snprintf(bg_choice, sizeof(bg_choice),"data/backgrounds/%s/000_00.pcx",Lista_de_Cenarios_Instalados[ind]);
+sprintf(bg_choice, "data/backgrounds/%s/000_00.pcx",Lista_de_Cenarios_Instalados[ind]);
 bg_hamoopi[ind]= load_bitmap(bg_choice, NULL);
 }
 
@@ -917,7 +917,7 @@ BITMAP *P2BIGDisplay = create_bitmap(128,128);
 BITMAP *P2BIGDisplayInv = create_bitmap(128,128);
 
 //idioma do jogo
-snprintf(IDIOMA, sizeof(IDIOMA), "%s", (char *) get_config_string("CONFIG", "language", "BR"));
+sprintf(IDIOMA, "%s", (char *) get_config_string("CONFIG", "language", "BR"));
 if (strcmp (IDIOMA,"BR")==0){ if (HamoopiError==1) allegro_message("ARQUIVOS OU DIRETORIOS NAO ENCONTRADOS."); }
 if (strcmp (IDIOMA,"US")==0){ if (HamoopiError==1) allegro_message("FILES OR DIRECTORIES NOT FOUND."); }
 
@@ -985,13 +985,13 @@ destroy_bitmap(MINIspr[ind]);
 
 //P1 miniatura da foto ingame
 strcpy(P[1].Name, (char *)get_config_string("CHARS", "char1", ""));
-char P1_1s[25]="";
-snprintf(P1_1s, sizeof(P1_1s),"data/chars/%s/000_01.pcx",P[1].Name);
+char P1_1s[40]="";
+sprintf(P1_1s, "data/chars/%s/000_01.pcx",P[1].Name);
 BITMAP *P1_1 = load_bitmap(P1_1s, NULL);
 if (!P1_1) { P1_1=load_bitmap("data/system/000_01.pcx", NULL); }
 //P2 miniatura da foto ingame
 strcpy(P[2].Name, (char *)get_config_string("CHARS", "char2", ""));
-char P2_1s[25]="";
+char P2_1s[40]="";
 sprintf(P2_1s, "data/chars/%s/000_01.pcx", P[2].Name);
 BITMAP *P2_1 = load_bitmap(P2_1s, NULL);
 if (!P2_1) { P2_1=load_bitmap("data/system/000_01.pcx", NULL); }
@@ -1666,7 +1666,7 @@ textprintf_centre_ex(bufferx, font_20, 320, 407, makecol(255,255,255), -1, "Esco
 
 //desenha nome do cenario na tela
 set_config_file("SETUP.ini");
-char bg_read[25]="";
+char bg_read[40]="";
 if (SelectBGID==1) { strcpy(bg_read, (char *)get_config_string("BACKGROUNDS", "bg1", "")); }
 if (SelectBGID==2) { strcpy(bg_read, (char *)get_config_string("BACKGROUNDS", "bg2", "")); }
 if (SelectBGID==3) { strcpy(bg_read, (char *)get_config_string("BACKGROUNDS", "bg3", "")); }
@@ -2021,7 +2021,7 @@ SelectBGID--; play_sample(cursor, 255, 128, 1000, 0); AtualizaGPS=1;
 }
 if (AtualizaGPS==1){
 AtualizaGPS=0;
-char bg_choice_string[25];
+char bg_choice_string[40];
 if (SelectBGID==1) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[1]); }
 if (SelectBGID==2) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[2]); }
 if (SelectBGID==3) { sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", Lista_de_Cenarios_Instalados[3]); }
@@ -2162,7 +2162,7 @@ if (Estagio_Atual==8){ draw_sprite(bufferx, spr_cursor_historia, 64+(64*7), 400)
 
 //desenha gps do mapa
 if (timermenus==0){
-char bg_choice_string[25];
+char bg_choice_string[40];
 sprintf(bg_choice_string, "data/backgrounds/%s/config.ini", ChoiceBG);
 set_config_file(bg_choice_string);
 MapPosX=get_config_int ( "DATA", "MapPosX", 0 );
@@ -2264,12 +2264,12 @@ if (GamePlayMode==1){
 if (timer_rounds==0) {
 desabilita_players=1; FadeCtr=255; FadeIN=0; FadeOUT=1;
 //P1 miniatura da foto ingame
-char P1_1s[25]="";
+char P1_1s[40]="";
 sprintf(P1_1s, "data/chars/%s/000_01.pcx", P[1].Name);
 P1_1 = load_bitmap(P1_1s, NULL);
 if (!P1_1) { P1_1=load_bitmap("data/system/000_01.pcx", NULL); }
 //P2 miniatura da foto ingame
-char P2_1s[25]="";
+char P2_1s[40]="";
 sprintf(P2_1s, "data/chars/%s/000_01.pcx", P[2].Name);
 P2_1 = load_bitmap(P2_1s, NULL);
 if (!P2_1) { P2_1=load_bitmap("data/system/000_01.pcx", NULL); }
@@ -10928,7 +10928,7 @@ if(ind==2){ sprintf(P2_Caminho, "data/chars/%s/char.ini", P[ind].Name); set_conf
 
 if( P[ind].IndexAnim==0 ){
 
-snprintf(P[ind].State_s, sizeof(P[ind].State_s), "%d", P[ind].State); //State String
+sprintf(P[ind].State_s, "%d", P[ind].State); //State String
 
 if (P[ind].State<700) {
 P[ind].TableAtlas[line][ 4] = get_config_int ( P[ind].State_s, "XAlign", P[ind].Largura/2 );
