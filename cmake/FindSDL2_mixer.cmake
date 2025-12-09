@@ -50,3 +50,4 @@ if(SDL2_MIXER_FOUND)
 endif()
 
 mark_as_advanced(SDL2_MIXER_INCLUDE_DIR SDL2_MIXER_LIBRARY)
+

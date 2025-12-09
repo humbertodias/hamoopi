@@ -50,3 +50,4 @@ if(SDL2_TTF_FOUND)
 endif()
 
 mark_as_advanced(SDL2_TTF_INCLUDE_DIR SDL2_TTF_LIBRARY)
+

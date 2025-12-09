@@ -50,3 +50,4 @@ if(SDL2_IMAGE_FOUND)
 endif()
 
 mark_as_advanced(SDL2_IMAGE_INCLUDE_DIR SDL2_IMAGE_LIBRARY)
+

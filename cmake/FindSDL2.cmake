@@ -5,7 +5,6 @@
 #  SDL2_FOUND - system has SDL2
 #  SDL2_INCLUDE_DIRS - the SDL2 include directories
 #  SDL2_LIBRARIES - the libraries needed to use SDL2
-#  SDL2_VERSION - the version of SDL2 found
 
 # Find the SDL2 include directory
 find_path(SDL2_INCLUDE_DIR
@@ -34,7 +33,6 @@ find_library(SDL2_LIBRARY
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SDL2
     REQUIRED_VARS SDL2_LIBRARY SDL2_INCLUDE_DIR
-    VERSION_VAR SDL2_VERSION
 )
 
 if(SDL2_FOUND)
@@ -52,3 +50,4 @@ if(SDL2_FOUND)
 endif()
 
 mark_as_advanced(SDL2_INCLUDE_DIR SDL2_LIBRARY)
+
