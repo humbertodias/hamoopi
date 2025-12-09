@@ -34,10 +34,10 @@ if(USE_SDL2)
     
     # Link SDL2 libraries
     target_link_libraries(HAMOOPI 
-        SDL2
-        SDL2_image
-        SDL2_mixer
-        SDL2_ttf
+        ${SDL2_LIBRARIES}
+        ${SDL2_IMAGE_LIBRARIES}
+        ${SDL2_MIXER_LIBRARIES}
+        ${SDL2_TTF_LIBRARIES}
         m
         ${INIH_LIBRARIES}
     )
