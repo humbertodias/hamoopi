@@ -4,6 +4,14 @@
 #include "platform_compat.h"
 
 // Type definitions for HAMOOPI game structures
+// 
+// These structures depend on BITMAP type from platform_compat.h which provides
+// platform-independent type definitions. The BITMAP type is mapped to:
+// - Allegro 4: typedef BITMAP (native Allegro type)
+// - SDL2: struct PlatformBitmap wrapping SDL_Surface
+// - Other: Forward declared struct for future implementations
+//
+// This header is designed to be included via hamoopi_core.h after platform_compat.h
 
 struct HitSparkDEF {
     int x;
