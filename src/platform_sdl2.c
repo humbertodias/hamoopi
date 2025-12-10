@@ -7,6 +7,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdint.h>
 #include "ini.h"
 
 
@@ -37,8 +38,11 @@ static void check_timer(void) {
         // This matches the behavior of the original SDL_AddTimer implementation
         if (elapsed_ticks >= g_timer_interval_ticks) {
             g_timer_callback();
-            // Increment last_tick by interval to prevent drift
-            g_timer_last_tick += g_timer_interval_ticks;
+            
+            // Advance by the appropriate number of intervals to prevent falling behind
+            // If we've missed multiple intervals, skip ahead to the current time
+            Uint64 intervals_elapsed = elapsed_ticks / g_timer_interval_ticks;
+            g_timer_last_tick += intervals_elapsed * g_timer_interval_ticks;
         }
     }
 }
@@ -321,9 +325,16 @@ void platform_install_int_ex(void (*callback)(void), int interval_us) {
     Uint64 freq = SDL_GetPerformanceFrequency();
     
     // Calculate interval in ticks: (interval_us / 1000000) * freq
-    // To avoid overflow, use double precision for calculation
-    double interval_seconds = (double)interval_us / 1000000.0;
-    g_timer_interval_ticks = (Uint64)(interval_seconds * freq);
+    // Use integer arithmetic to avoid precision errors
+    // Check for potential overflow before multiplication
+    if (freq > UINT64_MAX / (Uint64)interval_us) {
+        // Use double precision if overflow would occur
+        double interval_seconds = (double)interval_us / 1000000.0;
+        g_timer_interval_ticks = (Uint64)(interval_seconds * freq);
+    } else {
+        // Safe to use integer arithmetic
+        g_timer_interval_ticks = ((Uint64)interval_us * freq) / 1000000ULL;
+    }
     
     // Ensure at least 1 tick for very small intervals
     if (g_timer_interval_ticks < 1) {
