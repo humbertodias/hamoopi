@@ -108,3 +108,7 @@ add_custom_command(TARGET HAMOOPI POST_BUILD
         $<TARGET_FILE_DIR:HAMOOPI>/SETUP.ini
         COMMENT "Copying SETUP.ini..."
 )
+
+# Add tools subdirectories
+add_subdirectory(tools/font-generator)
+add_subdirectory(tools/pallete-generator)
