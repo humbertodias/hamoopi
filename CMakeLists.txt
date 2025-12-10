@@ -109,6 +109,21 @@ add_custom_command(TARGET HAMOOPI POST_BUILD
         COMMENT "Copying SETUP.ini..."
 )
 
-# Add tools subdirectories
-add_subdirectory(tools/font-generator)
-add_subdirectory(tools/pallete-generator)
+# Build tools (optional)
+option(BUILD_TOOLS "Build additional tools (font-generator and pallete-generator)" ON)
+
+if(BUILD_TOOLS)
+    # Font generator requires Qt6
+    find_package(Qt6 QUIET COMPONENTS Core Gui Widgets)
+    if(Qt6_FOUND)
+        message(STATUS "Building font-generator tool (Qt6 found)")
+        add_subdirectory(tools/font-generator)
+    else()
+        message(STATUS "Skipping font-generator tool (Qt6 not found)")
+    endif()
+    
+    # Palette generator uses the same SDL2 as main project when USE_SDL2 is ON
+    # or can use Allegro 4 when USE_SDL2 is OFF
+    message(STATUS "Building pallete-generator tool")
+    add_subdirectory(tools/pallete-generator)
+endif()
