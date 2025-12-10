@@ -7,7 +7,7 @@ PLATFORM     := $(shell uname -s)-$(shell uname -m)
 BUILD_TYPE   := Debug
 SDL2         := ON
 CMAKE_FLAGS  := -DUSE_SDL2=$(SDL2)
-# To disable building tools, add: -DBUILD_TOOLS=OFF
+# To enable building tools, add: -DBUILD_TOOLS=ON
 # To enable Allegro backend, set: SDL2=OFF
 
 .PHONY: build clean zip

@@ -64,34 +64,11 @@ jobs:
           brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf inih qt@6
 
       # Windows dependencies
-      - name: Cache vcpkg packages (Windows - SDL2)
-        if: matrix.os == 'windows-latest' && matrix.backend == 'sdl2'
-        uses: actions/cache@v4
-        with:
-          path: |
-            C:/vcpkg/installed
-            C:/vcpkg/packages
-          key: ${{ runner.os }}-vcpkg-sdl2-${{ hashFiles('.github/workflows/build.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-sdl2-
-            ${{ runner.os }}-vcpkg-
-
-      - name: Setup vcpkg (Windows - SDL2)
+      - name: Install dependencies (Windows - SDL2)
         if: matrix.os == 'windows-latest' && matrix.backend == 'sdl2'
         run: |
-          vcpkg integrate install
-          vcpkg install sdl2:x86-windows sdl2-image:x86-windows sdl2-mixer:x86-windows sdl2-ttf:x86-windows inih:x86-windows
+          choco install sdl2 sdl2_image sdl2_mixer sdl2_ttf qt6-base-redist -y
         shell: bash
-
-      - name: Install Qt6 (Windows - SDL2)
-        if: matrix.os == 'windows-latest' && matrix.backend == 'sdl2'
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.7.*'
-          host: 'windows'
-          target: 'desktop'
-          arch: 'win64_msvc2019_64'
-          cache: true
 
       - name: Install Allegro 4 manually (Windows)
         if: matrix.os == 'windows-latest' && matrix.backend == 'allegro'
@@ -148,10 +125,10 @@ jobs:
         if: matrix.backend == 'sdl2'
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            # Use Win32 (x86) architecture for Windows SDL2 builds to match vcpkg installation
-            cmake -B build -A Win32 -DUSE_SDL2=ON -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+            # Use Win32 (x86) architecture for Windows SDL2 builds
+            cmake -B build -A Win32 -DUSE_SDL2=ON -DBUILD_TOOLS=ON
           else
-            cmake -B build -DUSE_SDL2=ON
+            cmake -B build -DUSE_SDL2=ON -DBUILD_TOOLS=ON
           fi
           cmake --build build --config Release
         shell: bash
@@ -307,7 +284,8 @@ jobs:
             fi
             
             # Copy Qt6 DLLs for font-generator
-            QT_BIN="$IQTA_TOOLS/../bin"
+            # Chocolatey installs Qt6 to C:/ProgramData/chocolatey/lib/qt6-base-redist/tools
+            QT_BIN="C:/ProgramData/chocolatey/lib/qt6-base-redist/tools/bin"
             if [ -d "$QT_BIN" ]; then
               cp "$QT_BIN/Qt6Core.dll" artifacts/ 2>/dev/null || echo "Warning: Qt6Core.dll not found"
               cp "$QT_BIN/Qt6Gui.dll" artifacts/ 2>/dev/null || echo "Warning: Qt6Gui.dll not found"
@@ -326,40 +304,21 @@ jobs:
           
           # Copy SDL2 shared libraries for SDL2 backend
           if [ "${{ matrix.backend }}" == "sdl2" ]; then
-            echo "Copying SDL2 DLLs from vcpkg..."
-            # vcpkg installs DLLs in the installed/x86-windows/bin directory
-            VCPKG_BIN="$VCPKG_INSTALLATION_ROOT/installed/x86-windows/bin"
-            if [ -d "$VCPKG_BIN" ]; then
-              cp "$VCPKG_BIN/SDL2.dll" artifacts/ 2>/dev/null || echo "Warning: SDL2.dll not found"
-              cp "$VCPKG_BIN/SDL2_image.dll" artifacts/ 2>/dev/null || echo "Warning: SDL2_image.dll not found"
-              cp "$VCPKG_BIN/SDL2_mixer.dll" artifacts/ 2>/dev/null || echo "Warning: SDL2_mixer.dll not found"
-              cp "$VCPKG_BIN/SDL2_ttf.dll" artifacts/ 2>/dev/null || echo "Warning: SDL2_ttf.dll not found"
-              cp "$VCPKG_BIN/inih.dll" artifacts/ 2>/dev/null || echo "Warning: inih.dll not found"
-              # SDL2_image dependencies
-              cp "$VCPKG_BIN/jpeg62.dll" artifacts/ 2>/dev/null || echo "Warning: jpeg62.dll not found"
-              cp "$VCPKG_BIN/libpng16.dll" artifacts/ 2>/dev/null || echo "Warning: libpng16.dll not found"
-              cp "$VCPKG_BIN/zlib1.dll" artifacts/ 2>/dev/null || echo "Warning: zlib1.dll not found"
-              cp "$VCPKG_BIN/tiff.dll" artifacts/ 2>/dev/null || echo "Warning: tiff.dll not found"
-              cp "$VCPKG_BIN/libwebp.dll" artifacts/ 2>/dev/null || echo "Warning: libwebp.dll not found"
-              # SDL2_mixer dependencies
-              cp "$VCPKG_BIN/libvorbis.dll" artifacts/ 2>/dev/null || echo "Warning: libvorbis.dll not found"
-              cp "$VCPKG_BIN/libvorbisfile.dll" artifacts/ 2>/dev/null || echo "Warning: libvorbisfile.dll not found"
-              cp "$VCPKG_BIN/libogg.dll" artifacts/ 2>/dev/null || echo "Warning: libogg.dll not found"
-              cp "$VCPKG_BIN/libmodplug.dll" artifacts/ 2>/dev/null || echo "Warning: libmodplug.dll not found"
-              cp "$VCPKG_BIN/libmpg123.dll" artifacts/ 2>/dev/null || echo "Warning: libmpg123.dll not found"
-              cp "$VCPKG_BIN/libopus.dll" artifacts/ 2>/dev/null || echo "Warning: libopus.dll not found"
-              cp "$VCPKG_BIN/libopusfile.dll" artifacts/ 2>/dev/null || echo "Warning: libopusfile.dll not found"
-              cp "$VCPKG_BIN/libFLAC.dll" artifacts/ 2>/dev/null || echo "Warning: libFLAC.dll not found"
-              # SDL2_ttf dependencies
-              cp "$VCPKG_BIN/freetype.dll" artifacts/ 2>/dev/null || echo "Warning: freetype.dll not found"
-              cp "$VCPKG_BIN/bz2.dll" artifacts/ 2>/dev/null || echo "Warning: bz2.dll not found"
-              cp "$VCPKG_BIN/brotlicommon.dll" artifacts/ 2>/dev/null || echo "Warning: brotlicommon.dll not found"
-              cp "$VCPKG_BIN/brotlidec.dll" artifacts/ 2>/dev/null || echo "Warning: brotlidec.dll not found"
-              echo "DLL files in artifacts:"
-              ls -la artifacts/*.dll 2>/dev/null || echo "No DLL files found in artifacts"
-            else
-              echo "Warning: vcpkg bin directory not found at $VCPKG_BIN"
-            fi
+            echo "Copying SDL2 DLLs from Chocolatey..."
+            # Chocolatey installs DLLs to various lib directories
+            # Copy SDL2 DLLs
+            cp "C:/ProgramData/chocolatey/lib/sdl2/tools/bin/SDL2.dll" artifacts/ 2>/dev/null || echo "Warning: SDL2.dll not found"
+            cp "C:/ProgramData/chocolatey/lib/sdl2_image/tools/bin/SDL2_image.dll" artifacts/ 2>/dev/null || echo "Warning: SDL2_image.dll not found"
+            cp "C:/ProgramData/chocolatey/lib/sdl2_mixer/tools/bin/SDL2_mixer.dll" artifacts/ 2>/dev/null || echo "Warning: SDL2_mixer.dll not found"
+            cp "C:/ProgramData/chocolatey/lib/sdl2_ttf/tools/bin/SDL2_ttf.dll" artifacts/ 2>/dev/null || echo "Warning: SDL2_ttf.dll not found"
+            
+            # Copy dependencies that might be included
+            cp "C:/ProgramData/chocolatey/lib/sdl2_image/tools/bin/"*.dll artifacts/ 2>/dev/null || echo "Warning: SDL2_image dependencies not found"
+            cp "C:/ProgramData/chocolatey/lib/sdl2_mixer/tools/bin/"*.dll artifacts/ 2>/dev/null || echo "Warning: SDL2_mixer dependencies not found"
+            cp "C:/ProgramData/chocolatey/lib/sdl2_ttf/tools/bin/"*.dll artifacts/ 2>/dev/null || echo "Warning: SDL2_ttf dependencies not found"
+            
+            echo "DLL files in artifacts:"
+            ls -la artifacts/*.dll 2>/dev/null || echo "No DLL files found in artifacts"
           fi
           
           # Create zip for Windows

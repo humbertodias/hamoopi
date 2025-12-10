@@ -110,7 +110,7 @@ add_custom_command(TARGET HAMOOPI POST_BUILD
 )
 
 # Build tools (optional)
-option(BUILD_TOOLS "Build additional tools (font-generator and pallete-generator)" ON)
+option(BUILD_TOOLS "Build additional tools (font-generator and pallete-generator)" OFF)
 
 if(BUILD_TOOLS)
     # Font generator requires Qt6
