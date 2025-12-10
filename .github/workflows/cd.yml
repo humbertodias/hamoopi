@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Linux dependencies
       - name: Install dependencies (Linux - Allegro)
@@ -311,7 +311,7 @@ jobs:
       # Upload artifacts for all builds
       - name: Upload artifacts (Linux/macOS)
         if: matrix.os != 'windows-latest'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: HAMOOPI-${{ matrix.platform_name }}-${{ matrix.backend }}
           path: HAMOOPI-${{ matrix.platform_name }}-${{ matrix.backend }}.tar.gz
@@ -319,7 +319,7 @@ jobs:
 
       - name: Upload artifacts (Windows)
         if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: HAMOOPI-${{ matrix.platform_name }}-${{ matrix.backend }}
           path: HAMOOPI-${{ matrix.platform_name }}-${{ matrix.backend }}.zip
@@ -335,7 +335,7 @@ jobs:
     
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           path: artifacts
           
@@ -343,7 +343,7 @@ jobs:
         run: ls -R artifacts
         
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: artifacts/*/*
           draft: false
