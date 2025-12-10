@@ -7258,10 +7258,6 @@ if (current_time < frame_target_time) {
     }
 }
 
-// Sync with interrupt-based timer for compatibility (single check, no wait loop)
-// This allows the timer variable to catch up without blocking
-delay = timer;
-
 clear(LayerHUD);
 clear_to_color(LayerHUD, makecol(255, 0, 255));
 clear_to_color(LayerHUDa, makecol(255, 0, 255));
