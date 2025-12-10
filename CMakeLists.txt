@@ -124,6 +124,15 @@ if(BUILD_TOOLS)
     
     # Palette generator uses the same SDL2 as main project when USE_SDL2 is ON
     # or can use Allegro 4 when USE_SDL2 is OFF
-    message(STATUS "Building pallete-generator tool")
-    add_subdirectory(tools/pallete-generator)
+    # Pass the backend choice to the palette generator
+    if(USE_SDL2)
+        message(STATUS "Building pallete-generator tool (SDL2 backend)")
+        add_subdirectory(tools/pallete-generator)
+    else()
+        message(STATUS "Building pallete-generator tool (Allegro backend)")
+        # Set USE_ALLEGRO for the subdirectory
+        set(USE_ALLEGRO ON CACHE BOOL "Use Allegro for pallete-generator" FORCE)
+        add_subdirectory(tools/pallete-generator)
+        unset(USE_ALLEGRO CACHE)
+    endif()
 endif()
