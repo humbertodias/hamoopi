@@ -22,10 +22,29 @@ static void (*g_close_callback)(void) = NULL;
 static void (*g_timer_callback)(void) = NULL;
 static Uint64 g_timer_last_tick = 0;
 static Uint64 g_timer_interval_ticks = 0;
+static SDL_TimerID g_timer_id = 0;
 
 // Drawing state
 static int g_drawing_mode = PDRAW_MODE_SOLID;
 static int g_trans_alpha = 255;
+
+// Timer callback wrapper using SDL_GetPerformanceCounter for precise timing
+static Uint32 timer_callback_wrapper(Uint32 interval, void *param) {
+    if (g_timer_callback && g_timer_interval_ticks > 0) {
+        Uint64 current_tick = SDL_GetPerformanceCounter();
+        Uint64 elapsed_ticks = current_tick - g_timer_last_tick;
+        
+        // Only fire callback if enough time has actually elapsed (using performance counter)
+        if (elapsed_ticks >= g_timer_interval_ticks) {
+            g_timer_callback();
+            
+            // Advance by the appropriate number of intervals to prevent falling behind
+            Uint64 intervals_elapsed = elapsed_ticks / g_timer_interval_ticks;
+            g_timer_last_tick += intervals_elapsed * g_timer_interval_ticks;
+        }
+    }
+    return interval;  // Continue timer with same interval
+}
 
 // Helper function to check and fire timer callback
 static void check_timer(void) {
@@ -323,12 +342,16 @@ void platform_install_int_ex(void (*callback)(void), int interval_us) {
     // Validate interval
     if (interval_us <= 0) {
         g_timer_interval_ticks = 0;
+        if (g_timer_id) {
+            SDL_RemoveTimer(g_timer_id);
+            g_timer_id = 0;
+        }
         return;
     }
 
     // interval_us is in microseconds (from PLATFORM_BPS_TO_TIMER macro)
     // SDL_GetPerformanceCounter returns ticks in performance counter frequency
-    // Convert microseconds to performance counter ticks
+    // Convert microseconds to performance counter ticks for precise timing
     
     Uint64 freq = SDL_GetPerformanceFrequency();
     
@@ -351,6 +374,19 @@ void platform_install_int_ex(void (*callback)(void), int interval_us) {
     
     // Initialize the last tick to current time
     g_timer_last_tick = SDL_GetPerformanceCounter();
+    
+    // Convert to milliseconds for SDL_AddTimer
+    // This provides the background timing, while SDL_GetPerformanceCounter provides precision
+    Uint32 interval_ms = interval_us / 1000;
+    if (interval_ms < 1) interval_ms = 1;
+    
+    // Remove old timer if exists
+    if (g_timer_id) {
+        SDL_RemoveTimer(g_timer_id);
+    }
+    
+    // Install SDL timer for reliable background execution
+    g_timer_id = SDL_AddTimer(interval_ms, timer_callback_wrapper, NULL);
 }
 
 volatile char* platform_get_key_state(void) {
