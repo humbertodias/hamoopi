@@ -76,8 +76,10 @@ static void check_timer(void) {
 
 // Helper function to update screen using renderer and texture
 static void update_screen_with_renderer(void) {
-    // Check timer before rendering to ensure consistent frame timing
-    check_timer();
+    // Only check timer if SDL_AddTimer failed (fallback to polling mode)
+    if (g_timer_id == 0) {
+        check_timer();
+    }
     
     if (g_screen && g_screen->surface && g_renderer && g_screen_texture) {
         // Update texture with screen surface data
@@ -404,8 +406,10 @@ volatile char* platform_get_key_state(void) {
     // Update SDL events to refresh keyboard state
     SDL_PumpEvents();
 
-    // Check timer using helper function
-    check_timer();
+    // Only check timer if SDL_AddTimer failed (fallback to polling mode)
+    if (g_timer_id == 0) {
+        check_timer();
+    }
 
     // Update mouse state
     Uint32 mouse_state = SDL_GetMouseState((int*)&platform_mouse_x, (int*)&platform_mouse_y);
