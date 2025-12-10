@@ -6,13 +6,13 @@ PLATFORM     := $(shell uname -s)-$(shell uname -m)
 # Options
 BUILD_TYPE   := Debug
 SDL2         := ON
-CMAKE_FLAGS  := -DUSE_SDL2=$(SDL2) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+CMAKE_FLAGS  := -DUSE_SDL2=$(SDL2)
 
 .PHONY: build clean zip
 
 build: clean
 	cmake -B $(BUILD_DIR) $(CMAKE_FLAGS)
-	cmake --build $(BUILD_DIR)
+	cmake --build $(BUILD_DIR) --config $(BUILD_TYPE)
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET) $(TARGET).exe *.o *.so
