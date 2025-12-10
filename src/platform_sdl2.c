@@ -323,7 +323,9 @@ volatile char* platform_get_key_state(void) {
         Uint64 current_tick = SDL_GetPerformanceCounter();
         Uint64 elapsed_ticks = current_tick - g_timer_last_tick;
         
-        // If enough time has elapsed, call the callback
+        // If enough time has elapsed, call the callback once per check
+        // Note: If multiple intervals have passed, only one callback is executed
+        // This matches the behavior of the original SDL_AddTimer implementation
         if (elapsed_ticks >= g_timer_interval_ticks) {
             g_timer_callback();
             // Increment last_tick by interval to prevent drift
