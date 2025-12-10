@@ -185,14 +185,12 @@ jobs:
               done
               
               # Create a launcher script that sets LD_LIBRARY_PATH
-              cat > artifacts/HAMOOPI.sh << 'EOF'
-#!/bin/bash
-# Get the directory where the script is located
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Set library path and run the game
-export LD_LIBRARY_PATH="$DIR/lib:$LD_LIBRARY_PATH"
-exec "$DIR/HAMOOPI" "$@"
-EOF
+              {
+                echo '#!/bin/bash'
+                echo 'DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"'
+                echo 'export LD_LIBRARY_PATH="$DIR/lib:$LD_LIBRARY_PATH"'
+                echo 'exec "$DIR/HAMOOPI" "$@"'
+              } > artifacts/HAMOOPI.sh
               chmod +x artifacts/HAMOOPI.sh
               echo "Created launcher script HAMOOPI.sh"
               
@@ -225,17 +223,14 @@ EOF
               fi
               
               # Create a launcher script as fallback for systems with SIP restrictions
-              cat > artifacts/HAMOOPI.sh << 'EOF'
-#!/bin/bash
-# Get the directory where the script is located
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Try to run the game directly (will work if @rpath is properly set)
-# If that fails, set DYLD_LIBRARY_PATH as fallback (may not work with SIP enabled)
-"$DIR/HAMOOPI" "$@" || {
-  export DYLD_LIBRARY_PATH="$DIR/lib:$DYLD_LIBRARY_PATH"
-  exec "$DIR/HAMOOPI" "$@"
-}
-EOF
+              {
+                echo '#!/bin/bash'
+                echo 'DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"'
+                echo '"$DIR/HAMOOPI" "$@" || {'
+                echo '  export DYLD_LIBRARY_PATH="$DIR/lib:$DYLD_LIBRARY_PATH"'
+                echo '  exec "$DIR/HAMOOPI" "$@"'
+                echo '}'
+              } > artifacts/HAMOOPI.sh
               chmod +x artifacts/HAMOOPI.sh
               echo "Created launcher script HAMOOPI.sh"
             fi
