@@ -28,20 +28,10 @@ static SDL_TimerID g_timer_id = 0;
 static int g_drawing_mode = PDRAW_MODE_SOLID;
 static int g_trans_alpha = 255;
 
-// Timer callback wrapper using SDL_GetPerformanceCounter for precise timing
+// Timer callback wrapper - fires at regular intervals like Allegro's install_int_ex
 static Uint32 timer_callback_wrapper(Uint32 interval, void *param) {
-    if (g_timer_callback && g_timer_interval_ticks > 0) {
-        Uint64 current_tick = SDL_GetPerformanceCounter();
-        Uint64 elapsed_ticks = current_tick - g_timer_last_tick;
-        
-        // Only fire callback if enough time has actually elapsed (using performance counter)
-        if (elapsed_ticks >= g_timer_interval_ticks) {
-            g_timer_callback();
-            
-            // Always advance by exactly one interval to maintain consistent timer increments
-            // This ensures the game timer increments by 1 each callback, preventing stuttering
-            g_timer_last_tick += g_timer_interval_ticks;
-        }
+    if (g_timer_callback) {
+        g_timer_callback();
     }
     return interval;  // Continue timer with same interval
 }
@@ -352,46 +342,34 @@ void platform_install_int_ex(void (*callback)(void), int interval_us) {
     }
 
     // interval_us is in microseconds (from PLATFORM_BPS_TO_TIMER macro)
-    // SDL_GetPerformanceCounter returns ticks in performance counter frequency
-    // Convert microseconds to performance counter ticks for precise timing
+    // SDL_AddTimer expects milliseconds
+    // Convert: milliseconds = microseconds / 1000
+    Uint32 interval_ms = interval_us / 1000;
+    if (interval_ms < 1) interval_ms = 1;
     
+    // Store interval for fallback check_timer() if needed
     Uint64 freq = SDL_GetPerformanceFrequency();
-    
-    // Calculate interval in ticks: (interval_us / 1000000) * freq
-    // Use integer arithmetic to avoid precision errors
-    // Check for potential overflow before multiplication
     if (freq > UINT64_MAX / (Uint64)interval_us) {
-        // Use double precision if overflow would occur
         double interval_seconds = (double)interval_us / 1000000.0;
         g_timer_interval_ticks = (Uint64)(interval_seconds * freq);
     } else {
-        // Safe to use integer arithmetic
         g_timer_interval_ticks = ((Uint64)interval_us * freq) / 1000000ULL;
     }
-    
-    // Ensure at least 1 tick for very small intervals
     if (g_timer_interval_ticks < 1) {
         g_timer_interval_ticks = 1;
     }
-    
-    // Initialize the last tick to current time
     g_timer_last_tick = SDL_GetPerformanceCounter();
-    
-    // Convert to milliseconds for SDL_AddTimer with proper rounding
-    // This provides the background timing, while SDL_GetPerformanceCounter provides precision
-    Uint32 interval_ms = (interval_us + 999) / 1000;  // Round up
-    if (interval_ms < 1) interval_ms = 1;
     
     // Remove old timer if exists
     if (g_timer_id) {
         SDL_RemoveTimer(g_timer_id);
     }
     
-    // Install SDL timer for reliable background execution
+    // Install SDL timer - behaves like Allegro's install_int_ex
     g_timer_id = SDL_AddTimer(interval_ms, timer_callback_wrapper, NULL);
     if (g_timer_id == 0) {
-        // Timer creation failed - log error or handle gracefully
-        // Fall back to polling-only mode by keeping check_timer() calls in place
+        // Timer creation failed - log error
+        // check_timer() will be used as fallback in platform_get_key_state
         fprintf(stderr, "Warning: SDL_AddTimer failed: %s\n", SDL_GetError());
     }
 }
