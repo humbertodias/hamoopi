@@ -205,19 +205,36 @@ EOF
               for lib in libSDL2-2.0.0.dylib libSDL2_image-2.0.0.dylib libSDL2_mixer-2.0.0.dylib libSDL2_ttf-2.0.0.dylib libinih.0.dylib; do
                 if [ -f "$BREW_PREFIX/lib/$lib" ]; then
                   cp "$BREW_PREFIX/lib/$lib" artifacts/lib/
+                  # Update the library path to use @rpath for better compatibility
+                  chmod +w "artifacts/lib/$lib"
+                  install_name_tool -id "@rpath/$lib" "artifacts/lib/$lib" 2>/dev/null || echo "Warning: Could not update install name for $lib"
                 else
                   echo "Warning: $lib not found in $BREW_PREFIX/lib/"
                 fi
               done
               
-              # Create a launcher script that sets DYLD_LIBRARY_PATH
+              # Update executable to use @rpath
+              if [ -f "artifacts/HAMOOPI" ]; then
+                chmod +w artifacts/HAMOOPI
+                # Add @executable_path/lib to rpath
+                install_name_tool -add_rpath "@executable_path/lib" artifacts/HAMOOPI 2>/dev/null || echo "Warning: Could not add rpath to executable"
+                # Update library references in the executable
+                for lib in libSDL2-2.0.0.dylib libSDL2_image-2.0.0.dylib libSDL2_mixer-2.0.0.dylib libSDL2_ttf-2.0.0.dylib libinih.0.dylib; do
+                  install_name_tool -change "$BREW_PREFIX/lib/$lib" "@rpath/$lib" artifacts/HAMOOPI 2>/dev/null || true
+                done
+              fi
+              
+              # Create a launcher script as fallback for systems with SIP restrictions
               cat > artifacts/HAMOOPI.sh << 'EOF'
 #!/bin/bash
 # Get the directory where the script is located
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Set library path and run the game
-export DYLD_LIBRARY_PATH="$DIR/lib:$DYLD_LIBRARY_PATH"
-exec "$DIR/HAMOOPI" "$@"
+# Try to run the game directly (will work if @rpath is properly set)
+# If that fails, set DYLD_LIBRARY_PATH as fallback (may not work with SIP enabled)
+"$DIR/HAMOOPI" "$@" || {
+  export DYLD_LIBRARY_PATH="$DIR/lib:$DYLD_LIBRARY_PATH"
+  exec "$DIR/HAMOOPI" "$@"
+}
 EOF
               chmod +x artifacts/HAMOOPI.sh
               echo "Created launcher script HAMOOPI.sh"
@@ -288,18 +305,6 @@ EOF
               ls -la artifacts/*.dll 2>/dev/null || echo "No DLL files found in artifacts"
             else
               echo "Warning: vcpkg bin directory not found at $VCPKG_BIN"
-            fi
-          fi
-          
-          # Copy Allegro DLLs for Allegro backend
-          if [ "${{ matrix.backend }}" == "allegro" ]; then
-            echo "Copying Allegro DLLs..."
-            # Check if Allegro DLLs exist in the install location
-            if [ -f "C:/allegro/bin/alleg44.dll" ]; then
-              cp C:/allegro/bin/alleg44.dll artifacts/
-              echo "Copied alleg44.dll"
-            else
-              echo "Warning: alleg44.dll not found in C:/allegro/bin/"
             fi
           fi
           
