@@ -145,6 +145,9 @@ extern int P1HitPause, P2HitPause;
 extern int P1HitOn, P2HitOn;
 extern int ShakeDist;
 extern int contatofisico;
+extern int PlaySoundHitLvl1;
+extern int PlaySoundHitLvl2;
+extern int PlaySoundHitLvl3;
 
 // Color palette variables
 extern char P1_Pallete_string[40];
