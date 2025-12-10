@@ -1,7 +1,7 @@
 #ifndef HAMOOPI_TYPES_H
 #define HAMOOPI_TYPES_H
 
-#include "platform_compat.h"
+#include "../backend/platform_compat.h"
 
 // Type definitions for HAMOOPI game structures
 // 

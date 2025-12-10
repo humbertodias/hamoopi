@@ -1,7 +1,9 @@
 #ifndef HAMOOPI_INPUT_H
 #define HAMOOPI_INPUT_H
 
-#include "hamoopi_types.h"
+#include "../backend/platform_compat.h"
+#include "../core/types.h"
+#include "../core/globals.h"
 
 // Input handling functions
 void check_keys_P1();

@@ -1,7 +1,10 @@
 #ifndef HAMOOPI_PLAYER_H
 #define HAMOOPI_PLAYER_H
 
-#include "hamoopi_types.h"
+#include "../backend/platform_compat.h"
+#include "../core/types.h"
+#include "../core/globals.h"
+#include "../modules/collision.h"
 
 // Player state management functions
 void LOAD_PLAYERS();

@@ -1,7 +1,7 @@
 #ifndef HAMOOPI_GLOBALS_H
 #define HAMOOPI_GLOBALS_H
 
-#include "hamoopi_types.h"
+#include "types.h"
 
 // Global variable declarations for HAMOOPI game engine
 // These are defined in HAMOOPI.c and accessible to all modules

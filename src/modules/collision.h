@@ -1,7 +1,10 @@
 #ifndef HAMOOPI_COLLISION_H
 #define HAMOOPI_COLLISION_H
 
-#include "hamoopi_types.h"
+#include "../backend/platform_compat.h"
+#include "../core/types.h"
+#include "../core/globals.h"
+#include "../modules/player.h"
 
 // Collision detection functions
 void Checar_Colisao();

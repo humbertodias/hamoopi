@@ -1,8 +1,5 @@
-// hamoopi_collision.c - Collision detection system
-// Extracted from HAMOOPI.c
 
-#include "platform_compat.h"
-#include "hamoopi_core.h"
+#include "collision.h"
 
 void Draw_CHBoxes_P1()
 {

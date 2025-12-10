@@ -14,20 +14,20 @@ if(USE_SDL2)
     # On Windows, SDL2 requires WIN32 executable type
     if(WIN32)
         add_executable(HAMOOPI WIN32 
-            src/HAMOOPI.c 
-            src/hamoopi_input.c 
-            src/hamoopi_collision.c 
-            src/hamoopi_player.c 
-            src/hamoopi_editor.c 
-            src/platform_sdl2.c)
+            src/HAMOOPI.c
+                src/modules/input.c
+                src/modules/collision.c
+                src/modules/player.c
+                src/modules/editor.c
+                src/backend/platform_sdl2.c)
     else()
         add_executable(HAMOOPI 
-            src/HAMOOPI.c 
-            src/hamoopi_input.c 
-            src/hamoopi_collision.c 
-            src/hamoopi_player.c 
-            src/hamoopi_editor.c 
-            src/platform_sdl2.c)
+            src/HAMOOPI.c
+                src/modules/input.c
+                src/modules/collision.c
+                src/modules/player.c
+                src/modules/editor.c
+                src/backend/platform_sdl2.c)
     endif()
 
     # Find SDL2 packages
@@ -73,20 +73,20 @@ else()
     # On Windows, Allegro 4 requires WIN32 executable type
     if(WIN32)
         add_executable(HAMOOPI WIN32 
-            src/HAMOOPI.c 
-            src/hamoopi_input.c 
-            src/hamoopi_collision.c 
-            src/hamoopi_player.c 
-            src/hamoopi_editor.c 
-            src/platform_allegro.c)
+            src/HAMOOPI.c
+                src/modules/input.c
+                src/modules/collision.c
+                src/modules/player.c
+                src/modules/editor.c
+                src/backend/platform_allegro.c)
     else()
         add_executable(HAMOOPI 
-            src/HAMOOPI.c 
-            src/hamoopi_input.c 
-            src/hamoopi_collision.c 
-            src/hamoopi_player.c 
-            src/hamoopi_editor.c 
-            src/platform_allegro.c)
+            src/HAMOOPI.c
+                src/modules/input.c
+                src/modules/collision.c
+                src/modules/player.c
+                src/modules/editor.c
+                src/backend/platform_allegro.c)
     endif()
 
     # Find Allegro 4 using custom Find module

@@ -1,7 +1,9 @@
 #ifndef HAMOOPI_EDITOR_H
 #define HAMOOPI_EDITOR_H
 
-#include "hamoopi_types.h"
+#include "../core/types.h"
+#include "../core/globals.h"
+#include "../modules/collision.h"
 
 // Editor functions
 void ED_inicializar();

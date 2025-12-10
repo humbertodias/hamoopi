@@ -1,8 +1,4 @@
-// hamoopi_utils.c - Utility functions extracted from HAMOOPI.c
-// Input slot management and utility functions
-
-#include "platform_compat.h"
-#include "hamoopi_core.h"
+#include "input.h"
 
 void MovSlots_P1()
 {

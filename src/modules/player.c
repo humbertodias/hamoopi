@@ -1,8 +1,5 @@
-// hamoopi_player.c - Player state and animation management
-// Extracted from HAMOOPI.c
 
-#include "platform_compat.h"
-#include "hamoopi_core.h"
+#include "player.h"
 
 void LOAD_PLAYERS(){
 
