@@ -408,6 +408,20 @@ int ED_MovimentaPivot=0;
 char ED_Name_Display[50]="char1";
 
 ///////////////////////////////////////////////////////////////////////////////
+// GAME LOOP FUNCTIONS -------------------------------------------------------
+///////////////////////////////////////////////////////////////////////////////
+
+// Forward declarations for game loop functions
+void GameLoop_IntroMode();
+void GameLoop_DonationScreen();
+void GameLoop_ApresentacaoMode();
+void GameLoop_OptionsMode();
+void GameLoop_SelectCharMode();
+void GameLoop_TelaDeVersus();
+void GameLoop_GamePlayMode();
+void GameLoop_EditMode();
+
+///////////////////////////////////////////////////////////////////////////////
 // INICIALIZACAO ALLEGRO ------------------------------------------------[**02]
 ///////////////////////////////////////////////////////////////////////////////
 
