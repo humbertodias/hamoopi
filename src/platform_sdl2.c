@@ -26,8 +26,28 @@ static Uint64 g_timer_interval_ticks = 0;
 static int g_drawing_mode = PDRAW_MODE_SOLID;
 static int g_trans_alpha = 255;
 
+// Helper function to check and fire timer callback
+static void check_timer(void) {
+    if (g_timer_callback && g_timer_interval_ticks > 0) {
+        Uint64 current_tick = SDL_GetPerformanceCounter();
+        Uint64 elapsed_ticks = current_tick - g_timer_last_tick;
+        
+        // If enough time has elapsed, call the callback once per check
+        // Note: If multiple intervals have passed, only one callback is executed
+        // This matches the behavior of the original SDL_AddTimer implementation
+        if (elapsed_ticks >= g_timer_interval_ticks) {
+            g_timer_callback();
+            // Increment last_tick by interval to prevent drift
+            g_timer_last_tick += g_timer_interval_ticks;
+        }
+    }
+}
+
 // Helper function to update screen using renderer and texture
 static void update_screen_with_renderer(void) {
+    // Check timer before rendering to ensure consistent frame timing
+    check_timer();
+    
     if (g_screen && g_screen->surface && g_renderer && g_screen_texture) {
         // Update texture with screen surface data
         SDL_UpdateTexture(g_screen_texture, NULL,
@@ -318,20 +338,8 @@ volatile char* platform_get_key_state(void) {
     // Update SDL events to refresh keyboard state
     SDL_PumpEvents();
 
-    // Check timer using SDL_GetPerformanceCounter
-    if (g_timer_callback && g_timer_interval_ticks > 0) {
-        Uint64 current_tick = SDL_GetPerformanceCounter();
-        Uint64 elapsed_ticks = current_tick - g_timer_last_tick;
-        
-        // If enough time has elapsed, call the callback once per check
-        // Note: If multiple intervals have passed, only one callback is executed
-        // This matches the behavior of the original SDL_AddTimer implementation
-        if (elapsed_ticks >= g_timer_interval_ticks) {
-            g_timer_callback();
-            // Increment last_tick by interval to prevent drift
-            g_timer_last_tick += g_timer_interval_ticks;
-        }
-    }
+    // Check timer using helper function
+    check_timer();
 
     // Update mouse state
     Uint32 mouse_state = SDL_GetMouseState((int*)&platform_mouse_x, (int*)&platform_mouse_y);
