@@ -7258,16 +7258,9 @@ if (current_time < frame_target_time) {
     }
 }
 
-// Also wait for interrupt-based timer (maintains compatibility)
-// Add timeout to prevent infinite loop if timer fails
-unsigned int timer_wait_start = platform_get_ticks();
-while(timer==delay) {
-    // Safety timeout: if we've waited longer than 2 frame periods, break
-    if (platform_get_ticks() - timer_wait_start > (2000 / Ctrl_FPS)) {
-        break;
-    }
-    platform_rest(0); // yield CPU
-}
+// Sync with interrupt-based timer for compatibility (single check, no wait loop)
+// This allows the timer variable to catch up without blocking
+delay = timer;
 
 clear(LayerHUD);
 clear_to_color(LayerHUD, makecol(255, 0, 255));
