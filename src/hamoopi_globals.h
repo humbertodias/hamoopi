@@ -146,6 +146,14 @@ extern int P1HitOn, P2HitOn;
 extern int ShakeDist;
 extern int contatofisico;
 
+// Color palette variables
+extern char P1_Pallete_string[40];
+extern char P2_Pallete_string[40];
+extern BITMAP *P1_Pallete;
+extern BITMAP *P2_Pallete;
+extern int P1_ContadorDeCor;
+extern int P2_ContadorDeCor;
+
 // Editor variables
 extern char ED_Name[50];
 extern int ED_CharID;
