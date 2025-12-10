@@ -34,8 +34,10 @@ static void check_timer(void) {
         Uint64 elapsed_ticks = current_tick - g_timer_last_tick;
         
         // If enough time has elapsed, call the callback once per check
-        // Note: If multiple intervals have passed, only one callback is executed
-        // This matches the behavior of the original SDL_AddTimer implementation
+        // NOTE: This differs from SDL_AddTimer which would fire multiple times for
+        // multiple elapsed intervals. We fire once and skip ahead to maintain timing
+        // while preventing callback spam during lag spikes. This is intentional for
+        // compatibility with the game's frame timing logic (while(timer==delay){}).
         if (elapsed_ticks >= g_timer_interval_ticks) {
             g_timer_callback();
             
@@ -317,6 +319,12 @@ void platform_set_close_button_callback(void (*callback)(void)) {
 
 void platform_install_int_ex(void (*callback)(void), int interval_us) {
     g_timer_callback = callback;
+
+    // Validate interval
+    if (interval_us <= 0) {
+        g_timer_interval_ticks = 0;
+        return;
+    }
 
     // interval_us is in microseconds (from PLATFORM_BPS_TO_TIMER macro)
     // SDL_GetPerformanceCounter returns ticks in performance counter frequency
