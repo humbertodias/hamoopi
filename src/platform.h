@@ -396,6 +396,8 @@ int platform_getb(PlatformColor color);
 // Rest/sleep for specified milliseconds
 void platform_rest(int milliseconds);
 
+// Get current time in milliseconds (for frame timing)
+unsigned int platform_get_ticks(void);
 
 // Set drawing mode
 void platform_drawing_mode(int mode, void *pattern, int x_anchor, int y_anchor);

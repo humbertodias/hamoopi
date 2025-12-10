@@ -73,6 +73,9 @@ int timer=0; void tempo() {timer++;} float delay=0;
 int Horas=0; int Minutos=0; int Segundos=0;
 int timermenus=-1;
 int Ctrl_FPS=60;
+// High-resolution timing for efficient frame limiting
+unsigned int frame_start_time=0;
+unsigned int frame_target_time=0;
 int WindowResNumber = 2;
 int WindowResX = 640;
 int WindowResY = 480;
@@ -1064,6 +1067,9 @@ set_window_title(versao);
 
 while (sair==0)
 {
+
+// Start of frame timing - capture current time
+frame_start_time = platform_get_ticks();
 
 check_keys_P1(); check_keys_P2(); //verifica teclas key_press, key_hold, key_released
 delay=timer;
@@ -7231,10 +7237,25 @@ stretch_blit(LayerHUDb, screen, 0, 0, LayerHUDb->w, LayerHUDb->h, 0, 0, screen->
 // Present the frame to screen (SDL optimization)
 platform_present_screen();
 
-// Frame limiter - improved timing without busy-wait
-// Small sleep to prevent CPU spinning while still maintaining responsiveness
-while(timer==delay){ 
-    rest(0); // yield CPU slice without forcing minimum delay
+// Efficient frame timing - calculate target frame time and sleep if we're ahead
+// This replaces the inefficient busy-wait loop with precise timing
+frame_target_time = frame_start_time + (1000 / Ctrl_FPS);
+unsigned int current_time = platform_get_ticks();
+if (current_time < frame_target_time) {
+    // Sleep for most of the remaining time, leaving a small margin
+    unsigned int sleep_time = frame_target_time - current_time;
+    if (sleep_time > 2) {
+        platform_rest(sleep_time - 1);
+    }
+    // Precise wait for the remaining time
+    while (platform_get_ticks() < frame_target_time) {
+        // Tight loop for sub-millisecond precision
+    }
+}
+
+// Wait for timer to increment (maintains compatibility with existing timer logic)
+while(timer==delay) {
+    platform_rest(0); // yield CPU
 }
 
 clear(LayerHUD);

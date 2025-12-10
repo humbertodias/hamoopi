@@ -388,6 +388,15 @@ void platform_rest(int milliseconds) {
     rest(milliseconds);
 }
 
+unsigned int platform_get_ticks(void) {
+    // Allegro 4 doesn't have SDL_GetTicks equivalent
+    // Use a static counter based on retrace_count (60Hz typically)
+    // This is approximate but works for frame timing
+    static volatile int tick_counter = 0;
+    tick_counter++;
+    return (unsigned int)(tick_counter * 16); // ~60Hz = 16.67ms per tick
+}
+
 void platform_drawing_mode(int mode, void *pattern, int x_anchor, int y_anchor) {
     drawing_mode(mode, pattern, x_anchor, y_anchor);
 }

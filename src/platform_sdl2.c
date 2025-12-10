@@ -1188,6 +1188,10 @@ void platform_rest(int milliseconds) {
     SDL_Delay(milliseconds);
 }
 
+unsigned int platform_get_ticks(void) {
+    return SDL_GetTicks();
+}
+
 void platform_drawing_mode(int mode, void *pattern, int x_anchor, int y_anchor) {
     g_drawing_mode = mode;
     // Note: SDL2 doesn't have direct equivalent, would need custom implementation
