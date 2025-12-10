@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -17,6 +18,7 @@ SDL_Renderer *renderer = NULL;
 SDL_Texture *buffer_texture = NULL;
 SDL_Surface *buffer_surface = NULL;
 Uint32 timer_interval = 0;
+TTF_Font *font = NULL;
 
 // Timer callback
 Uint32 tempo_callback(Uint32 interval, void *param) {
@@ -174,15 +176,48 @@ SDL_Surface* create_sub_bitmap(SDL_Surface *parent, int x, int y, int width, int
     return sub;
 }
 
-// Text rendering (simplified - SDL2 doesn't have built-in font, using simple placeholder)
-void textprintf_centre_ex(SDL_Surface *surface, int x, int y, Uint32 color, const char *text) {
-    // For now, skip text rendering as it requires SDL_ttf and font files
-    // This is a minimal implementation
+// Text rendering with centered alignment
+void textprintf_centre_ex(SDL_Surface *surface, int x, int y, Uint32 fg_color, Uint32 bg_color, const char *text) {
+    if (!font || !surface || !text) return;
+    
+    SDL_Color fg = { (fg_color >> 16) & 0xFF, (fg_color >> 8) & 0xFF, fg_color & 0xFF, 255 };
+    SDL_Surface *text_surface = TTF_RenderUTF8_Blended(font, text, fg);
+    
+    if (text_surface) {
+        // Center the text horizontally around x
+        SDL_Rect dest_rect = {x - text_surface->w / 2, y, text_surface->w, text_surface->h};
+        
+        // If background color is specified (not -1), draw background
+        if (bg_color != (Uint32)-1) {
+            SDL_Rect bg_rect = dest_rect;
+            SDL_FillRect(surface, &bg_rect, bg_color);
+        }
+        
+        SDL_BlitSurface(text_surface, NULL, surface, &dest_rect);
+        SDL_FreeSurface(text_surface);
+    }
 }
 
-void textprintf_right_ex(SDL_Surface *surface, int x, int y, Uint32 color, const char *text) {
-    // For now, skip text rendering as it requires SDL_ttf and font files
-    // This is a minimal implementation
+// Text rendering with right alignment
+void textprintf_right_ex(SDL_Surface *surface, int x, int y, Uint32 fg_color, Uint32 bg_color, const char *text) {
+    if (!font || !surface || !text) return;
+    
+    SDL_Color fg = { (fg_color >> 16) & 0xFF, (fg_color >> 8) & 0xFF, fg_color & 0xFF, 255 };
+    SDL_Surface *text_surface = TTF_RenderUTF8_Blended(font, text, fg);
+    
+    if (text_surface) {
+        // Right-align the text (x is the right edge)
+        SDL_Rect dest_rect = {x - text_surface->w, y, text_surface->w, text_surface->h};
+        
+        // If background color is specified (not -1), draw background
+        if (bg_color != (Uint32)-1) {
+            SDL_Rect bg_rect = dest_rect;
+            SDL_FillRect(surface, &bg_rect, bg_color);
+        }
+        
+        SDL_BlitSurface(text_surface, NULL, surface, &dest_rect);
+        SDL_FreeSurface(text_surface);
+    }
 }
 
 // INICIALIZACAO SDL2 //
@@ -200,6 +235,28 @@ int main(int argc, char *argv[])
         printf("IMG_Init failed: %s\n", IMG_GetError());
         SDL_Quit();
         return 1;
+    }
+    
+    // Initialize SDL_ttf
+    if (TTF_Init() < 0) {
+        printf("TTF_Init failed: %s\n", TTF_GetError());
+        IMG_Quit();
+        SDL_Quit();
+        return 1;
+    }
+    
+    // Load font (try to load from data/system directory, fallback to relative path)
+    font = TTF_OpenFont("data/system/font_10.ttf", 10);
+    if (!font) {
+        // Try alternative path
+        font = TTF_OpenFont("../../data/system/font_10.ttf", 10);
+        if (!font) {
+            printf("Failed to load font: %s\n", TTF_GetError());
+            TTF_Quit();
+            IMG_Quit();
+            SDL_Quit();
+            return 1;
+        }
     }
     
     // Create window
@@ -289,15 +346,15 @@ int main(int argc, char *argv[])
     SDL_Surface *EditorBackground = load_bitmap("data/system/EditorBackground.pcx");
     SDL_Surface *SlotVazio = load_bitmap("data/system/SlotVazio.pcx");
     SDL_Surface *StatusOK = load_bitmap("data/system/StatusOK.pcx");
-    SDL_Surface *StripPal0 = create_bitmap(32, 1); clear_to_color(StripPal0, makecol(255, 0, 255));
-    SDL_Surface *StripPal1 = create_bitmap(32, 1); clear_to_color(StripPal1, makecol(255, 0, 255));
-    SDL_Surface *StripPal2 = create_bitmap(32, 1); clear_to_color(StripPal2, makecol(255, 0, 255));
-    SDL_Surface *StripPal3 = create_bitmap(32, 1); clear_to_color(StripPal3, makecol(255, 0, 255));
-    SDL_Surface *StripPal4 = create_bitmap(32, 1); clear_to_color(StripPal4, makecol(255, 0, 255));
-    SDL_Surface *StripPal5 = create_bitmap(32, 1); clear_to_color(StripPal5, makecol(255, 0, 255));
-    SDL_Surface *StripPal6 = create_bitmap(32, 1); clear_to_color(StripPal6, makecol(255, 0, 255));
-    SDL_Surface *StripPal7 = create_bitmap(32, 1); clear_to_color(StripPal7, makecol(255, 0, 255));
-    SDL_Surface *StripPal8 = create_bitmap(32, 1); clear_to_color(StripPal8, makecol(255, 0, 255));
+    SDL_Surface *StripPal0 = create_bitmap(32, 1); clear_to_color(StripPal0, makecol(255, 0, 255)); SDL_SetColorKey(StripPal0, SDL_TRUE, makecol(255, 0, 255));
+    SDL_Surface *StripPal1 = create_bitmap(32, 1); clear_to_color(StripPal1, makecol(255, 0, 255)); SDL_SetColorKey(StripPal1, SDL_TRUE, makecol(255, 0, 255));
+    SDL_Surface *StripPal2 = create_bitmap(32, 1); clear_to_color(StripPal2, makecol(255, 0, 255)); SDL_SetColorKey(StripPal2, SDL_TRUE, makecol(255, 0, 255));
+    SDL_Surface *StripPal3 = create_bitmap(32, 1); clear_to_color(StripPal3, makecol(255, 0, 255)); SDL_SetColorKey(StripPal3, SDL_TRUE, makecol(255, 0, 255));
+    SDL_Surface *StripPal4 = create_bitmap(32, 1); clear_to_color(StripPal4, makecol(255, 0, 255)); SDL_SetColorKey(StripPal4, SDL_TRUE, makecol(255, 0, 255));
+    SDL_Surface *StripPal5 = create_bitmap(32, 1); clear_to_color(StripPal5, makecol(255, 0, 255)); SDL_SetColorKey(StripPal5, SDL_TRUE, makecol(255, 0, 255));
+    SDL_Surface *StripPal6 = create_bitmap(32, 1); clear_to_color(StripPal6, makecol(255, 0, 255)); SDL_SetColorKey(StripPal6, SDL_TRUE, makecol(255, 0, 255));
+    SDL_Surface *StripPal7 = create_bitmap(32, 1); clear_to_color(StripPal7, makecol(255, 0, 255)); SDL_SetColorKey(StripPal7, SDL_TRUE, makecol(255, 0, 255));
+    SDL_Surface *StripPal8 = create_bitmap(32, 1); clear_to_color(StripPal8, makecol(255, 0, 255)); SDL_SetColorKey(StripPal8, SDL_TRUE, makecol(255, 0, 255));
     SDL_Surface *Slot0 = load_bitmap("data/pal0.pcx"); if (!Slot0) { Pal0found = 0; }
     SDL_Surface *Slot1 = load_bitmap("data/pal1.pcx"); if (!Slot1) { Pal1found = 0; }
     SDL_Surface *Slot2 = load_bitmap("data/pal2.pcx"); if (!Slot2) { Pal2found = 0; }
@@ -696,10 +753,10 @@ int main(int argc, char *argv[])
             draw_sprite(buffer_surface, EditorBackground, 0, 0);
         }
         
-        // Draw text (simplified - no actual text rendering in this minimal version)
-        // textprintf_centre_ex(buffer_surface, 320, 20, makecol(255, 255, 255), "HAMOOPI - PALLETE GENERATOR");
-        // textprintf_centre_ex(buffer_surface, 320, 35, makecol(255, 255, 255), "Aperte F1 para criar uma nova paleta");
-        // textprintf_centre_ex(buffer_surface, 320, 45, makecol(255, 255, 255), "Aperte ESC para sair");
+        // Draw text
+        textprintf_centre_ex(buffer_surface, 320, 20, makecol(255, 255, 255), -1, "HAMOOPI - PALLETE GENERATOR");
+        textprintf_centre_ex(buffer_surface, 320, 35, makecol(255, 255, 255), -1, "Aperte F1 para criar uma nova paleta");
+        textprintf_centre_ex(buffer_surface, 320, 45, makecol(255, 255, 255), -1, "Aperte ESC para sair");
         
         // Draw SlotPallete
         stretch_blit(SlotPallete, SlotPalleteDisplay,
@@ -738,6 +795,49 @@ int main(int argc, char *argv[])
         if (Slot7OK == 1 && StatusOK) { draw_sprite(buffer_surface, StatusOK, 32 + 64 + 128 * 2 + 4, 32 + 76 + 128 * 2 + 4); }
         if (Slot8OK == 1 && StatusOK) { draw_sprite(buffer_surface, StatusOK, 32 + 64 + 128 * 3 + 6, 32 + 76 + 128 * 2 + 4); }
         
+        // Draw text labels with shadow effect (black shadow + white text)
+        textprintf_right_ex(buffer_surface, 122 + 128 * 0 + 0 + 64 + 1, 76 + 128 * 0 + 0 + 116 + 1 - 110, makecol(0, 0, 0), -1, "LP");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 0 + 0 + 64 + 0, 76 + 128 * 0 + 0 + 116 + 0 - 110, makecol(255, 255, 255), -1, "LP");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 0 + 0 + 64 + 1, 212 + 1, makecol(0, 0, 0), -1, "MP");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 0 + 0 + 64 + 0, 212 + 0, makecol(255, 255, 255), -1, "MP");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 1 + 0 + 66 + 1, 212 + 1, makecol(0, 0, 0), -1, "HP");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 1 + 0 + 66 + 0, 212 + 0, makecol(255, 255, 255), -1, "HP");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 2 + 0 + 68 + 1, 212 + 1, makecol(0, 0, 0), -1, "LK");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 2 + 0 + 68 + 0, 212 + 0, makecol(255, 255, 255), -1, "LK");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 3 + 0 + 70 + 1, 212 + 1, makecol(0, 0, 0), -1, "MK");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 3 + 0 + 70 + 0, 212 + 0, makecol(255, 255, 255), -1, "MK");
+        
+        textprintf_right_ex(buffer_surface, 122 + 128 * 0 + 0 + 64 + 1, 130 + 212 + 1, makecol(0, 0, 0), -1, "HK");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 0 + 0 + 64 + 0, 130 + 212 + 0, makecol(255, 255, 255), -1, "HK");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 1 + 0 + 66 + 1, 130 + 212 + 1, makecol(0, 0, 0), -1, "SELECT");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 1 + 0 + 66 + 0, 130 + 212 + 0, makecol(255, 255, 255), -1, "SELECT");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 2 + 0 + 68 + 1, 130 + 212 + 1, makecol(0, 0, 0), -1, "START");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 2 + 0 + 68 + 0, 130 + 212 + 0, makecol(255, 255, 255), -1, "START");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 3 + 0 + 70 + 1, 130 + 212 + 1, makecol(0, 0, 0), -1, "HOLD");
+        textprintf_right_ex(buffer_surface, 122 + 128 * 3 + 0 + 70 + 0, 130 + 212 + 0, makecol(255, 255, 255), -1, "HOLD");
+        
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 0 + 0 + 64 + 1, 76 + 128 * 0 + 0 + 116 + 1, makecol(0, 0, 0), -1, "data/pal0.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 0 + 0 + 64 + 0, 76 + 128 * 0 + 0 + 116 + 0, makecol(255, 255, 255), -1, "data/pal0.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 0 + 0 + 64 + 1, 76 + 128 * 1 + 0 + 118 + 1, makecol(0, 0, 0), -1, "data/pal1.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 0 + 0 + 64 + 0, 76 + 128 * 1 + 0 + 118 + 0, makecol(255, 255, 255), -1, "data/pal1.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 1 + 0 + 64 + 1, 76 + 128 * 1 + 0 + 118 + 1, makecol(0, 0, 0), -1, "data/pal2.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 1 + 0 + 64 + 0, 76 + 128 * 1 + 0 + 118 + 0, makecol(255, 255, 255), -1, "data/pal2.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 2 + 0 + 64 + 1, 76 + 128 * 1 + 0 + 118 + 1, makecol(0, 0, 0), -1, "data/pal3.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 2 + 0 + 64 + 0, 76 + 128 * 1 + 0 + 118 + 0, makecol(255, 255, 255), -1, "data/pal3.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 3 + 0 + 64 + 1, 76 + 128 * 1 + 0 + 118 + 1, makecol(0, 0, 0), -1, "data/pal4.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 3 + 0 + 64 + 0, 76 + 128 * 1 + 0 + 118 + 0, makecol(255, 255, 255), -1, "data/pal4.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 0 + 0 + 64 + 1, 76 + 128 * 2 + 0 + 120 + 1, makecol(0, 0, 0), -1, "data/pal5.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 0 + 0 + 64 + 0, 76 + 128 * 2 + 0 + 120 + 0, makecol(255, 255, 255), -1, "data/pal5.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 1 + 0 + 64 + 1, 76 + 128 * 2 + 0 + 120 + 1, makecol(0, 0, 0), -1, "data/pal6.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 1 + 0 + 64 + 0, 76 + 128 * 2 + 0 + 120 + 0, makecol(255, 255, 255), -1, "data/pal6.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 2 + 0 + 64 + 1, 76 + 128 * 2 + 0 + 120 + 1, makecol(0, 0, 0), -1, "data/pal7.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 2 + 0 + 64 + 0, 76 + 128 * 2 + 0 + 120 + 0, makecol(255, 255, 255), -1, "data/pal7.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 3 + 0 + 64 + 1, 76 + 128 * 2 + 0 + 120 + 1, makecol(0, 0, 0), -1, "data/pal8.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 3 + 0 + 64 + 0, 76 + 128 * 2 + 0 + 120 + 0, makecol(255, 255, 255), -1, "data/pal8.pcx");
+        
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 2 + 0 + 64 + 1, 76 + 128 * 0 + 0 + 102 + 1, makecol(0, 0, 0), -1, "data/pallete.pcx");
+        textprintf_centre_ex(buffer_surface, 64 + 128 * 2 + 0 + 64 + 0, 76 + 128 * 0 + 0 + 102 + 0, makecol(255, 255, 255), -1, "data/pallete.pcx");
+        
         // DEBUG - Draw strips
         draw_sprite(buffer_surface, StripPal0, 80, 30 + 3);
         draw_sprite(buffer_surface, StripPal1, 80, 32 + 3);
@@ -763,6 +863,7 @@ int main(int argc, char *argv[])
     
     // Cleanup
     SDL_RemoveTimer(timer_id);
+    if (font) TTF_CloseFont(font);
     if (Slot0) SDL_FreeSurface(Slot0);
     if (Slot1) SDL_FreeSurface(Slot1);
     if (Slot2) SDL_FreeSurface(Slot2);
@@ -791,6 +892,7 @@ int main(int argc, char *argv[])
     SDL_FreeSurface(buffer_surface);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
     
