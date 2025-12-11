@@ -27,6 +27,10 @@ static Uint32 g_timer_interval_ms = 0;
 static int g_drawing_mode = PDRAW_MODE_SOLID;
 static int g_trans_alpha = 255;
 
+// Timer constants
+#define TIMER_MAX_CATCHUP_INTERVALS 10  // Maximum number of intervals to catch up
+#define MICROSECONDS_ROUNDING_OFFSET 500  // For proper microseconds to milliseconds conversion
+
 // Helper function to check and fire timer callback based on elapsed time
 // This is the optimized version that doesn't use SDL_AddTimer
 // 
@@ -43,14 +47,23 @@ static int g_trans_alpha = 255;
 static void check_timer(void) {
     if (g_timer_callback && g_timer_interval_ms > 0) {
         Uint32 current_tick = SDL_GetTicks();
-        Uint32 elapsed_ms = current_tick - g_timer_last_tick;
+        
+        // Handle SDL_GetTicks() wraparound (occurs every ~49 days)
+        // Use signed difference to handle wraparound correctly
+        Sint64 elapsed_ms = (Sint64)current_tick - (Sint64)g_timer_last_tick;
+        
+        // If elapsed time is negative or unreasonably large, we've likely wrapped around
+        // or the system time was adjusted. Reset the timer to current time.
+        if (elapsed_ms < 0 || elapsed_ms > 86400000) {  // > 24 hours is unreasonable
+            g_timer_last_tick = current_tick;
+            return;
+        }
 
         // Limit catch-up to prevent excessive callbacks during lag spikes or system pauses
-        // If more than 10 intervals have elapsed, skip ahead to avoid tight loop
-        const Uint32 max_catchup_intervals = 10;
-        Uint32 max_catchup_ms = g_timer_interval_ms * max_catchup_intervals;
+        // If more than TIMER_MAX_CATCHUP_INTERVALS have elapsed, skip ahead to avoid tight loop
+        Uint32 max_catchup_ms = g_timer_interval_ms * TIMER_MAX_CATCHUP_INTERVALS;
         
-        if (elapsed_ms > max_catchup_ms) {
+        if ((Uint32)elapsed_ms > max_catchup_ms) {
             // Skip ahead to current time minus one interval
             // This allows the game to recover smoothly from extended pauses
             g_timer_last_tick = current_tick - g_timer_interval_ms;
@@ -59,7 +72,7 @@ static void check_timer(void) {
 
         // Check if enough time has elapsed for the next timer tick
         // Fire the callback for each elapsed interval to maintain timing accuracy
-        while (elapsed_ms >= g_timer_interval_ms) {
+        while ((Uint32)elapsed_ms >= g_timer_interval_ms) {
             g_timer_callback();
             g_timer_last_tick += g_timer_interval_ms;
             elapsed_ms -= g_timer_interval_ms;
@@ -356,9 +369,9 @@ void platform_install_int_ex(void (*callback)(void), int interval_us) {
     }
 
     // interval_us is in microseconds (from PLATFORM_BPS_TO_TIMER macro)
-    // Convert to milliseconds with proper rounding: (us + 500) / 1000
+    // Convert to milliseconds with proper rounding: (us + MICROSECONDS_ROUNDING_OFFSET) / 1000
     // This ensures accurate timing (e.g., 16666us → 17ms for true 60 FPS)
-    g_timer_interval_ms = (interval_us + 500) / 1000;
+    g_timer_interval_ms = (interval_us + MICROSECONDS_ROUNDING_OFFSET) / 1000;
     if (g_timer_interval_ms < 1) {
         g_timer_interval_ms = 1;
     }
