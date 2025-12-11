@@ -29,6 +29,17 @@ static int g_trans_alpha = 255;
 
 // Helper function to check and fire timer callback based on elapsed time
 // This is the optimized version that doesn't use SDL_AddTimer
+// 
+// The design is based on the Allegro version behavior:
+// - Allegro uses install_int_ex(tempo, BPS_TO_TIMER(60)) to fire a callback at 60 Hz
+// - The callback (tempo) increments a global timer variable
+// - The game loop uses while(timer==delay){} to wait for frame advancement
+// 
+// This implementation:
+// - Uses SDL_GetTicks() for millisecond-based timing (simpler than performance counters)
+// - Fires the callback for EACH elapsed interval to maintain accuracy
+// - Called from platform_get_key_state() which is invoked every game loop iteration
+// - Ensures consistent 60 FPS behavior matching the Allegro version
 static void check_timer(void) {
     if (g_timer_callback && g_timer_interval_ms > 0) {
         Uint32 current_tick = SDL_GetTicks();
@@ -313,6 +324,16 @@ void platform_set_close_button_callback(void (*callback)(void)) {
     g_close_callback = callback;
 }
 
+// Install timer callback - optimized version without SDL_AddTimer
+// 
+// This replaces the previous SDL_AddTimer approach with a simpler polling-based system
+// The callback is invoked from check_timer() which is called during:
+// - platform_get_key_state() (every frame)
+// - update_screen_with_renderer() (on screen updates)
+//
+// For 60 FPS: install_int_ex(tempo, BPS_TO_TIMER(60))
+//   => interval_us = 1000000/60 = 16666 microseconds
+//   => interval_ms = 16 milliseconds
 void platform_install_int_ex(void (*callback)(void), int interval_us) {
     g_timer_callback = callback;
 
