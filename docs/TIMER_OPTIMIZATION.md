@@ -3,79 +3,107 @@
 ## Problem
 The timer in `platform_sdl2.c` was running slow, causing gameplay to feel sluggish and animations to run at incorrect speeds.
 
-## Root Causes
+## Final Solution: Pure Polling-Based Timer
 
-### 1. Critical Bug in check_timer() Function
-The most significant issue was in the `check_timer()` polling function. It was only calling the timer callback ONCE even when multiple timer intervals had elapsed. This caused the timer to run slower than expected.
+After testing with the threaded timer approach (SDL_AddTimer) and hybrid solutions, the most reliable and performant solution is to use a **pure polling-based timer** using `SDL_GetPerformanceCounter()`.
+
+### Why Pure Polling?
+
+1. **No Thread Overhead**: SDL_AddTimer runs in a separate thread with synchronization overhead
+2. **Deterministic Timing**: Polling provides more predictable timing in the main thread
+3. **Better Performance**: Eliminates thread context switching and callback marshalling
+4. **Simpler Code**: Single timer path without fallback complexity
+
+## Root Causes (Previous Issues)
+
+### 1. SDL_AddTimer Thread Overhead
+Using SDL_AddTimer introduced threading overhead and potential synchronization issues:
+- Timer callback runs in separate thread
+- Requires thread-safe callback execution
+- Context switching adds latency
+- Unpredictable timing due to OS scheduling
+
+### 2. Critical Bug in check_timer() Function (Now Fixed)
+The polling function had a bug where it only called the callback ONCE even when multiple intervals had elapsed:
 
 **Example of the bug:**
-- Game expects 60 FPS (timer should increment 60 times per second = every ~16.67ms)
-- If `check_timer()` is called after 3 intervals have passed (50ms elapsed)
+- Game expects 60 FPS (timer should increment 60 times per second)
+- If `check_timer()` is called after 3 intervals (50ms elapsed)
 - **Old behavior**: Fired callback once → timer incremented by 1 → WRONG!
 - **New behavior**: Fires callback 3 times → timer increments by 3 → CORRECT!
 
-This was the primary cause of the slow timer issue.
-
-### 2. Insufficient Timer Polling
-The timer check was only performed when `SDL_AddTimer` failed (fallback mode). However, even when the threaded timer is working, there can be delays or timing issues. Not polling the timer regularly meant missed increments.
-
-### 3. VSync Limitation
-The renderer was created with `SDL_RENDERER_PRESENTVSYNC` flag, which forces the rendering to synchronize with the monitor's vertical refresh rate. While VSync doesn't directly affect the game loop timing, it can cause issues:
-
-- Adds frame presentation delays when the game tries to render faster than the monitor refresh rate
-- Can introduce input latency as frames wait for the next vsync interval
-- May cause stuttering if the game loop and monitor refresh rate don't perfectly align
-- Creates unnecessary overhead when precise frame timing is managed by the game's internal timer
+### 3. VSync Limitation (Fixed)
+The renderer was created with `SDL_RENDERER_PRESENTVSYNC` which added frame presentation delays.
 
 ## Solution
 
-### Changes Made
+### Final Implementation: Pure Polling-Based Timer
 
-1. **Fixed check_timer() to call callback for each elapsed interval**
+The SDL2 backend now uses **only** polling with `SDL_GetPerformanceCounter()` for maximum performance and accuracy. SDL_AddTimer has been completely removed.
+
+**Key changes:**
+
+1. **Removed SDL_AddTimer completely**
    ```c
-   // Before: Only called callback once, even for multiple intervals
-   if (elapsed_ticks >= g_timer_interval_ticks) {
-       g_timer_callback();  // Called once!
-       Uint64 intervals_elapsed = elapsed_ticks / g_timer_interval_ticks;
-       g_timer_last_tick += intervals_elapsed * g_timer_interval_ticks;
-   }
+   // Removed:
+   // - static SDL_TimerID g_timer_id = 0;
+   // - static Uint32 timer_callback_wrapper()
+   // - SDL_AddTimer() call
+   // - SDL_RemoveTimer() calls
    
-   // After: Calls callback for each elapsed interval
-   #define MAX_TIMER_CALLBACKS_PER_CHECK 10
-   
-   if (elapsed_ticks >= g_timer_interval_ticks) {
-       Uint64 intervals_elapsed = elapsed_ticks / g_timer_interval_ticks;
+   // Now using pure polling
+   static Uint64 g_timer_last_tick = 0;
+   static Uint64 g_timer_interval_ticks = 0;
+   ```
+
+2. **Simplified platform_install_int_ex()**
+   ```c
+   void platform_install_int_ex(void (*callback)(void), int interval_us) {
+       g_timer_callback = callback;
        
-       // Fire callback for each elapsed interval (capped to prevent runaway)
-       Uint64 callbacks_to_fire = intervals_elapsed;
-       if (callbacks_to_fire > MAX_TIMER_CALLBACKS_PER_CHECK) {
-           callbacks_to_fire = MAX_TIMER_CALLBACKS_PER_CHECK;
-       }
-       
-       for (Uint64 i = 0; i < callbacks_to_fire; i++) {
-           g_timer_callback();  // Called multiple times!
-       }
-       
-       g_timer_last_tick += intervals_elapsed * g_timer_interval_ticks;
+       // Convert interval to performance counter ticks
+       Uint64 freq = SDL_GetPerformanceFrequency();
+       g_timer_interval_ticks = ((Uint64)interval_us * freq) / 1000000ULL;
+       g_timer_last_tick = SDL_GetPerformanceCounter();
    }
    ```
-   
-   This ensures the timer increments by the correct amount even when polling is infrequent.
 
-2. **Always call check_timer() in platform_get_key_state()**
+3. **Fixed check_timer() to call callback for each elapsed interval**
    ```c
-   // Before: Only checked when SDL_AddTimer failed
-   if (g_timer_id == 0) {
-       check_timer();
+   static void check_timer(void) {
+       if (g_timer_callback && g_timer_interval_ticks > 0) {
+           Uint64 current_tick = SDL_GetPerformanceCounter();
+           Uint64 elapsed_ticks = current_tick - g_timer_last_tick;
+           
+           if (elapsed_ticks >= g_timer_interval_ticks) {
+               Uint64 intervals_elapsed = elapsed_ticks / g_timer_interval_ticks;
+               
+               // Fire callback for each elapsed interval (capped)
+               Uint64 callbacks_to_fire = intervals_elapsed;
+               if (callbacks_to_fire > MAX_TIMER_CALLBACKS_PER_CHECK) {
+                   callbacks_to_fire = MAX_TIMER_CALLBACKS_PER_CHECK;
+               }
+               
+               for (Uint64 i = 0; i < callbacks_to_fire; i++) {
+                   g_timer_callback();
+               }
+               
+               g_timer_last_tick += intervals_elapsed * g_timer_interval_ticks;
+           }
+       }
    }
-   
-   // After: Always check for better responsiveness
-   check_timer();
    ```
-   
-   This hybrid approach uses both threaded timer and polling for maximum reliability.
 
-3. **Removed SDL_RENDERER_PRESENTVSYNC from renderer creation**
+4. **Call check_timer() in platform_get_key_state()**
+   ```c
+   volatile char* platform_get_key_state(void) {
+       SDL_PumpEvents();
+       check_timer();  // Poll timer every time keys are checked
+       // ... rest of function
+   }
+   ```
+
+5. **Removed SDL_RENDERER_PRESENTVSYNC**
    ```c
    // Before:
    g_renderer = SDL_CreateRenderer(g_window, -1, 
@@ -88,13 +116,23 @@ The renderer was created with `SDL_RENDERER_PRESENTVSYNC` flag, which forces the
 
 ## Benefits
 
-- **Accurate Timing**: Timer now correctly increments by the right amount for elapsed time
-- **Reliable 60 FPS**: Game runs at precisely 60 FPS as configured
-- **No Skipped Increments**: Timer polling fires callback for each elapsed interval
-- **Hybrid Approach**: Uses both threaded timer (SDL_AddTimer) and polling for reliability
+- **Maximum Performance**: Pure polling eliminates thread overhead from SDL_AddTimer
+- **Deterministic Timing**: Timer runs in main thread with predictable behavior
+- **Accurate 60 FPS**: Timer correctly increments for each elapsed interval
+- **No Thread Synchronization**: Eliminates potential race conditions and context switching
+- **Simpler Code**: Single timer implementation path without fallback complexity
 - **Reduced Latency**: No VSync-induced frame delays
-- **Better Performance**: Decoupled rendering from VSync timing
 - **Consistent Behavior**: Game loop timing is independent of monitor refresh rate
+
+## Comparison: SDL2 vs Allegro
+
+| Aspect | Allegro 4 | SDL2 (New) |
+|--------|-----------|------------|
+| Timer Type | Hardware timer with OS support | Pure polling with SDL_GetPerformanceCounter() |
+| Implementation | install_int_ex() → OS timer | Polling in platform_get_key_state() |
+| Thread Model | Timer callback in separate thread | Main thread polling |
+| Accuracy | OS-dependent, generally good | High precision, main-thread deterministic |
+| Overhead | Low (hardware timer) | Very low (simple counter check) |
 
 ## Technical Details
 

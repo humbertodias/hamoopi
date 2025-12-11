@@ -22,19 +22,11 @@ static void (*g_close_callback)(void) = NULL;
 static void (*g_timer_callback)(void) = NULL;
 static Uint64 g_timer_last_tick = 0;
 static Uint64 g_timer_interval_ticks = 0;
-static SDL_TimerID g_timer_id = 0;
+// SDL_AddTimer removed - using pure polling for better performance
 
 // Drawing state
 static int g_drawing_mode = PDRAW_MODE_SOLID;
 static int g_trans_alpha = 255;
-
-// Timer callback wrapper - fires at regular intervals like Allegro's install_int_ex
-static Uint32 timer_callback_wrapper(Uint32 interval, void *param) {
-    if (g_timer_callback) {
-        g_timer_callback();
-    }
-    return interval;  // Continue timer with same interval
-}
 
 // Maximum callbacks to fire per check to prevent runaway during extreme lag
 #define MAX_TIMER_CALLBACKS_PER_CHECK 10
@@ -339,20 +331,12 @@ void platform_install_int_ex(void (*callback)(void), int interval_us) {
     // Validate interval
     if (interval_us <= 0) {
         g_timer_interval_ticks = 0;
-        if (g_timer_id) {
-            SDL_RemoveTimer(g_timer_id);
-            g_timer_id = 0;
-        }
         return;
     }
 
+    // Use pure polling-based timer for better performance and accuracy
     // interval_us is in microseconds (from PLATFORM_BPS_TO_TIMER macro)
-    // SDL_AddTimer expects milliseconds
-    // Convert: milliseconds = microseconds / 1000
-    Uint32 interval_ms = interval_us / 1000;
-    if (interval_ms < 1) interval_ms = 1;
-
-    // Store interval for fallback check_timer() if needed
+    // Convert to performance counter ticks
     Uint64 freq = SDL_GetPerformanceFrequency();
     if (freq > UINT64_MAX / (Uint64)interval_us) {
         double interval_seconds = (double)interval_us / 1000000.0;
@@ -364,27 +348,13 @@ void platform_install_int_ex(void (*callback)(void), int interval_us) {
         g_timer_interval_ticks = 1;
     }
     g_timer_last_tick = SDL_GetPerformanceCounter();
-
-    // Remove old timer if exists
-    if (g_timer_id) {
-        SDL_RemoveTimer(g_timer_id);
-    }
-
-    // Install SDL timer - behaves like Allegro's install_int_ex
-    g_timer_id = SDL_AddTimer(interval_ms, timer_callback_wrapper, NULL);
-    if (g_timer_id == 0) {
-        // Timer creation failed - log error
-        // check_timer() will be used as fallback in platform_get_key_state
-        fprintf(stderr, "Warning: SDL_AddTimer failed: %s\n", SDL_GetError());
-    }
 }
 
 volatile char* platform_get_key_state(void) {
     // Update SDL events to refresh keyboard state
     SDL_PumpEvents();
 
-    // Always check timer in polling mode for better responsiveness
-    // This ensures the timer callback fires even if SDL_AddTimer has delays
+    // Pure polling-based timer check for accurate 60 FPS timing
     check_timer();
 
     // Update mouse state
