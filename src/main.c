@@ -62,7 +62,7 @@ int sair = 0;
 void sair_allegro() { sair = 1; }
 // Frame timing variables for SDL2
 Uint64 frame_start_time = 0;
-Uint64 frame_target_time = 0;
+Uint64 frame_count = 0;  // Global frame counter replacing timer
 const int TARGET_FPS = 60;
 const Uint64 FRAME_TIME_MS = 1000 / TARGET_FPS; // ~16.67ms per frame at 60 FPS
 float delay = 0;
@@ -1622,7 +1622,6 @@ int main() {
 
     // Initialize frame timing for 60 FPS
     frame_start_time = SDL_GetTicks64();
-    Uint64 frame_count = 0;
 
     while (sair == 0) {
         // Start of frame timing
