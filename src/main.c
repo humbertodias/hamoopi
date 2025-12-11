@@ -863,11 +863,7 @@ void dispose_game_elements();
 void initialize_allegro_subsystems();
 void load_fonts();
 void load_configuration();
-void load_system_bitmaps();
 void create_render_buffers();
-void initialize_character_lists();
-void load_character_thumbnails();
-void load_audio_resources();
 
 
 ///////////////////////////////////////////////////////////////////////////////
