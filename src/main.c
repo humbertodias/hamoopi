@@ -901,11 +901,10 @@ void load_fonts() {
     font_30 = load_font("data/system/font_30.pcx", NULL, NULL);
 }
 
-
-int main() {
-    initialize_allegro_subsystems();
-    load_fonts();
-
+/**
+ * Load configuration from SETUP.ini and initialize game settings
+ */
+void load_configuration() {
     //carrega os dados do setup.ini
     set_config_file("SETUP.ini");
 
@@ -937,6 +936,57 @@ int main() {
     if (ModoFullscreen == 0) { set_gfx_mode(GFX_AUTODETECT_WINDOWED, WindowResX, WindowResY, 0, 0); }
     //opcao de framedata
     op_ShowFrameData = get_config_int("CONFIG", "frame_data", 0);
+
+    //idioma do jogo
+    const char *lang = get_config_string("CONFIG", "language", "BR");
+    snprintf(IDIOMA, sizeof(IDIOMA), "%s", lang);
+
+    //define centro do mapa
+    MapCenterX = get_config_int("TEMPLATE", "MapCenterX", 320);
+    MapCenterY = get_config_int("TEMPLATE", "MapCenterY", 118);
+    difficulty = get_config_int("CONFIG", "difficulty", 3);
+
+    //propriedades de round
+    RoundTime = get_config_int("CONFIG", "time", 99);
+    RoundTime = RoundTime * 60 + 59;
+    RoundTotal = get_config_int("CONFIG", "rounds", 3);
+
+    //inputs dos jogadores
+    p1_up = get_config_int("P1_CONTROL", "P1_UP", 84);
+    p1_down = get_config_int("P1_CONTROL", "P1_DOWN", 85);
+    p1_left = get_config_int("P1_CONTROL", "P1_LEFT", 82);
+    p1_right = get_config_int("P1_CONTROL", "P1_RIGHT", 83);
+    p1_bt1 = get_config_int("P1_CONTROL", "P1_BT1", 1);
+    p1_bt2 = get_config_int("P1_CONTROL", "P1_BT2", 19);
+    p1_bt3 = get_config_int("P1_CONTROL", "P1_BT3", 4);
+    p1_bt4 = get_config_int("P1_CONTROL", "P1_BT4", 26);
+    p1_bt5 = get_config_int("P1_CONTROL", "P1_BT5", 24);
+    p1_bt6 = get_config_int("P1_CONTROL", "P1_BT6", 3);
+    p1_select = get_config_int("P1_CONTROL", "P1_SELECT", 75);
+    p1_start = get_config_int("P1_CONTROL", "P1_START", 67);
+    p2_up = get_config_int("P2_CONTROL", "P2_UP", 9);
+    p2_down = get_config_int("P2_CONTROL", "P2_DOWN", 11);
+    p2_left = get_config_int("P2_CONTROL", "P2_LEFT", 10);
+    p2_right = get_config_int("P2_CONTROL", "P2_RIGHT", 12);
+    p2_bt1 = get_config_int("P2_CONTROL", "P2_BT1", 6);
+    p2_bt2 = get_config_int("P2_CONTROL", "P2_BT2", 7);
+    p2_bt3 = get_config_int("P2_CONTROL", "P2_BT3", 8);
+    p2_bt4 = get_config_int("P2_CONTROL", "P2_BT4", 22);
+    p2_bt5 = get_config_int("P2_CONTROL", "P2_BT5", 2);
+    p2_bt6 = get_config_int("P2_CONTROL", "P2_BT6", 14);
+    p2_select = get_config_int("P2_CONTROL", "P2_SELECT", 18);
+    p2_start = get_config_int("P2_CONTROL", "P2_START", 20);
+
+    //propriedades da paleta de cor
+    P[1].DefineCorDaPaleta = 0;
+    P[2].DefineCorDaPaleta = 0;
+}
+
+
+int main() {
+    initialize_allegro_subsystems();
+    load_fonts();
+    load_configuration();
 
     //Valores de Referencia:
     //Genesis [320x224]
