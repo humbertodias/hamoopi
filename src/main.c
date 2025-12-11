@@ -982,30 +982,16 @@ void load_configuration() {
     P[2].DefineCorDaPaleta = 0;
 }
 
-
-int main() {
-    initialize_allegro_subsystems();
-    load_fonts();
-    load_configuration();
-
+/**
+ * Create all render buffers and sprite atlases
+ */
+void create_render_buffers() {
     //Valores de Referencia:
     //Genesis [320x224]
     //Snes [256x224]
     //CapcomCPS1 [384x224]
     //NeoGeo [320x224]
     bg_test = create_bitmap(1280, 960); //tamanho max do cenario
-
-    //carrega a lista de Cenarios instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
-        char strtemp[9] = "";
-        sprintf(strtemp, "bg%i", ind);
-        strcpy(Lista_de_Cenarios_Instalados[ind], (char *)get_config_string("BACKGROUNDS", strtemp, ""));
-    }
-    //abastece Atlas de cenario
-    for (int ind = 1; ind <= 8; ind++) {
-        sprintf(bg_choice, "data/backgrounds/%s/000_00.png", Lista_de_Cenarios_Instalados[ind]);
-        bg_hamoopi[ind] = load_bitmap(bg_choice, NULL);
-    }
 
     bufferx = create_bitmap(2560, 1920); //layer do cenario e personagens escalonados
     LayerHUD = create_bitmap(WindowResX, WindowResY); //layer das barras de energia
@@ -1040,6 +1026,34 @@ int main() {
     clear_to_color(HitSpark_Aux, makecol(255, 0, 255));
     clear_to_color(P1_Pallete, makecol(255, 0, 255));
     clear_to_color(P2_Pallete, makecol(255, 0, 255));
+}
+
+
+int main() {
+    initialize_allegro_subsystems();
+    load_fonts();
+    load_configuration();
+
+    //Valores de Referencia:
+    //Genesis [320x224]
+    //Snes [256x224]
+    //CapcomCPS1 [384x224]
+    //NeoGeo [320x224]
+    bg_test = create_bitmap(1280, 960); //tamanho max do cenario
+
+    //carrega a lista de Cenarios instalados
+    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+        char strtemp[9] = "";
+        sprintf(strtemp, "bg%i", ind);
+        strcpy(Lista_de_Cenarios_Instalados[ind], (char *)get_config_string("BACKGROUNDS", strtemp, ""));
+    }
+    //abastece Atlas de cenario
+    for (int ind = 1; ind <= 8; ind++) {
+        sprintf(bg_choice, "data/backgrounds/%s/000_00.png", Lista_de_Cenarios_Instalados[ind]);
+        bg_hamoopi[ind] = load_bitmap(bg_choice, NULL);
+    }
+
+    create_render_buffers();
 
     int HamoopiError = 0;
     GAME_logo = load_bitmap("data/system/GAME_logo.png", NULL);
