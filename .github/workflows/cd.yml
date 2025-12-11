@@ -352,6 +352,8 @@ jobs:
               cp "$VCPKG_BIN/libopusfile.dll" artifacts/ 2>/dev/null || echo "Warning: libopusfile.dll not found"
               cp "$VCPKG_BIN/libFLAC.dll" artifacts/ 2>/dev/null || echo "Warning: libFLAC.dll not found"
               cp "$VCPKG_BIN/wavpackdll.dll" artifacts/ 2>/dev/null || echo "Warning: wavpackdll.dll not found"
+              cp "$VCPKG_BIN/ogg.dll" artifacts/ 2>/dev/null || echo "Warning: ogg.dll not found"
+              cp "$VCPKG_BIN/vorbis.dll" artifacts/ 2>/dev/null || echo "Warning: vorbis.dll not found"
               # SDL2_ttf dependencies
               cp "$VCPKG_BIN/freetype.dll" artifacts/ 2>/dev/null || echo "Warning: freetype.dll not found"
               cp "$VCPKG_BIN/bz2.dll" artifacts/ 2>/dev/null || echo "Warning: bz2.dll not found"
