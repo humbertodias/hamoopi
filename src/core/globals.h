@@ -256,4 +256,94 @@ extern int P2_Fireball_FrameTime_03, P2_Fireball_FrameTime_04, P2_Fireball_Frame
 extern int P2_Fireball_FrameTime_06, P2_Fireball_FrameTime_07, P2_Fireball_FrameTime_08;
 extern int P2_Fireball_FrameTime_09, P2_Fireball_FrameTime_10, P2_Fireball_FrameTime;
 
+// game_play
+extern int FadeIN, FadeOUT, FadeCtr, sair, IntroTimer, DonationScreen, ApresentacaoMode, IntroMode, SelectCharMode,
+        OptionsMode;
+extern char IDIOMA[3];
+// presentation
+extern int menu_op, options_op;
+extern char ChoiceP1[50];
+extern char ChoiceP2[50];
+extern char ChoiceBG[50];
+
+extern char versao[45];
+
+// game_play
+extern int timer_rounds, RoundTime, timer_final_de_rounds, EndRoundT, RoundAtual, RoundTotal, ModoHistoria, ModoMapa, SelectCharMode, EditModeTime;
+extern BITMAP *P1_1, *P2_1, *bg_test;
+extern MIDI *bgm_select_screen;
+extern SAMPLE *back;
+extern int Ctrl_FPS, Draw_Debug, Draw_Input, Draw_Box, ativa_especial, bta, btb, btc;
+extern int ZoomMaximoAtingido, Zoom_eixo, VScreen_FatorZoom;
+extern float VScreen_w, VScreen_h, VScreen_x, VScreen_y, VScreen_x2, VScreen_y2;
+extern int op_ShowFrameData, op_Zoom, op_desenhar_sombras;
+extern SAMPLE *attacklvl1, *attacklvl2, *attacklvl3, *hitlvl1, *hitlvl2, *hitlvl3, *ko, *perfect, *round1, *round2, *
+        round3, *fight;
+
+extern BITMAP *bufferx, *LayerHUD, *LayerHUDa, *LayerHUDb;
+extern FONT *font_debug, *font_10, *font_19, *font_20, *font_30;
+
+extern BITMAP *P1_Sombra, *P2_Sombra, *P1_Sombra_Aux, *P2_Sombra_Aux, *P1_energy_flip, *P1_energy_red_flip;
+extern BITMAP *HitSparkspr, *HitSpark_Aux;
+extern int timer;
+
+extern void tempo();
+
+extern float delay;
+extern int Horas, Minutos, Segundos;
+
+extern BITMAP *spr991_00, *spr991_01, *spr991_02, *spr991_03, *spr991_04, *spr991_05, *spr992_00, *spr992_01, *spr992_02
+        , *spr992_03, *spr992_04, *spr992_05, *spr993_00, *spr993_01, *spr993_02, *spr993_03, *spr993_04, *spr993_05, *
+        spr994_00, *spr994_01, *spr994_02, *spr994_03, *spr994_04, *spr994_05;
+extern BITMAP *spr_input_0, *spr_input_1, *spr_input_2, *spr_input_3, *spr_input_4, *spr_input_5, *spr_input_6, *
+        spr_input_7, *spr_input_8, *spr_input_9, *spr_input_10, *spr_input_11, *spr_input_12, *spr_input_13, *
+        spr_input_14, *spr_input_15, *spr_input_16, *spr_input_17, *spr_bg_bar, *spr_energy_bar, *spr_energy_bar_full, *
+        spr_energy_red_bar, *spr_energy_red_bar_ful, *spr_bg_bar_sp, *spr_bg_energy_bar_sp, *GAME_logo, *flag_BR, *
+        sel_mark_p1, *sel_mark_p2, *flag_US, *SELECT_CHARS, *VS_SCREEN, *vs_icon, *SELECT_BG, *donation, *spr_p1_cursor,
+        *spr_p2_cursor, *spr_cursor_historia, *spr_cursor_vazio, *spr_ponteiro, *spr_menu_icon, *GAME_intro, *
+        GAME_options, *char_generic, *char_generic2x, *spr_mold_results, *spr_result_perfect, *spr_result_win, *
+        spr_splash_round1, *spr_splash_round2, *spr_splash_round3, *spr_splash_round4, *spr_splash_round5, *
+        spr_splash_fight, *spr_splash_youwin, *spr_splash_p1win, *spr_splash_p2win, *spr_splash_youlose, *spr_splash_ko,
+        *spr_splash_perfect, *spr_splash_draw, *spr_splash_time_ove, *spr, *edit_bt_blue, *edit_bt_red, *edit_bt_null, *
+        edit_bt_null0, *edit_prevst, *edit_nextst, *edit_prevchar, *edit_nextchar, *edit_firstchar, *edit_lastchar, *
+        spr_nao_implementad, *edit_playback, *edit_pause, *edit_bt_FrameTime, *edit_bt_plus, *edit_bt_minus, *mouse, *
+        mouse2, *save_file, *bt_pivot, *spr000_00, *spr000_01, *bt_joystick, *ed_mode1_on, *ed_mode2_on, *ed_mode1_off,
+        *ed_mode2_off, *bt_reset_input, *bt_up_1, *bt_up_2, *bt_up_3, *bt_down_1, *bt_down_2, *bt_down_3, *bt_left_1, *
+        bt_left_2, *bt_left_3, *bt_right_1, *bt_right_2, *bt_right_3, *bt_1, *bt_2, *bt_3, *bt_ss_1, *bt_ss_2, *bt_ss_3,
+        *P1_Sombra, *P2_Sombra, *P1_Sombra_Aux, *P2_Sombra_Aux, *P1_energy_flip, *P1_energy_red_fli, *ED_Spr, *ED_Mini,
+        *P1_Spr_Aux, *P2_Spr_Aux, *ED_Spr_Aux, *HitSparkspr, *HitSpark_Aux, *P1_Pallete, *P2_Pallete;
+
+extern int FD_P1_Status, FD_P1_Startup, FD_P1_Active, FD_P1_Recovery, FD_P1_Active_IN, FD_P1_Active_OUT, FD_P1_HitBox01,
+        FD_P1_HitBox01x1, FD_P2_Status, FD_P2_Startup, FD_P2_Active, FD_P2_Recovery, FD_P2_Active_IN, FD_P2_Active_OUT,
+        FD_P2_HitBox01x1;
+extern BITMAP *spr_input_0, *spr_input_1, *spr_input_2, *spr_input_3, *spr_input_4, *spr_input_5, *spr_input_6, *
+        spr_input_7, *spr_input_8, *spr_input_9, *spr_input_10, *spr_input_11, *spr_input_12, *spr_input_13, *
+        spr_input_14, *spr_input_15, *spr_input_16, *spr_input_17, *spr_bg_bar, *spr_energy_bar, *spr_energy_bar_full, *
+        spr_energy_red_bar, *spr_energy_red_bar_full, *spr_bg_bar_sp, *spr_bg_energy_bar_sp, *GAME_logo, *flag_BR, *
+        sel_mark_p1, *sel_mark_p2, *flag_US, *SELECT_CHARS, *VS_SCREEN, *vs_icon, *SELECT_BG, *donation, *spr_p1_cursor,
+        *spr_p2_cursor, *spr_cursor_historia, *spr_cursor_vazio, *spr_ponteiro, *spr_menu_icon, *GAME_intro, *
+        GAME_options, *char_generic, *char_generic2x, *spr_mold_results, *spr_result_perfect, *spr_result_win, *
+        spr_splash_round1, *spr_splash_round2, *spr_splash_round3, *spr_splash_round4, *spr_splash_round5, *
+        spr_splash_fight, *spr_splash_youwin, *spr_splash_p1win, *spr_splash_p2win, *spr_splash_youlose, *spr_splash_ko,
+        *spr_splash_perfect, *spr_splash_draw, *spr_splash_time_over, *spr_num[10], *edit_bt_blue, *edit_bt_red, *
+        edit_bt_null, *edit_bt_null0, *edit_prevst, *edit_nextst, *edit_prevchar, *edit_nextchar, *edit_firstchar, *
+        edit_lastchar, *spr_nao_implementado, *edit_playback, *edit_pause, *edit_bt_FrameTime, *edit_bt_plus, *
+        edit_bt_minus, *mouse, *mouse2, *save_file, *bt_pivot, *spr000_00, *spr000_01, *bt_joystick, *ed_mode1_on, *
+        ed_mode2_on, *ed_mode1_off, *ed_mode2_off, *bt_reset_input, *bt_up_1, *bt_up_2, *bt_up_3, *bt_down_1, *bt_down_2
+        , *bt_down_3, *bt_left_1, *bt_left_2, *bt_left_3, *bt_right_1, *bt_right_2, *bt_right_3, *bt_1, *bt_2, *bt_3, *
+        bt_ss_1, *bt_ss_2, *bt_ss_3, *P1_Sombra, *P2_Sombra, *P1_Sombra_Aux, *P2_Sombra_Aux, *P1_energy_flip, *
+        P1_energy_red_flip, *ED_Spr, *ED_Mini, *P1_Spr_Aux, *P2_Spr_Aux, *ED_Spr_Aux, *HitSparkspr, *HitSpark_Aux, *
+        P1_Pallete, *P2_Pallete;
+extern MIDI *bgm_versus_mode, *bgm_apresentacao;
+extern int NumPersonagensEscolhidos, SelectCharTimerAnim, ModoMapaTimerAnim, Estagio_Atual, MapPosX, MapPosY, MapCenterX
+        , MapCenterY;
+extern char P1BIGDisplaystring[40], P2BIGDisplaystring[40], P1_Pallete_string[40], P2_Pallete_string[40];
+extern BITMAP *P1BIGDisplay, *P2BIGDisplay, *P2BIGDisplayInv, *MINIsprDisplayArcadeMode[9], *MINIsprDisplay[9], *bg_test, *bg_hamoopi[9];
+extern char Lista_de_Personagens_Instalados[9][50], Lista_de_Personagens_ArcadeMode[9][50], Lista_de_Cenarios_Instalados
+        [9][50], Lista_de_Cenarios_ArcadeMode[9][50];
+extern int Qtde_Personagens_Instalados, Qtde_Cenarios_Instalados, SelectCharP1ID, SelectCharP2ID, SelectBGID, TelaDeVersusTimer, TelaDeVersus, ModoFullscreen, WindowResX, WindowResY, op_sfx_volume, op_sound_volume, WindowResNumber;
+extern SAMPLE *cursor, *choice, *intro, *confirm;
+extern float AnimTransTimer;
+extern int ED_MovimentaPivot, ED_alertsave2, ED_io, SelectBGID;
+
 #endif // HAMOOPI_GLOBALS_H
