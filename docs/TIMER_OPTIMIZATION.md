@@ -6,12 +6,12 @@ The timer in `platform_sdl2.c` was running slow, causing gameplay to feel sluggi
 ## Root Causes
 
 ### 1. VSync Limitation
-The renderer was created with `SDL_RENDERER_PRESENTVSYNC` flag, which forces the rendering to synchronize with the monitor's vertical refresh rate. This causes several issues:
+The renderer was created with `SDL_RENDERER_PRESENTVSYNC` flag, which forces the rendering to synchronize with the monitor's vertical refresh rate. While VSync doesn't directly affect the game loop timing, it can cause issues:
 
-- Forces frame timing to match monitor refresh rate (typically 60Hz)
-- Can conflict with the game's internal 60 FPS timer
-- Introduces additional latency and timing inconsistencies
-- May cause the game to run slower than intended on monitors with different refresh rates
+- Adds frame presentation delays when the game tries to render faster than the monitor refresh rate
+- Can introduce input latency as frames wait for the next vsync interval
+- May cause stuttering if the game loop and monitor refresh rate don't perfectly align
+- Creates unnecessary overhead when precise frame timing is managed by the game's internal timer
 
 ### 2. Redundant Timer Checking
 The `check_timer()` function was being called in `update_screen_with_renderer()`, which is called during screen updates. This was redundant because:
@@ -51,10 +51,12 @@ The `check_timer()` function was being called in `update_screen_with_renderer()`
 
 The game uses the following timer mechanism:
 
-1. `install_int_ex(tempo, BPS_TO_TIMER(60))` installs a timer callback that runs at 60 FPS
+1. `platform_install_int_ex(tempo, BPS_TO_TIMER(60))` installs a timer callback that runs at 60 FPS
+   - `BPS_TO_TIMER` is a macro that converts from "beats per second" to microseconds
+   - This is part of the platform abstraction layer, compatible with both Allegro and SDL2
 2. The `tempo()` callback increments the global `timer` variable
 3. Game loop uses `while (timer == delay)` to wait for the next frame
-4. SDL2 implementation uses `SDL_AddTimer()` for the callback, with a fallback to polling
+4. SDL2 implementation uses `SDL_AddTimer()` for the callback, with a fallback to polling via `check_timer()`
 
 With VSync removed, the game loop can run at its own pace without being limited by the monitor's refresh rate, ensuring precise 60 FPS timing.
 
