@@ -45,6 +45,18 @@ static void check_timer(void) {
         Uint32 current_tick = SDL_GetTicks();
         Uint32 elapsed_ms = current_tick - g_timer_last_tick;
 
+        // Limit catch-up to prevent excessive callbacks during lag spikes or system pauses
+        // If more than 10 intervals have elapsed, skip ahead to avoid tight loop
+        const Uint32 max_catchup_intervals = 10;
+        Uint32 max_catchup_ms = g_timer_interval_ms * max_catchup_intervals;
+        
+        if (elapsed_ms > max_catchup_ms) {
+            // Skip ahead to current time minus one interval
+            // This allows the game to recover smoothly from extended pauses
+            g_timer_last_tick = current_tick - g_timer_interval_ms;
+            elapsed_ms = g_timer_interval_ms;
+        }
+
         // Check if enough time has elapsed for the next timer tick
         // Fire the callback for each elapsed interval to maintain timing accuracy
         while (elapsed_ms >= g_timer_interval_ms) {
@@ -333,7 +345,7 @@ void platform_set_close_button_callback(void (*callback)(void)) {
 //
 // For 60 FPS: install_int_ex(tempo, BPS_TO_TIMER(60))
 //   => interval_us = 1000000/60 = 16666 microseconds
-//   => interval_ms = 16 milliseconds
+//   => interval_ms = 17 milliseconds (rounded for accuracy)
 void platform_install_int_ex(void (*callback)(void), int interval_us) {
     g_timer_callback = callback;
 
@@ -344,8 +356,9 @@ void platform_install_int_ex(void (*callback)(void), int interval_us) {
     }
 
     // interval_us is in microseconds (from PLATFORM_BPS_TO_TIMER macro)
-    // Convert to milliseconds: milliseconds = microseconds / 1000
-    g_timer_interval_ms = interval_us / 1000;
+    // Convert to milliseconds with proper rounding: (us + 500) / 1000
+    // This ensures accurate timing (e.g., 16666us → 17ms for true 60 FPS)
+    g_timer_interval_ms = (interval_us + 500) / 1000;
     if (g_timer_interval_ms < 1) {
         g_timer_interval_ms = 1;
     }
