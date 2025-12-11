@@ -858,33 +858,53 @@ char bg_choice[40] = "";
 // GAME LOOP FUNCTIONS -------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////
 
-// Forward declarations for game loop functions
+// Forward declarations for game loop and initialization functions
 void dispose_game_elements();
+void initialize_allegro_subsystems();
+void load_fonts();
+void load_configuration();
+void load_system_bitmaps();
+void create_render_buffers();
+void initialize_character_lists();
+void load_character_thumbnails();
+void load_audio_resources();
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // INICIALIZACAO ALLEGRO ------------------------------------------------[**02]
 ///////////////////////////////////////////////////////////////////////////////
 
-
-int main() {
+/**
+ * Initialize Allegro/SDL subsystems
+ */
+void initialize_allegro_subsystems() {
     set_uformat(U_UTF8); //permite usar acentuação no jogo (diacríticos)
     allegro_init();
     install_timer();
     install_keyboard();
     install_mouse();
     set_color_depth(32);
-    //set_gfx_mode() é declarado logo abaixo, apos carregar dados do SETUP.INI
     install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL);
     install_int_ex(tempo, BPS_TO_TIMER(60)); //60fps
     set_window_title("HAMOOPI is Loading... Please wait :) ");
     set_close_button_callback(sair_allegro);
+}
 
+/**
+ * Load all font resources
+ */
+void load_fonts() {
     font_debug = load_font("data/system/font_debug.pcx", NULL, NULL);
     font_10 = load_font("data/system/font_10.pcx", NULL, NULL);
     font_19 = load_font("data/system/font_19.pcx", NULL, NULL);
     font_20 = load_font("data/system/font_20.pcx", NULL, NULL);
     font_30 = load_font("data/system/font_30.pcx", NULL, NULL);
+}
+
+
+int main() {
+    initialize_allegro_subsystems();
+    load_fonts();
 
     //carrega os dados do setup.ini
     set_config_file("SETUP.ini");
