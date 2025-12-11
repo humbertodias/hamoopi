@@ -5,7 +5,7 @@ on:
     tags:
       - 'v*'
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
         else
           ARCH=$(uname -m)
           echo "ARCH=$ARCH" >> $GITHUB_ENV
-        fi    
+        fi
 
     - name: Install dependencies (Linux only)
       if: matrix.os == 'ubuntu-latest'
