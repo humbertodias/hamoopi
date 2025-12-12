@@ -33,6 +33,7 @@
 *******************************************************************************/
 
 #include "backend/platform_compat.h"
+#include "core/constants.h"
 #include "core/types.h"
 #include "core/globals.h"
 #include "modules/input.h"
@@ -68,10 +69,10 @@ int Horas = 0;
 int Minutos = 0;
 int Segundos = 0;
 int timermenus = -1;
-int Ctrl_FPS = 60;
-int WindowResNumber = 2;
-int WindowResX = 640;
-int WindowResY = 480;
+int Ctrl_FPS = DEFAULT_FPS;
+int WindowResNumber = DEFAULT_WINDOW_RES_NUMBER;
+int WindowResX = GAME_BASE_WIDTH;
+int WindowResY = GAME_BASE_HEIGHT;
 
 int ativa_especial = 0;
 int bta = 0;
@@ -80,9 +81,9 @@ int btc = 0;
 int navAtlas = 0; //utilizado para navegar no debug Atlas
 int contatofisico = 0;
 
-struct HitSparkDEF HitSpark[99];
-struct FireballsDEF Fireball[3];
-struct PlayerDEF P[3];
+struct HitSparkDEF HitSpark[MAX_HIT_SPARKS];
+struct FireballsDEF Fireball[MAX_FIREBALLS];
+struct PlayerDEF P[PLAYER_ARRAY_SIZE];
 
 //permite a config de teclas
 int p1_up, p2_up;
@@ -98,8 +99,8 @@ int p1_bt6, p2_bt6;
 int p1_select, p2_select;
 int p1_start, p2_start;
 
-int op_sound_volume = 255;
-int op_sfx_volume = 255;
+int op_sound_volume = DEFAULT_SOUND_VOLUME;
+int op_sfx_volume = DEFAULT_SFX_VOLUME;
 char IDIOMA[3];
 int IntroMode = 1;
 int IntroTimer = 0;
@@ -906,8 +907,9 @@ void load_fonts() {
 
 /**
  * Load configuration from SETUP.ini and initialize game settings
+ * @return 0 on success, -1 on error
  */
-void load_configuration() {
+int load_configuration() {
     //carrega os dados do setup.ini
     set_config_file("SETUP.ini");
 
@@ -983,53 +985,106 @@ void load_configuration() {
     //propriedades da paleta de cor
     P[1].DefineCorDaPaleta = 0;
     P[2].DefineCorDaPaleta = 0;
+    
+    return 0;
 }
 
 /**
  * Create all render buffers and sprite atlases
+ * @return 0 on success, -1 on memory allocation failure
  */
-void create_render_buffers() {
+int create_render_buffers() {
     //Valores de Referencia:
     //Genesis [320x224]
     //Snes [256x224]
     //CapcomCPS1 [384x224]
     //NeoGeo [320x224]
-    bg_test = create_bitmap(1280, 960); //tamanho max do cenario
+    bg_test = create_bitmap(BACKGROUND_MAX_WIDTH, BACKGROUND_MAX_HEIGHT);
+    if (!bg_test) return -1;
 
-    bufferx = create_bitmap(2560, 1920); //layer do cenario e personagens escalonados
-    LayerHUD = create_bitmap(WindowResX, WindowResY); //layer das barras de energia
-    LayerHUDa = create_bitmap(640, 480); //layer das barras de energia
-    LayerHUDb = create_bitmap(WindowResX, WindowResY); //layer das barras de energia
+    bufferx = create_bitmap(BUFFER_MAX_WIDTH, BUFFER_MAX_HEIGHT);
+    if (!bufferx) return -1;
+    
+    LayerHUD = create_bitmap(WindowResX, WindowResY);
+    if (!LayerHUD) return -1;
+    
+    LayerHUDa = create_bitmap(GAME_BASE_WIDTH, GAME_BASE_HEIGHT);
+    if (!LayerHUDa) return -1;
+    
+    LayerHUDb = create_bitmap(WindowResX, WindowResY);
+    if (!LayerHUDb) return -1;
 
-    for (int ind = 0; ind <= 500; ind++) {
-        P[1].SprAtlas[ind] = create_bitmap(480, 480); //reserva memoria para sprites dos players
-        P[2].SprAtlas[ind] = create_bitmap(480, 480); //reserva memoria para sprites dos players
+    for (int ind = 0; ind < MAX_SPRITE_ATLAS; ind++) {
+        P[1].SprAtlas[ind] = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+        if (!P[1].SprAtlas[ind]) return -1;
+        
+        P[2].SprAtlas[ind] = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+        if (!P[2].SprAtlas[ind]) return -1;
     }
 
-    P[1].Spr = create_bitmap(480, 480);
-    P[2].Spr = create_bitmap(480, 480);
-    Fireball[1].Spr = create_bitmap(480, 480);
-    Fireball[2].Spr = create_bitmap(480, 480);
-    P1_Sombra = create_bitmap(480, 128);
-    P2_Sombra = create_bitmap(480, 128);
-    P1_Sombra_Aux = create_bitmap(480, 128);
-    P2_Sombra_Aux = create_bitmap(480, 128);
+    P[1].Spr = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+    if (!P[1].Spr) return -1;
+    
+    P[2].Spr = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+    if (!P[2].Spr) return -1;
+    
+    Fireball[1].Spr = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+    if (!Fireball[1].Spr) return -1;
+    
+    Fireball[2].Spr = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+    if (!Fireball[2].Spr) return -1;
+    
+    P1_Sombra = create_bitmap(SHADOW_WIDTH, SHADOW_HEIGHT);
+    if (!P1_Sombra) return -1;
+    
+    P2_Sombra = create_bitmap(SHADOW_WIDTH, SHADOW_HEIGHT);
+    if (!P2_Sombra) return -1;
+    
+    P1_Sombra_Aux = create_bitmap(SHADOW_WIDTH, SHADOW_HEIGHT);
+    if (!P1_Sombra_Aux) return -1;
+    
+    P2_Sombra_Aux = create_bitmap(SHADOW_WIDTH, SHADOW_HEIGHT);
+    if (!P2_Sombra_Aux) return -1;
+    
     P1_energy_flip = create_bitmap(250, 40);
+    if (!P1_energy_flip) return -1;
+    
     P1_energy_red_flip = create_bitmap(250, 40);
-    ED_Spr = create_bitmap(480, 480); //Editor
-    ED_Mini = create_bitmap(32, 32);
-    P1_Spr_Aux = create_bitmap(480, 480); //sprite auxiliar utilizado na funcao de animacao
-    P2_Spr_Aux = create_bitmap(480, 480); //sprite auxiliar utilizado na funcao de animacao
-    ED_Spr_Aux = create_bitmap(480, 480); //sprite auxiliar utilizado na funcao de animacao
+    if (!P1_energy_red_flip) return -1;
+    
+    ED_Spr = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+    if (!ED_Spr) return -1;
+    
+    ED_Mini = create_bitmap(MINI_SPRITE_SIZE, MINI_SPRITE_SIZE);
+    if (!ED_Mini) return -1;
+    
+    P1_Spr_Aux = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+    if (!P1_Spr_Aux) return -1;
+    
+    P2_Spr_Aux = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+    if (!P2_Spr_Aux) return -1;
+    
+    ED_Spr_Aux = create_bitmap(SPRITE_SIZE, SPRITE_SIZE);
+    if (!ED_Spr_Aux) return -1;
+    
     HitSparkspr = create_bitmap(260, 260);
+    if (!HitSparkspr) return -1;
+    
     HitSpark_Aux = create_bitmap(130, 130);
+    if (!HitSpark_Aux) return -1;
+    
     P1_Pallete = create_bitmap(32, 10);
+    if (!P1_Pallete) return -1;
+    
     P2_Pallete = create_bitmap(32, 10);
-    clear_to_color(HitSparkspr, makecol(255, 0, 255));
-    clear_to_color(HitSpark_Aux, makecol(255, 0, 255));
-    clear_to_color(P1_Pallete, makecol(255, 0, 255));
-    clear_to_color(P2_Pallete, makecol(255, 0, 255));
-}
+    if (!P2_Pallete) return -1;
+    
+    clear_to_color(HitSparkspr, makecol(COLOR_MAGENTA_R, COLOR_MAGENTA_G, COLOR_MAGENTA_B));
+    clear_to_color(HitSpark_Aux, makecol(COLOR_MAGENTA_R, COLOR_MAGENTA_G, COLOR_MAGENTA_B));
+    clear_to_color(P1_Pallete, makecol(COLOR_MAGENTA_R, COLOR_MAGENTA_G, COLOR_MAGENTA_B));
+    clear_to_color(P2_Pallete, makecol(COLOR_MAGENTA_R, COLOR_MAGENTA_G, COLOR_MAGENTA_B));
+    
+    return 0;
 
 /**
  * Load all system bitmaps (UI elements, sprites, etc.)
@@ -1475,8 +1530,9 @@ void load_audio_resources() {
 
 /**
  * Initialize character and stage lists from configuration
+ * @return 0 on success, -1 on error
  */
-void initialize_character_and_stage_lists() {
+int initialize_character_and_stage_lists() {
     // Create miniature display bitmaps
     MINIspr[1] = create_bitmap(32, 32);
     MINIspr[2] = create_bitmap(32, 32);
@@ -1512,40 +1568,40 @@ void initialize_character_and_stage_lists() {
     P2BIGDisplayInv = create_bitmap(128, 128);
 
     //carrega a lista de personagens instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         char strtemp[9] = "";
         sprintf(strtemp, "char%i", ind);
         strcpy(Lista_de_Personagens_Instalados[ind], (char *)get_config_string("CHARS", strtemp, ""));
     }
 
     //atualiza a qtde de personagens instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         if (strcmp(Lista_de_Personagens_Instalados[ind], "") != 0) { Qtde_Personagens_Instalados++; }
     }
     //faz o sorteio de personagens do modo historia <nao utilizado no momento, aguardando futura implementacao>
     // Ao sortear, levar em consideracao o total de personagens instalados, abastecendo a lista arcade apropriadamente
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         strcpy(Lista_de_Personagens_ArcadeMode[ind], Lista_de_Personagens_Instalados[ind]);
     }
 
     //carrega a lista de Cenarios instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         char strtemp[9] = "";
         sprintf(strtemp, "bg%i", ind);
         strcpy(Lista_de_Cenarios_Instalados[ind], (char *)get_config_string("BACKGROUNDS", strtemp, ""));
     }
     //atualiza a qtde de Cenarios instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         if (strcmp(Lista_de_Cenarios_Instalados[ind], "") != 0) { Qtde_Cenarios_Instalados++; }
     }
     //faz o sorteio de Cenarios do modo historia <nao utilizado no momento, aguardando futura implementacao>
     // Ao sortear, levar em consideracao o total de Cenarios instalados, abastecendo a lista arcade apropriadamente
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         strcpy(Lista_de_Cenarios_ArcadeMode[ind], Lista_de_Cenarios_Instalados[ind]);
     }
 
     //Carrega Miniaturas - SELECT CHARS
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         if (Qtde_Personagens_Instalados >= ind) {
             char MINIstring[99] = "";
             sprintf(MINIstring, "data/chars/%s/000_01.png", Lista_de_Personagens_Instalados[ind]);
@@ -1558,7 +1614,7 @@ void initialize_character_and_stage_lists() {
     }
 
     //miniaturas do arcade mode
-    for (int ind = 1; ind <= 8; ind++) {
+    for (int ind = 1; ind <= MAX_STAGES; ind++) {
         if (Qtde_Personagens_Instalados >= ind) {
             char MINIstring[99] = "";
             sprintf(MINIstring, "data/chars/%s/000_01.png", Lista_de_Personagens_ArcadeMode[ind]);
@@ -1582,34 +1638,47 @@ void initialize_character_and_stage_lists() {
     sprintf(P2_1s, "data/chars/%s/000_01.png", P[2].Name);
     P2_1 = load_bitmap(P2_1s, NULL);
     if (!P2_1) { P2_1 = load_bitmap("data/system/000_01.png", NULL); }
+    
+    return 0;
 }
 
 
 int main() {
     initialize_allegro_subsystems();
     load_fonts();
-    load_configuration();
+    
+    if (load_configuration() != 0) {
+        allegro_message("Failed to load configuration");
+        return 1;
+    }
 
     //carrega a lista de Cenarios instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         char strtemp[9] = "";
         sprintf(strtemp, "bg%i", ind);
         strcpy(Lista_de_Cenarios_Instalados[ind], (char *)get_config_string("BACKGROUNDS", strtemp, ""));
     }
     //abastece Atlas de cenario
-    for (int ind = 1; ind <= 8; ind++) {
+    for (int ind = 1; ind <= MAX_STAGES; ind++) {
         sprintf(bg_choice, "data/backgrounds/%s/000_00.png", Lista_de_Cenarios_Instalados[ind]);
         bg_hamoopi[ind] = load_bitmap(bg_choice, NULL);
     }
 
-    create_render_buffers();
+    if (create_render_buffers() != 0) {
+        allegro_message("Failed to allocate render buffers");
+        return 1;
+    }
 
     if (load_system_bitmaps() != 0) {
         return 1; // Exit if critical resources failed to load
     }
 
     load_animation_frames();
-    initialize_character_and_stage_lists();
+    
+    if (initialize_character_and_stage_lists() != 0) {
+        allegro_message("Failed to initialize character lists");
+        return 1;
+    }
     load_audio_resources();
 
     set_window_title(versao);
