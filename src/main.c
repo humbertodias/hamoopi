@@ -34,6 +34,8 @@
 
 #include "backend/platform_compat.h"
 #include "core/constants.h"
+#include "core/macros.h"
+#include "core/utils.h"
 #include "core/types.h"
 #include "core/globals.h"
 #include "modules/input.h"
@@ -920,20 +922,21 @@ int load_configuration() {
     //opcao que mostra os inputs ingame
     Draw_Input = get_config_int("CONFIG", "show_inputs", 0);
     //sound e soundfx volumes
-    op_sound_volume = get_config_int("CONFIG", "sound_volume", 255);
-    op_sfx_volume = get_config_int("CONFIG", "sfx_volume", 255);
+    op_sound_volume = normalize_volume(get_config_int("CONFIG", "sound_volume", DEFAULT_SOUND_VOLUME));
+    op_sfx_volume = normalize_volume(get_config_int("CONFIG", "sfx_volume", DEFAULT_SFX_VOLUME));
+    
     //resolucao de tela no modo windowed
-    WindowResX = get_config_int("CONFIG", "window_res_x", 640);
-    WindowResY = get_config_int("CONFIG", "window_res_y", 480);
-    //define o ResWindowNumber
-    if (WindowResX == 320 && WindowResY == 240) WindowResNumber = 1;
-    if (WindowResX == 640 && WindowResY == 480) WindowResNumber = 2;
-    if (WindowResX == 720 && WindowResY == 480) WindowResNumber = 3; //SD
-    if (WindowResX == 800 && WindowResY == 600) WindowResNumber = 4;
-    if (WindowResX == 960 && WindowResY == 640) WindowResNumber = 5;
-    if (WindowResX == 960 && WindowResY == 720) WindowResNumber = 6;
-    if (WindowResX == 1024 && WindowResY == 600) WindowResNumber = 7;
-    if (WindowResX == 1280 && WindowResY == 720) WindowResNumber = 8; //HD
+    WindowResX = get_config_int("CONFIG", "window_res_x", GAME_BASE_WIDTH);
+    WindowResY = get_config_int("CONFIG", "window_res_y", GAME_BASE_HEIGHT);
+    
+    //define o ResWindowNumber usando função utilitária
+    WindowResNumber = get_resolution_number(WindowResX, WindowResY);
+    if (WindowResNumber == 0) {
+        // Resolução inválida, usar padrão
+        WindowResNumber = DEFAULT_WINDOW_RES_NUMBER;
+        WindowResX = GAME_BASE_WIDTH;
+        WindowResY = GAME_BASE_HEIGHT;
+    }
     //define se resolucao é fullscreen
     ModoFullscreen = get_config_int("CONFIG", "FullScreen", 0);
     //ajusta a tela com as novas configuracoes
@@ -943,18 +946,18 @@ int load_configuration() {
     op_ShowFrameData = get_config_int("CONFIG", "frame_data", 0);
 
     //idioma do jogo
-    const char *lang = get_config_string("CONFIG", "language", "BR");
-    snprintf(IDIOMA, sizeof(IDIOMA), "%s", lang);
+    const char *lang = get_config_string("CONFIG", "language", DEFAULT_LANGUAGE);
+    safe_copy_name(IDIOMA, lang, sizeof(IDIOMA));
 
     //define centro do mapa
-    MapCenterX = get_config_int("TEMPLATE", "MapCenterX", 320);
-    MapCenterY = get_config_int("TEMPLATE", "MapCenterY", 118);
-    difficulty = get_config_int("CONFIG", "difficulty", 3);
+    MapCenterX = get_config_int("TEMPLATE", "MapCenterX", DEFAULT_MAP_CENTER_X);
+    MapCenterY = get_config_int("TEMPLATE", "MapCenterY", DEFAULT_MAP_CENTER_Y);
+    difficulty = get_config_int("CONFIG", "difficulty", DEFAULT_DIFFICULTY);
 
     //propriedades de round
-    RoundTime = get_config_int("CONFIG", "time", 99);
-    RoundTime = RoundTime * 60 + 59;
-    RoundTotal = get_config_int("CONFIG", "rounds", 3);
+    RoundTime = get_config_int("CONFIG", "time", DEFAULT_ROUND_TIME);
+    RoundTime = RoundTime * SECONDS_PER_MINUTE + 59;
+    RoundTotal = get_config_int("CONFIG", "rounds", DEFAULT_ROUNDS);
 
     //inputs dos jogadores
     p1_up = get_config_int("P1_CONTROL", "P1_UP", 84);
@@ -1602,42 +1605,35 @@ int initialize_character_and_stage_lists() {
 
     //Carrega Miniaturas - SELECT CHARS
     for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
-        if (Qtde_Personagens_Instalados >= ind) {
-            char MINIstring[99] = "";
-            sprintf(MINIstring, "data/chars/%s/000_01.png", Lista_de_Personagens_Instalados[ind]);
-            MINIspr[ind] = platform_load_bitmap(MINIstring, NULL);
-            if (!MINIspr[ind]) { MINIspr[ind] = load_bitmap("data/system/000_01.png", NULL); }
-            stretch_blit(MINIspr[ind], MINIsprDisplay[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0,
-                         MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
-            destroy_bitmap(MINIspr[ind]);
+        if (Qtde_Personagens_Instalados >= ind && is_valid_character_name(Lista_de_Personagens_Instalados[ind])) {
+            MINIspr[ind] = load_character_sprite(Lista_de_Personagens_Instalados[ind], "000_01.png");
+            if (MINIspr[ind]) {
+                stretch_blit(MINIspr[ind], MINIsprDisplay[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0,
+                             MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
+                destroy_bitmap(MINIspr[ind]);
+            }
         }
     }
 
     //miniaturas do arcade mode
     for (int ind = 1; ind <= MAX_STAGES; ind++) {
-        if (Qtde_Personagens_Instalados >= ind) {
-            char MINIstring[99] = "";
-            sprintf(MINIstring, "data/chars/%s/000_01.png", Lista_de_Personagens_ArcadeMode[ind]);
-            MINIspr[ind] = platform_load_bitmap(MINIstring, NULL);
-            if (!MINIspr[ind]) { MINIspr[ind] = load_bitmap("data/system/000_01.png", NULL); }
-            stretch_blit(MINIspr[ind], MINIsprDisplayArcadeMode[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0,
-                         MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
-            destroy_bitmap(MINIspr[ind]);
+        if (Qtde_Personagens_Instalados >= ind && is_valid_character_name(Lista_de_Personagens_ArcadeMode[ind])) {
+            MINIspr[ind] = load_character_sprite(Lista_de_Personagens_ArcadeMode[ind], "000_01.png");
+            if (MINIspr[ind]) {
+                stretch_blit(MINIspr[ind], MINIsprDisplayArcadeMode[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0,
+                             MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
+                destroy_bitmap(MINIspr[ind]);
+            }
         }
     }
 
     //P1 miniatura da foto ingame
-    strcpy(P[1].Name, (char *)get_config_string("CHARS", "char1", ""));
-    char P1_1s[40] = "";
-    sprintf(P1_1s, "data/chars/%s/000_01.png", P[1].Name);
-    P1_1 = load_bitmap(P1_1s, NULL);
-    if (!P1_1) { P1_1 = load_bitmap("data/system/000_01.png", NULL); }
+    safe_copy_name(P[1].Name, get_config_string("CHARS", "char1", ""), sizeof(P[1].Name));
+    P1_1 = load_character_sprite(P[1].Name, "000_01.png");
+    
     //P2 miniatura da foto ingame
-    strcpy(P[2].Name, (char *)get_config_string("CHARS", "char2", ""));
-    char P2_1s[40] = "";
-    sprintf(P2_1s, "data/chars/%s/000_01.png", P[2].Name);
-    P2_1 = load_bitmap(P2_1s, NULL);
-    if (!P2_1) { P2_1 = load_bitmap("data/system/000_01.png", NULL); }
+    safe_copy_name(P[2].Name, get_config_string("CHARS", "char2", ""), sizeof(P[2].Name));
+    P2_1 = load_character_sprite(P[2].Name, "000_01.png");
     
     return 0;
 }
@@ -1699,11 +1695,11 @@ int main() {
         
         // Update frame-based timers using frame count instead of timer callback
         frame_count++;
-        Segundos = ((frame_count / 60) - Minutos * 60) - Horas * 3600;
-        if (Segundos >= 60) {
+        Segundos = ((frame_count / DEFAULT_FPS) - Minutos * SECONDS_PER_MINUTE) - Horas * 3600;
+        if (Segundos >= SECONDS_PER_MINUTE) {
             Minutos++;
             Segundos = 0;
-            if (Minutos >= 60) {
+            if (Minutos >= SECONDS_PER_MINUTE) {
                 Horas++;
                 Minutos = 0;
             }

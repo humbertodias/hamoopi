@@ -3,6 +3,20 @@
 ## Visão Geral
 Este documento descreve as melhorias implementadas no código-fonte do motor de jogos de luta HAMOOPI.
 
+## Arquivos Criados
+
+### 1. src/core/constants.h
+Constantes centralizadas do projeto organizadas por categoria.
+
+### 2. src/core/macros.h
+Macros úteis para operações comuns e simplificação de código.
+
+### 3. src/core/utils.h
+Funções utilitárias inline para operações frequentes.
+
+### 4. IMPROVEMENTS.md
+Este documento de documentação das melhorias.
+
 ## Melhorias Implementadas
 
 ### 1. Constantes Centralizadas (src/core/constants.h)
@@ -168,6 +182,77 @@ void log_info(const char* fmt, ...);
 void log_warning(const char* fmt, ...);
 void log_error(const char* fmt, ...);
 ```
+
+```
+
+### 6. Macros Utilitários (src/core/macros.h)
+**Problema:** Código repetitivo para operações comuns.
+
+**Solução:** Criados macros para:
+- Verificação de memória (`CHECK_NULL`, `CREATE_BITMAP_CHECKED`)
+- Operações matemáticas (`CLAMP`, `MIN`, `MAX`)
+- Manipulação de arrays (`ARRAY_SIZE`, `ARRAY_FOREACH`)
+- Strings seguras (`SAFE_STRCPY`, `STR_EQUALS`)
+- Logging e debug (`LOG_INFO`, `LOG_WARNING`, `LOG_ERROR`)
+- Conversões (`SECONDS_TO_FRAMES`, `DEG_TO_RAD`)
+- Validações específicas do jogo
+
+**Benefícios:**
+- ✅ Código mais conciso e expressivo
+- ✅ Menos erros em operações comuns
+- ✅ Melhor depuração com macros de logging
+
+**Exemplo:**
+```c
+// Antes:
+my_bitmap = create_bitmap(480, 480);
+if (!my_bitmap) return -1;
+
+// Depois:
+CREATE_BITMAP_CHECKED(my_bitmap, SPRITE_SIZE, SPRITE_SIZE);
+```
+
+### 7. Funções Utilitárias (src/core/utils.h)
+**Problema:** Operações comuns repetidas em vários lugares.
+
+**Solução:** Criadas funções inline para:
+- Carregamento de recursos com fallback
+- Normalização de valores (volume, FPS)
+- Detecção de colisões
+- Cálculos matemáticos (distância, interpolação)
+- Formatação de tempo
+- Validações
+
+**Benefícios:**
+- ✅ Reutilização de código
+- ✅ Comportamento consistente
+- ✅ Funções inline sem overhead de chamada
+
+**Exemplo:**
+```c
+// Antes:
+char path[99];
+sprintf(path, "data/chars/%s/000_01.png", char_name);
+BITMAP* bmp = load_bitmap(path, NULL);
+if (!bmp) bmp = load_bitmap("data/system/000_01.png", NULL);
+
+// Depois:
+BITMAP* bmp = load_character_sprite(char_name, "000_01.png");
+```
+
+### 8. Uso de Funções Utilitárias em main.c
+**Problema:** Código verboso e repetitivo.
+
+**Solução:** Substituído código manual por funções utilitárias:
+- `get_resolution_number()` ao invés de múltiplos ifs
+- `normalize_volume()` para validar volumes
+- `load_character_sprite()` para carregar sprites
+- `safe_copy_name()` ao invés de `strcpy()`
+
+**Benefícios:**
+- ✅ main.c mais limpo e legível
+- ✅ Menos linhas de código
+- ✅ Validações automáticas
 
 ### 5. Arrays Dinâmicos para Hitboxes
 **Sugestão:** Ao invés de declarar 30 variáveis individuais, usar arrays:
