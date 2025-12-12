@@ -864,18 +864,123 @@ char bg_choice[40] = "";
 // GAME LOOP FUNCTIONS -------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////
 
-// Forward declarations for game loop and initialization functions
-void dispose_game_elements();
-void initialize_allegro_subsystems();
-void load_fonts();
-void load_configuration();
-void create_render_buffers();
-int load_system_bitmaps();
-void load_animation_frames();
-void load_audio_resources();
-void initialize_character_and_stage_lists();
-
-
+void dispose_game_elements() {
+    destroy_bitmap(donation);
+    for (int ind = 0; ind <= 500; ind++) {
+        destroy_bitmap(P[1].SprAtlas[ind]);
+        destroy_bitmap(P[2].SprAtlas[ind]);
+    }
+    for (int ind = 0; ind < 10; ind++) { destroy_bitmap(spr_num[ind]); }
+    for (int ind = 0; ind < 30; ind++) { destroy_bitmap(AnimTrans[ind]); }
+    destroy_bitmap(LayerHUD);
+    destroy_bitmap(LayerHUDa);
+    destroy_bitmap(LayerHUDb);
+    destroy_bitmap(ed_mode1_on);
+    destroy_bitmap(ed_mode2_on);
+    destroy_bitmap(ed_mode1_off);
+    destroy_bitmap(ed_mode2_off);
+    destroy_bitmap(edit_prevchar);
+    destroy_bitmap(edit_nextchar);
+    destroy_bitmap(edit_firstchar);
+    destroy_bitmap(edit_lastchar);
+    destroy_bitmap(spr_nao_implementado);
+    destroy_bitmap(bt_reset_input);
+    destroy_bitmap(mouse);
+    destroy_bitmap(mouse2);
+    destroy_bitmap(spr_input_0);
+    destroy_bitmap(spr_input_1);
+    destroy_bitmap(spr_input_2);
+    destroy_bitmap(spr_input_3);
+    destroy_bitmap(spr_input_4);
+    destroy_bitmap(spr_input_5);
+    destroy_bitmap(spr_input_6);
+    destroy_bitmap(spr_input_7);
+    destroy_bitmap(spr_input_8);
+    destroy_bitmap(spr_input_9);
+    destroy_bitmap(spr_input_10);
+    destroy_bitmap(spr_input_11);
+    destroy_bitmap(spr_input_12);
+    destroy_bitmap(spr_input_13);
+    destroy_bitmap(spr_input_14);
+    destroy_bitmap(spr_input_15);
+    destroy_bitmap(spr_input_16);
+    destroy_bitmap(spr_input_17);
+    destroy_bitmap(bufferx);
+    destroy_bitmap(bt_joystick);
+    destroy_bitmap(bt_up_1);
+    destroy_bitmap(bt_up_2);
+    destroy_bitmap(bt_up_3);
+    destroy_bitmap(bt_down_1);
+    destroy_bitmap(bt_down_2);
+    destroy_bitmap(bt_down_3);
+    destroy_bitmap(bt_left_1);
+    destroy_bitmap(bt_left_2);
+    destroy_bitmap(bt_left_3);
+    destroy_bitmap(bt_right_1);
+    destroy_bitmap(bt_right_2);
+    destroy_bitmap(bt_right_3);
+    destroy_bitmap(bt_1);
+    destroy_bitmap(bt_2);
+    destroy_bitmap(bt_3);
+    destroy_bitmap(bt_ss_1);
+    destroy_bitmap(bt_ss_2);
+    destroy_bitmap(bt_ss_3);
+    destroy_bitmap(P[1].Spr);
+    destroy_bitmap(P[2].Spr);
+    destroy_bitmap(ED_Spr);
+    destroy_bitmap(Fireball[1].Spr);
+    destroy_bitmap(Fireball[2].Spr);
+    //destroy_bitmap(P1_Spr_Aux); destroy_bitmap(P2_Spr_Aux); destroy_bitmap(ED_Spr_Aux); //desativado, pois sao destruidos durante o loop de jogo
+    destroy_bitmap(P1_1);
+    destroy_bitmap(P2_1);
+    for (int ind = 0; ind < MAX_CHARS; ind++) { destroy_bitmap(MINIsprDisplay[ind]); }
+    for (int ind = 0; ind < MAX_CHARS; ind++) { destroy_bitmap(MINIsprDisplayArcadeMode[ind]); }
+    destroy_bitmap(P1BIGDisplay);
+    destroy_bitmap(P2BIGDisplay);
+    destroy_bitmap(P2BIGDisplayInv);
+    destroy_bitmap(spr_energy_bar);
+    destroy_bitmap(spr_energy_bar_full);
+    destroy_bitmap(P1_energy_flip);
+    destroy_bitmap(P1_energy_red_flip);
+    destroy_bitmap(char_generic);
+    destroy_bitmap(char_generic2x);
+    destroy_bitmap(spr_mold_results);
+    destroy_bitmap(spr_result_perfect);
+    destroy_bitmap(spr_result_win);
+    destroy_bitmap(spr_splash_draw);
+    destroy_bitmap(spr_splash_fight);
+    destroy_bitmap(spr_splash_ko);
+    destroy_bitmap(spr_splash_perfect);
+    destroy_bitmap(spr_splash_round1);
+    destroy_bitmap(spr_splash_round2);
+    destroy_bitmap(spr_splash_round3);
+    destroy_bitmap(spr_splash_round4);
+    destroy_bitmap(spr_splash_round5);
+    destroy_bitmap(spr_splash_youlose);
+    destroy_bitmap(spr_splash_youwin);
+    destroy_sample(round1);
+    destroy_sample(round2);
+    destroy_sample(round3);
+    destroy_sample(fight);
+    destroy_sample(ko);
+    destroy_sample(perfect);
+    destroy_sample(intro);
+    destroy_sample(back);
+    destroy_sample(choice);
+    destroy_sample(confirm);
+    destroy_sample(cursor);
+    destroy_sample(attacklvl1);
+    destroy_sample(attacklvl2);
+    destroy_sample(attacklvl3);
+    destroy_sample(hitlvl1);
+    destroy_sample(hitlvl2);
+    destroy_sample(hitlvl3);
+    destroy_midi(bgm_apresentacao);
+    destroy_midi(bgm_continue);
+    destroy_midi(bgm_select_screen);
+    destroy_midi(bgm_versus_mode);
+    clear_keybuf();
+}
 ///////////////////////////////////////////////////////////////////////////////
 // INICIALIZACAO ALLEGRO ------------------------------------------------[**02]
 ///////////////////////////////////////////////////////////////////////////////
@@ -1089,7 +1194,6 @@ int create_render_buffers() {
     
     return 0;
 }
-
 /**
  * Load all system bitmaps (UI elements, sprites, etc.)
  * Returns 0 on success, -1 if critical resources are missing
@@ -1867,120 +1971,3 @@ int main() {
     return 0;
 } //main()
 
-void dispose_game_elements() {
-    destroy_bitmap(donation);
-    for (int ind = 0; ind <= 500; ind++) {
-        destroy_bitmap(P[1].SprAtlas[ind]);
-        destroy_bitmap(P[2].SprAtlas[ind]);
-    }
-    for (int ind = 0; ind < 10; ind++) { destroy_bitmap(spr_num[ind]); }
-    for (int ind = 0; ind < 30; ind++) { destroy_bitmap(AnimTrans[ind]); }
-    destroy_bitmap(LayerHUD);
-    destroy_bitmap(LayerHUDa);
-    destroy_bitmap(LayerHUDb);
-    destroy_bitmap(ed_mode1_on);
-    destroy_bitmap(ed_mode2_on);
-    destroy_bitmap(ed_mode1_off);
-    destroy_bitmap(ed_mode2_off);
-    destroy_bitmap(edit_prevchar);
-    destroy_bitmap(edit_nextchar);
-    destroy_bitmap(edit_firstchar);
-    destroy_bitmap(edit_lastchar);
-    destroy_bitmap(spr_nao_implementado);
-    destroy_bitmap(bt_reset_input);
-    destroy_bitmap(mouse);
-    destroy_bitmap(mouse2);
-    destroy_bitmap(spr_input_0);
-    destroy_bitmap(spr_input_1);
-    destroy_bitmap(spr_input_2);
-    destroy_bitmap(spr_input_3);
-    destroy_bitmap(spr_input_4);
-    destroy_bitmap(spr_input_5);
-    destroy_bitmap(spr_input_6);
-    destroy_bitmap(spr_input_7);
-    destroy_bitmap(spr_input_8);
-    destroy_bitmap(spr_input_9);
-    destroy_bitmap(spr_input_10);
-    destroy_bitmap(spr_input_11);
-    destroy_bitmap(spr_input_12);
-    destroy_bitmap(spr_input_13);
-    destroy_bitmap(spr_input_14);
-    destroy_bitmap(spr_input_15);
-    destroy_bitmap(spr_input_16);
-    destroy_bitmap(spr_input_17);
-    destroy_bitmap(bufferx);
-    destroy_bitmap(bt_joystick);
-    destroy_bitmap(bt_up_1);
-    destroy_bitmap(bt_up_2);
-    destroy_bitmap(bt_up_3);
-    destroy_bitmap(bt_down_1);
-    destroy_bitmap(bt_down_2);
-    destroy_bitmap(bt_down_3);
-    destroy_bitmap(bt_left_1);
-    destroy_bitmap(bt_left_2);
-    destroy_bitmap(bt_left_3);
-    destroy_bitmap(bt_right_1);
-    destroy_bitmap(bt_right_2);
-    destroy_bitmap(bt_right_3);
-    destroy_bitmap(bt_1);
-    destroy_bitmap(bt_2);
-    destroy_bitmap(bt_3);
-    destroy_bitmap(bt_ss_1);
-    destroy_bitmap(bt_ss_2);
-    destroy_bitmap(bt_ss_3);
-    destroy_bitmap(P[1].Spr);
-    destroy_bitmap(P[2].Spr);
-    destroy_bitmap(ED_Spr);
-    destroy_bitmap(Fireball[1].Spr);
-    destroy_bitmap(Fireball[2].Spr);
-    //destroy_bitmap(P1_Spr_Aux); destroy_bitmap(P2_Spr_Aux); destroy_bitmap(ED_Spr_Aux); //desativado, pois sao destruidos durante o loop de jogo
-    destroy_bitmap(P1_1);
-    destroy_bitmap(P2_1);
-    for (int ind = 0; ind < MAX_CHARS; ind++) { destroy_bitmap(MINIsprDisplay[ind]); }
-    for (int ind = 0; ind < MAX_CHARS; ind++) { destroy_bitmap(MINIsprDisplayArcadeMode[ind]); }
-    destroy_bitmap(P1BIGDisplay);
-    destroy_bitmap(P2BIGDisplay);
-    destroy_bitmap(P2BIGDisplayInv);
-    destroy_bitmap(spr_energy_bar);
-    destroy_bitmap(spr_energy_bar_full);
-    destroy_bitmap(P1_energy_flip);
-    destroy_bitmap(P1_energy_red_flip);
-    destroy_bitmap(char_generic);
-    destroy_bitmap(char_generic2x);
-    destroy_bitmap(spr_mold_results);
-    destroy_bitmap(spr_result_perfect);
-    destroy_bitmap(spr_result_win);
-    destroy_bitmap(spr_splash_draw);
-    destroy_bitmap(spr_splash_fight);
-    destroy_bitmap(spr_splash_ko);
-    destroy_bitmap(spr_splash_perfect);
-    destroy_bitmap(spr_splash_round1);
-    destroy_bitmap(spr_splash_round2);
-    destroy_bitmap(spr_splash_round3);
-    destroy_bitmap(spr_splash_round4);
-    destroy_bitmap(spr_splash_round5);
-    destroy_bitmap(spr_splash_youlose);
-    destroy_bitmap(spr_splash_youwin);
-    destroy_sample(round1);
-    destroy_sample(round2);
-    destroy_sample(round3);
-    destroy_sample(fight);
-    destroy_sample(ko);
-    destroy_sample(perfect);
-    destroy_sample(intro);
-    destroy_sample(back);
-    destroy_sample(choice);
-    destroy_sample(confirm);
-    destroy_sample(cursor);
-    destroy_sample(attacklvl1);
-    destroy_sample(attacklvl2);
-    destroy_sample(attacklvl3);
-    destroy_sample(hitlvl1);
-    destroy_sample(hitlvl2);
-    destroy_sample(hitlvl3);
-    destroy_midi(bgm_apresentacao);
-    destroy_midi(bgm_continue);
-    destroy_midi(bgm_select_screen);
-    destroy_midi(bgm_versus_mode);
-    clear_keybuf();
-}

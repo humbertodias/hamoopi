@@ -9,7 +9,7 @@
  * que simplificam operações comuns no código.
  */
 
-#include "backend/platform_compat.h"
+#include "../backend/platform_compat.h"
 #include "constants.h"
 #include <stdio.h>
 #include <string.h>
