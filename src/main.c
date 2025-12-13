@@ -33,6 +33,9 @@
 *******************************************************************************/
 
 #include "backend/platform_compat.h"
+#include "core/constants.h"
+#include "core/macros.h"
+#include "core/utils.h"
 #include "core/types.h"
 #include "core/globals.h"
 #include "modules/input.h"
@@ -68,10 +71,10 @@ int Horas = 0;
 int Minutos = 0;
 int Segundos = 0;
 int timermenus = -1;
-int Ctrl_FPS = 60;
-int WindowResNumber = 2;
-int WindowResX = 640;
-int WindowResY = 480;
+int Ctrl_FPS = DEFAULT_FPS;
+int WindowResNumber = DEFAULT_WINDOW_RES_NUMBER;
+int WindowResX = GAME_BASE_WIDTH;
+int WindowResY = GAME_BASE_HEIGHT;
 
 int ativa_especial = 0;
 int bta = 0;
@@ -80,9 +83,9 @@ int btc = 0;
 int navAtlas = 0; //utilizado para navegar no debug Atlas
 int contatofisico = 0;
 
-struct HitSparkDEF HitSpark[99];
-struct FireballsDEF Fireball[3];
-struct PlayerDEF P[3];
+struct HitSparkDEF HitSpark[MAX_HIT_SPARKS];
+struct FireballsDEF Fireball[MAX_FIREBALLS];
+struct PlayerDEF P[PLAYER_ARRAY_SIZE];
 
 //permite a config de teclas
 int p1_up, p2_up;
@@ -98,8 +101,8 @@ int p1_bt6, p2_bt6;
 int p1_select, p2_select;
 int p1_start, p2_start;
 
-int op_sound_volume = 255;
-int op_sfx_volume = 255;
+int op_sound_volume = DEFAULT_SOUND_VOLUME;
+int op_sfx_volume = DEFAULT_SFX_VOLUME;
 char IDIOMA[3];
 int IntroMode = 1;
 int IntroTimer = 0;
@@ -861,18 +864,123 @@ char bg_choice[40] = "";
 // GAME LOOP FUNCTIONS -------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////
 
-// Forward declarations for game loop and initialization functions
-void dispose_game_elements();
-void initialize_allegro_subsystems();
-void load_fonts();
-void load_configuration();
-void create_render_buffers();
-int load_system_bitmaps();
-void load_animation_frames();
-void load_audio_resources();
-void initialize_character_and_stage_lists();
-
-
+void dispose_game_elements() {
+    destroy_bitmap(donation);
+    for (int ind = 0; ind <= 500; ind++) {
+        destroy_bitmap(P[1].SprAtlas[ind]);
+        destroy_bitmap(P[2].SprAtlas[ind]);
+    }
+    for (int ind = 0; ind < 10; ind++) { destroy_bitmap(spr_num[ind]); }
+    for (int ind = 0; ind < 30; ind++) { destroy_bitmap(AnimTrans[ind]); }
+    destroy_bitmap(LayerHUD);
+    destroy_bitmap(LayerHUDa);
+    destroy_bitmap(LayerHUDb);
+    destroy_bitmap(ed_mode1_on);
+    destroy_bitmap(ed_mode2_on);
+    destroy_bitmap(ed_mode1_off);
+    destroy_bitmap(ed_mode2_off);
+    destroy_bitmap(edit_prevchar);
+    destroy_bitmap(edit_nextchar);
+    destroy_bitmap(edit_firstchar);
+    destroy_bitmap(edit_lastchar);
+    destroy_bitmap(spr_nao_implementado);
+    destroy_bitmap(bt_reset_input);
+    destroy_bitmap(mouse);
+    destroy_bitmap(mouse2);
+    destroy_bitmap(spr_input_0);
+    destroy_bitmap(spr_input_1);
+    destroy_bitmap(spr_input_2);
+    destroy_bitmap(spr_input_3);
+    destroy_bitmap(spr_input_4);
+    destroy_bitmap(spr_input_5);
+    destroy_bitmap(spr_input_6);
+    destroy_bitmap(spr_input_7);
+    destroy_bitmap(spr_input_8);
+    destroy_bitmap(spr_input_9);
+    destroy_bitmap(spr_input_10);
+    destroy_bitmap(spr_input_11);
+    destroy_bitmap(spr_input_12);
+    destroy_bitmap(spr_input_13);
+    destroy_bitmap(spr_input_14);
+    destroy_bitmap(spr_input_15);
+    destroy_bitmap(spr_input_16);
+    destroy_bitmap(spr_input_17);
+    destroy_bitmap(bufferx);
+    destroy_bitmap(bt_joystick);
+    destroy_bitmap(bt_up_1);
+    destroy_bitmap(bt_up_2);
+    destroy_bitmap(bt_up_3);
+    destroy_bitmap(bt_down_1);
+    destroy_bitmap(bt_down_2);
+    destroy_bitmap(bt_down_3);
+    destroy_bitmap(bt_left_1);
+    destroy_bitmap(bt_left_2);
+    destroy_bitmap(bt_left_3);
+    destroy_bitmap(bt_right_1);
+    destroy_bitmap(bt_right_2);
+    destroy_bitmap(bt_right_3);
+    destroy_bitmap(bt_1);
+    destroy_bitmap(bt_2);
+    destroy_bitmap(bt_3);
+    destroy_bitmap(bt_ss_1);
+    destroy_bitmap(bt_ss_2);
+    destroy_bitmap(bt_ss_3);
+    destroy_bitmap(P[1].Spr);
+    destroy_bitmap(P[2].Spr);
+    destroy_bitmap(ED_Spr);
+    destroy_bitmap(Fireball[1].Spr);
+    destroy_bitmap(Fireball[2].Spr);
+    //destroy_bitmap(P1_Spr_Aux); destroy_bitmap(P2_Spr_Aux); destroy_bitmap(ED_Spr_Aux); //desativado, pois sao destruidos durante o loop de jogo
+    destroy_bitmap(P1_1);
+    destroy_bitmap(P2_1);
+    for (int ind = 0; ind < MAX_CHARS; ind++) { destroy_bitmap(MINIsprDisplay[ind]); }
+    for (int ind = 0; ind < MAX_CHARS; ind++) { destroy_bitmap(MINIsprDisplayArcadeMode[ind]); }
+    destroy_bitmap(P1BIGDisplay);
+    destroy_bitmap(P2BIGDisplay);
+    destroy_bitmap(P2BIGDisplayInv);
+    destroy_bitmap(spr_energy_bar);
+    destroy_bitmap(spr_energy_bar_full);
+    destroy_bitmap(P1_energy_flip);
+    destroy_bitmap(P1_energy_red_flip);
+    destroy_bitmap(char_generic);
+    destroy_bitmap(char_generic2x);
+    destroy_bitmap(spr_mold_results);
+    destroy_bitmap(spr_result_perfect);
+    destroy_bitmap(spr_result_win);
+    destroy_bitmap(spr_splash_draw);
+    destroy_bitmap(spr_splash_fight);
+    destroy_bitmap(spr_splash_ko);
+    destroy_bitmap(spr_splash_perfect);
+    destroy_bitmap(spr_splash_round1);
+    destroy_bitmap(spr_splash_round2);
+    destroy_bitmap(spr_splash_round3);
+    destroy_bitmap(spr_splash_round4);
+    destroy_bitmap(spr_splash_round5);
+    destroy_bitmap(spr_splash_youlose);
+    destroy_bitmap(spr_splash_youwin);
+    destroy_sample(round1);
+    destroy_sample(round2);
+    destroy_sample(round3);
+    destroy_sample(fight);
+    destroy_sample(ko);
+    destroy_sample(perfect);
+    destroy_sample(intro);
+    destroy_sample(back);
+    destroy_sample(choice);
+    destroy_sample(confirm);
+    destroy_sample(cursor);
+    destroy_sample(attacklvl1);
+    destroy_sample(attacklvl2);
+    destroy_sample(attacklvl3);
+    destroy_sample(hitlvl1);
+    destroy_sample(hitlvl2);
+    destroy_sample(hitlvl3);
+    destroy_midi(bgm_apresentacao);
+    destroy_midi(bgm_continue);
+    destroy_midi(bgm_select_screen);
+    destroy_midi(bgm_versus_mode);
+    clear_keybuf();
+}
 ///////////////////////////////////////////////////////////////////////////////
 // INICIALIZACAO ALLEGRO ------------------------------------------------[**02]
 ///////////////////////////////////////////////////////////////////////////////
@@ -906,8 +1014,9 @@ void load_fonts() {
 
 /**
  * Load configuration from SETUP.ini and initialize game settings
+ * @return 0 on success, -1 on error
  */
-void load_configuration() {
+int load_configuration() {
     //carrega os dados do setup.ini
     set_config_file("SETUP.ini");
 
@@ -918,20 +1027,21 @@ void load_configuration() {
     //opcao que mostra os inputs ingame
     Draw_Input = get_config_int("CONFIG", "show_inputs", 0);
     //sound e soundfx volumes
-    op_sound_volume = get_config_int("CONFIG", "sound_volume", 255);
-    op_sfx_volume = get_config_int("CONFIG", "sfx_volume", 255);
+    op_sound_volume = normalize_volume(get_config_int("CONFIG", "sound_volume", DEFAULT_SOUND_VOLUME));
+    op_sfx_volume = normalize_volume(get_config_int("CONFIG", "sfx_volume", DEFAULT_SFX_VOLUME));
+    
     //resolucao de tela no modo windowed
-    WindowResX = get_config_int("CONFIG", "window_res_x", 640);
-    WindowResY = get_config_int("CONFIG", "window_res_y", 480);
-    //define o ResWindowNumber
-    if (WindowResX == 320 && WindowResY == 240) WindowResNumber = 1;
-    if (WindowResX == 640 && WindowResY == 480) WindowResNumber = 2;
-    if (WindowResX == 720 && WindowResY == 480) WindowResNumber = 3; //SD
-    if (WindowResX == 800 && WindowResY == 600) WindowResNumber = 4;
-    if (WindowResX == 960 && WindowResY == 640) WindowResNumber = 5;
-    if (WindowResX == 960 && WindowResY == 720) WindowResNumber = 6;
-    if (WindowResX == 1024 && WindowResY == 600) WindowResNumber = 7;
-    if (WindowResX == 1280 && WindowResY == 720) WindowResNumber = 8; //HD
+    WindowResX = get_config_int("CONFIG", "window_res_x", GAME_BASE_WIDTH);
+    WindowResY = get_config_int("CONFIG", "window_res_y", GAME_BASE_HEIGHT);
+    
+    //define o ResWindowNumber usando função utilitária
+    WindowResNumber = get_resolution_number(WindowResX, WindowResY);
+    if (WindowResNumber == 0) {
+        // Resolução inválida, usar padrão
+        WindowResNumber = DEFAULT_WINDOW_RES_NUMBER;
+        WindowResX = GAME_BASE_WIDTH;
+        WindowResY = GAME_BASE_HEIGHT;
+    }
     //define se resolucao é fullscreen
     ModoFullscreen = get_config_int("CONFIG", "FullScreen", 0);
     //ajusta a tela com as novas configuracoes
@@ -941,18 +1051,18 @@ void load_configuration() {
     op_ShowFrameData = get_config_int("CONFIG", "frame_data", 0);
 
     //idioma do jogo
-    const char *lang = get_config_string("CONFIG", "language", "BR");
-    snprintf(IDIOMA, sizeof(IDIOMA), "%s", lang);
+    const char *lang = get_config_string("CONFIG", "language", DEFAULT_LANGUAGE);
+    safe_copy_name(IDIOMA, lang, sizeof(IDIOMA));
 
     //define centro do mapa
-    MapCenterX = get_config_int("TEMPLATE", "MapCenterX", 320);
-    MapCenterY = get_config_int("TEMPLATE", "MapCenterY", 118);
-    difficulty = get_config_int("CONFIG", "difficulty", 3);
+    MapCenterX = get_config_int("TEMPLATE", "MapCenterX", DEFAULT_MAP_CENTER_X);
+    MapCenterY = get_config_int("TEMPLATE", "MapCenterY", DEFAULT_MAP_CENTER_Y);
+    difficulty = get_config_int("CONFIG", "difficulty", DEFAULT_DIFFICULTY);
 
     //propriedades de round
-    RoundTime = get_config_int("CONFIG", "time", 99);
-    RoundTime = RoundTime * 60 + 59;
-    RoundTotal = get_config_int("CONFIG", "rounds", 3);
+    RoundTime = get_config_int("CONFIG", "time", DEFAULT_ROUND_TIME);
+    RoundTime = RoundTime * SECONDS_PER_MINUTE + 59;
+    RoundTotal = get_config_int("CONFIG", "rounds", DEFAULT_ROUNDS);
 
     //inputs dos jogadores
     p1_up = get_config_int("P1_CONTROL", "P1_UP", 84);
@@ -983,54 +1093,58 @@ void load_configuration() {
     //propriedades da paleta de cor
     P[1].DefineCorDaPaleta = 0;
     P[2].DefineCorDaPaleta = 0;
+    
+    return 0;
 }
 
 /**
  * Create all render buffers and sprite atlases
+ * @return 0 on success, -1 on memory allocation failure
  */
-void create_render_buffers() {
+int create_render_buffers() {
     //Valores de Referencia:
     //Genesis [320x224]
     //Snes [256x224]
     //CapcomCPS1 [384x224]
     //NeoGeo [320x224]
-    bg_test = create_bitmap(1280, 960); //tamanho max do cenario
+    CREATE_BITMAP_CHECKED(bg_test, BACKGROUND_MAX_WIDTH, BACKGROUND_MAX_HEIGHT);
+    CREATE_BITMAP_CHECKED(bufferx, BUFFER_MAX_WIDTH, BUFFER_MAX_HEIGHT);
+    CREATE_BITMAP_CHECKED(LayerHUD, WindowResX, WindowResY);
+    CREATE_BITMAP_CHECKED(LayerHUDa, GAME_BASE_WIDTH, GAME_BASE_HEIGHT);
+    CREATE_BITMAP_CHECKED(LayerHUDb, WindowResX, WindowResY);
 
-    bufferx = create_bitmap(2560, 1920); //layer do cenario e personagens escalonados
-    LayerHUD = create_bitmap(WindowResX, WindowResY); //layer das barras de energia
-    LayerHUDa = create_bitmap(640, 480); //layer das barras de energia
-    LayerHUDb = create_bitmap(WindowResX, WindowResY); //layer das barras de energia
-
-    for (int ind = 0; ind <= 500; ind++) {
-        P[1].SprAtlas[ind] = create_bitmap(480, 480); //reserva memoria para sprites dos players
-        P[2].SprAtlas[ind] = create_bitmap(480, 480); //reserva memoria para sprites dos players
+    for (int ind = 0; ind < MAX_SPRITE_ATLAS; ind++) {
+        CREATE_BITMAP_CHECKED(P[1].SprAtlas[ind], SPRITE_SIZE, SPRITE_SIZE);
+        CREATE_BITMAP_CHECKED(P[2].SprAtlas[ind], SPRITE_SIZE, SPRITE_SIZE);
     }
 
-    P[1].Spr = create_bitmap(480, 480);
-    P[2].Spr = create_bitmap(480, 480);
-    Fireball[1].Spr = create_bitmap(480, 480);
-    Fireball[2].Spr = create_bitmap(480, 480);
-    P1_Sombra = create_bitmap(480, 128);
-    P2_Sombra = create_bitmap(480, 128);
-    P1_Sombra_Aux = create_bitmap(480, 128);
-    P2_Sombra_Aux = create_bitmap(480, 128);
-    P1_energy_flip = create_bitmap(250, 40);
-    P1_energy_red_flip = create_bitmap(250, 40);
-    ED_Spr = create_bitmap(480, 480); //Editor
-    ED_Mini = create_bitmap(32, 32);
-    P1_Spr_Aux = create_bitmap(480, 480); //sprite auxiliar utilizado na funcao de animacao
-    P2_Spr_Aux = create_bitmap(480, 480); //sprite auxiliar utilizado na funcao de animacao
-    ED_Spr_Aux = create_bitmap(480, 480); //sprite auxiliar utilizado na funcao de animacao
-    HitSparkspr = create_bitmap(260, 260);
-    HitSpark_Aux = create_bitmap(130, 130);
-    P1_Pallete = create_bitmap(32, 10);
-    P2_Pallete = create_bitmap(32, 10);
-    clear_to_color(HitSparkspr, makecol(255, 0, 255));
-    clear_to_color(HitSpark_Aux, makecol(255, 0, 255));
-    clear_to_color(P1_Pallete, makecol(255, 0, 255));
-    clear_to_color(P2_Pallete, makecol(255, 0, 255));
+    CREATE_BITMAP_CHECKED(P[1].Spr, SPRITE_SIZE, SPRITE_SIZE);
+    CREATE_BITMAP_CHECKED(P[2].Spr, SPRITE_SIZE, SPRITE_SIZE);
+    CREATE_BITMAP_CHECKED(Fireball[1].Spr, SPRITE_SIZE, SPRITE_SIZE);
+    CREATE_BITMAP_CHECKED(Fireball[2].Spr, SPRITE_SIZE, SPRITE_SIZE);
+    CREATE_BITMAP_CHECKED(P1_Sombra, SHADOW_WIDTH, SHADOW_HEIGHT);
+    CREATE_BITMAP_CHECKED(P2_Sombra, SHADOW_WIDTH, SHADOW_HEIGHT);
+    CREATE_BITMAP_CHECKED(P1_Sombra_Aux, SHADOW_WIDTH, SHADOW_HEIGHT);
+    CREATE_BITMAP_CHECKED(P2_Sombra_Aux, SHADOW_WIDTH, SHADOW_HEIGHT);
+    CREATE_BITMAP_CHECKED(P1_energy_flip, 250, 40);
+    CREATE_BITMAP_CHECKED(P1_energy_red_flip, 250, 40);
+    CREATE_BITMAP_CHECKED(ED_Spr, SPRITE_SIZE, SPRITE_SIZE);
+    CREATE_BITMAP_CHECKED(ED_Mini, MINI_SPRITE_SIZE, MINI_SPRITE_SIZE);
+    CREATE_BITMAP_CHECKED(P1_Spr_Aux, SPRITE_SIZE, SPRITE_SIZE);
+    CREATE_BITMAP_CHECKED(P2_Spr_Aux, SPRITE_SIZE, SPRITE_SIZE);
+    CREATE_BITMAP_CHECKED(ED_Spr_Aux, SPRITE_SIZE, SPRITE_SIZE);
+    CREATE_BITMAP_CHECKED(HitSparkspr, 260, 260);
+    CREATE_BITMAP_CHECKED(HitSpark_Aux, 130, 130);
+    CREATE_BITMAP_CHECKED(P1_Pallete, 32, 10);
+    CREATE_BITMAP_CHECKED(P2_Pallete, 32, 10);
+    
+    clear_to_color(HitSparkspr, COLOR_TRANSPARENT);
+    clear_to_color(HitSpark_Aux, COLOR_TRANSPARENT);
+    clear_to_color(P1_Pallete, COLOR_TRANSPARENT);
+    clear_to_color(P2_Pallete, COLOR_TRANSPARENT);
+    
+    return 0;
 }
-
 /**
  * Load all system bitmaps (UI elements, sprites, etc.)
  * Returns 0 on success, -1 if critical resources are missing
@@ -1475,141 +1589,128 @@ void load_audio_resources() {
 
 /**
  * Initialize character and stage lists from configuration
+ * @return 0 on success, -1 on error
  */
-void initialize_character_and_stage_lists() {
+int initialize_character_and_stage_lists() {
     // Create miniature display bitmaps
-    MINIspr[1] = create_bitmap(32, 32);
-    MINIspr[2] = create_bitmap(32, 32);
-    MINIspr[3] = create_bitmap(32, 32);
-    MINIspr[4] = create_bitmap(32, 32);
-    MINIspr[5] = create_bitmap(32, 32);
-    MINIspr[6] = create_bitmap(32, 32);
-    MINIspr[7] = create_bitmap(32, 32);
-    MINIspr[8] = create_bitmap(32, 32);
+    for (int i = 1; i <= MAX_STAGES; i++) {
+        CREATE_BITMAP_CHECKED(MINIspr[i], MINI_SPRITE_SIZE, MINI_SPRITE_SIZE);
+    }
 
-    MINIsprDisplay[0] = create_bitmap(64, 64);
-    MINIsprDisplay[1] = create_bitmap(64, 64);
-    MINIsprDisplay[2] = create_bitmap(64, 64);
-    MINIsprDisplay[3] = create_bitmap(64, 64);
-    MINIsprDisplay[4] = create_bitmap(64, 64);
-    MINIsprDisplay[5] = create_bitmap(64, 64);
-    MINIsprDisplay[6] = create_bitmap(64, 64);
-    MINIsprDisplay[7] = create_bitmap(64, 64);
-    MINIsprDisplay[8] = create_bitmap(64, 64);
+    for (int i = 0; i <= MAX_STAGES; i++) {
+        CREATE_BITMAP_CHECKED(MINIsprDisplay[i], DISPLAY_SPRITE_SIZE, DISPLAY_SPRITE_SIZE);
+        CREATE_BITMAP_CHECKED(MINIsprDisplayArcadeMode[i], DISPLAY_SPRITE_SIZE, DISPLAY_SPRITE_SIZE);
+    }
 
-    MINIsprDisplayArcadeMode[0] = create_bitmap(64, 64);
-    MINIsprDisplayArcadeMode[1] = create_bitmap(64, 64);
-    MINIsprDisplayArcadeMode[2] = create_bitmap(64, 64);
-    MINIsprDisplayArcadeMode[3] = create_bitmap(64, 64);
-    MINIsprDisplayArcadeMode[4] = create_bitmap(64, 64);
-    MINIsprDisplayArcadeMode[5] = create_bitmap(64, 64);
-    MINIsprDisplayArcadeMode[6] = create_bitmap(64, 64);
-    MINIsprDisplayArcadeMode[7] = create_bitmap(64, 64);
-    MINIsprDisplayArcadeMode[8] = create_bitmap(64, 64);
-
-    P1BIGDisplay = create_bitmap(128, 128);
-    P2BIGDisplay = create_bitmap(128, 128);
-    P2BIGDisplayInv = create_bitmap(128, 128);
+    CREATE_BITMAP_CHECKED(P1BIGDisplay, BIG_DISPLAY_SIZE, BIG_DISPLAY_SIZE);
+    CREATE_BITMAP_CHECKED(P2BIGDisplay, BIG_DISPLAY_SIZE, BIG_DISPLAY_SIZE);
+    CREATE_BITMAP_CHECKED(P2BIGDisplayInv, BIG_DISPLAY_SIZE, BIG_DISPLAY_SIZE);
 
     //carrega a lista de personagens instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         char strtemp[9] = "";
         sprintf(strtemp, "char%i", ind);
         strcpy(Lista_de_Personagens_Instalados[ind], (char *)get_config_string("CHARS", strtemp, ""));
     }
 
     //atualiza a qtde de personagens instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
-        if (strcmp(Lista_de_Personagens_Instalados[ind], "") != 0) { Qtde_Personagens_Instalados++; }
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
+        if (!STR_EMPTY(Lista_de_Personagens_Instalados[ind])) { Qtde_Personagens_Instalados++; }
     }
     //faz o sorteio de personagens do modo historia <nao utilizado no momento, aguardando futura implementacao>
     // Ao sortear, levar em consideracao o total de personagens instalados, abastecendo a lista arcade apropriadamente
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         strcpy(Lista_de_Personagens_ArcadeMode[ind], Lista_de_Personagens_Instalados[ind]);
     }
 
     //carrega a lista de Cenarios instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         char strtemp[9] = "";
         sprintf(strtemp, "bg%i", ind);
         strcpy(Lista_de_Cenarios_Instalados[ind], (char *)get_config_string("BACKGROUNDS", strtemp, ""));
     }
     //atualiza a qtde de Cenarios instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
-        if (strcmp(Lista_de_Cenarios_Instalados[ind], "") != 0) { Qtde_Cenarios_Instalados++; }
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
+        if (!STR_EMPTY(Lista_de_Cenarios_Instalados[ind])) { Qtde_Cenarios_Instalados++; }
     }
     //faz o sorteio de Cenarios do modo historia <nao utilizado no momento, aguardando futura implementacao>
     // Ao sortear, levar em consideracao o total de Cenarios instalados, abastecendo a lista arcade apropriadamente
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         strcpy(Lista_de_Cenarios_ArcadeMode[ind], Lista_de_Cenarios_Instalados[ind]);
     }
 
     //Carrega Miniaturas - SELECT CHARS
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
-        if (Qtde_Personagens_Instalados >= ind) {
-            char MINIstring[99] = "";
-            sprintf(MINIstring, "data/chars/%s/000_01.png", Lista_de_Personagens_Instalados[ind]);
-            MINIspr[ind] = platform_load_bitmap(MINIstring, NULL);
-            if (!MINIspr[ind]) { MINIspr[ind] = load_bitmap("data/system/000_01.png", NULL); }
-            stretch_blit(MINIspr[ind], MINIsprDisplay[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0,
-                         MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
-            destroy_bitmap(MINIspr[ind]);
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
+        if (Qtde_Personagens_Instalados >= ind && is_valid_character_name(Lista_de_Personagens_Instalados[ind])) {
+            MINIspr[ind] = load_character_sprite(Lista_de_Personagens_Instalados[ind], "000_01.png");
+            if (MINIspr[ind]) {
+                stretch_blit(MINIspr[ind], MINIsprDisplay[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0,
+                             MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
+                destroy_bitmap(MINIspr[ind]);
+            }
         }
     }
 
     //miniaturas do arcade mode
-    for (int ind = 1; ind <= 8; ind++) {
-        if (Qtde_Personagens_Instalados >= ind) {
-            char MINIstring[99] = "";
-            sprintf(MINIstring, "data/chars/%s/000_01.png", Lista_de_Personagens_ArcadeMode[ind]);
-            MINIspr[ind] = platform_load_bitmap(MINIstring, NULL);
-            if (!MINIspr[ind]) { MINIspr[ind] = load_bitmap("data/system/000_01.png", NULL); }
-            stretch_blit(MINIspr[ind], MINIsprDisplayArcadeMode[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0,
-                         MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
-            destroy_bitmap(MINIspr[ind]);
+    for (int ind = 1; ind <= MAX_STAGES; ind++) {
+        if (Qtde_Personagens_Instalados >= ind && is_valid_character_name(Lista_de_Personagens_ArcadeMode[ind])) {
+            MINIspr[ind] = load_character_sprite(Lista_de_Personagens_ArcadeMode[ind], "000_01.png");
+            if (MINIspr[ind]) {
+                stretch_blit(MINIspr[ind], MINIsprDisplayArcadeMode[ind], 0, 0, MINIspr[ind]->w, MINIspr[ind]->h, 0, 0,
+                             MINIsprDisplay[1]->w, MINIsprDisplay[1]->h);
+                destroy_bitmap(MINIspr[ind]);
+            }
         }
     }
 
     //P1 miniatura da foto ingame
-    strcpy(P[1].Name, (char *)get_config_string("CHARS", "char1", ""));
-    char P1_1s[40] = "";
-    sprintf(P1_1s, "data/chars/%s/000_01.png", P[1].Name);
-    P1_1 = load_bitmap(P1_1s, NULL);
-    if (!P1_1) { P1_1 = load_bitmap("data/system/000_01.png", NULL); }
+    safe_copy_name(P[1].Name, get_config_string("CHARS", "char1", ""), sizeof(P[1].Name));
+    P1_1 = load_character_sprite(P[1].Name, "000_01.png");
+    
     //P2 miniatura da foto ingame
-    strcpy(P[2].Name, (char *)get_config_string("CHARS", "char2", ""));
-    char P2_1s[40] = "";
-    sprintf(P2_1s, "data/chars/%s/000_01.png", P[2].Name);
-    P2_1 = load_bitmap(P2_1s, NULL);
-    if (!P2_1) { P2_1 = load_bitmap("data/system/000_01.png", NULL); }
+    safe_copy_name(P[2].Name, get_config_string("CHARS", "char2", ""), sizeof(P[2].Name));
+    P2_1 = load_character_sprite(P[2].Name, "000_01.png");
+    
+    return 0;
 }
 
 
 int main() {
     initialize_allegro_subsystems();
     load_fonts();
-    load_configuration();
+    
+    if (load_configuration() != 0) {
+        allegro_message("Failed to load configuration");
+        return 1;
+    }
 
     //carrega a lista de Cenarios instalados
-    for (int ind = 1; ind <= MAX_CHARS; ind++) {
+    for (int ind = 1; ind <= MAX_CHARACTERS; ind++) {
         char strtemp[9] = "";
         sprintf(strtemp, "bg%i", ind);
         strcpy(Lista_de_Cenarios_Instalados[ind], (char *)get_config_string("BACKGROUNDS", strtemp, ""));
     }
     //abastece Atlas de cenario
-    for (int ind = 1; ind <= 8; ind++) {
+    for (int ind = 1; ind <= MAX_STAGES; ind++) {
         sprintf(bg_choice, "data/backgrounds/%s/000_00.png", Lista_de_Cenarios_Instalados[ind]);
         bg_hamoopi[ind] = load_bitmap(bg_choice, NULL);
     }
 
-    create_render_buffers();
+    if (create_render_buffers() != 0) {
+        allegro_message("Failed to allocate render buffers");
+        return 1;
+    }
 
     if (load_system_bitmaps() != 0) {
         return 1; // Exit if critical resources failed to load
     }
 
     load_animation_frames();
-    initialize_character_and_stage_lists();
+    
+    if (initialize_character_and_stage_lists() != 0) {
+        allegro_message("Failed to initialize character lists");
+        return 1;
+    }
     load_audio_resources();
 
     set_window_title(versao);
@@ -1630,11 +1731,11 @@ int main() {
         
         // Update frame-based timers using frame count instead of timer callback
         frame_count++;
-        Segundos = ((frame_count / 60) - Minutos * 60) - Horas * 3600;
-        if (Segundos >= 60) {
+        Segundos = ((frame_count / DEFAULT_FPS) - Minutos * SECONDS_PER_MINUTE) - Horas * 3600;
+        if (Segundos >= SECONDS_PER_MINUTE) {
             Minutos++;
             Segundos = 0;
-            if (Minutos >= 60) {
+            if (Minutos >= SECONDS_PER_MINUTE) {
                 Horas++;
                 Minutos = 0;
             }
@@ -1713,12 +1814,12 @@ int main() {
             int fx_h;
             fx_w = WindowResX;
             fx_h = WindowResY;
-            if (fx_w == 320) {
-                fx_w = 640;
-                fx_h = 480;
+            if (fx_w == RES_320x240_WIDTH) {
+                fx_w = GAME_BASE_WIDTH;
+                fx_h = GAME_BASE_HEIGHT;
             }
-            rectfill(bufferx, 0, 0, fx_w, fx_h, makecol(0, 0, 0));
-            if (CtrlAnimTrans[16] == 0) { rectfill(LayerHUDa, 0, 0, fx_w, fx_h, makecol(0, 0, 0)); }
+            rectfill(bufferx, 0, 0, fx_w, fx_h, COLOR_BLACK);
+            if (CtrlAnimTrans[16] == 0) { rectfill(LayerHUDa, 0, 0, fx_w, fx_h, COLOR_BLACK); }
             drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
         }
 
@@ -1768,7 +1869,7 @@ int main() {
         //////////////////////////////
         //BLIT de BUFFERX em SCREEN!//
         //////////////////////////////
-        if (GamePlayMode == 0) { stretch_blit(bufferx, screen, 0, 0, 640, 480, 0, 0, screen->w, screen->h); }
+        if (GamePlayMode == 0) { stretch_blit(bufferx, screen, 0, 0, GAME_BASE_WIDTH, GAME_BASE_HEIGHT, 0, 0, screen->w, screen->h); }
         if (GamePlayMode == 1) {
             masked_stretch_blit(LayerHUDa, LayerHUDb, 0, 0, LayerHUDa->w, LayerHUDa->h, 0, 0, LayerHUDb->w,
                                 LayerHUDb->h);
@@ -1790,9 +1891,9 @@ int main() {
         }
 
         clear(LayerHUD);
-        clear_to_color(LayerHUD, makecol(255, 0, 255));
-        clear_to_color(LayerHUDa, makecol(255, 0, 255));
-        clear_to_color(LayerHUDb, makecol(255, 0, 255));
+        clear_to_color(LayerHUD, COLOR_TRANSPARENT);
+        clear_to_color(LayerHUDa, COLOR_TRANSPARENT);
+        clear_to_color(LayerHUDb, COLOR_TRANSPARENT);
         clear(bufferx);
     } //(while sair==0)
 
@@ -1800,121 +1901,3 @@ int main() {
     dispose_game_elements();
     return 0;
 } //main()
-
-void dispose_game_elements() {
-    destroy_bitmap(donation);
-    for (int ind = 0; ind <= 500; ind++) {
-        destroy_bitmap(P[1].SprAtlas[ind]);
-        destroy_bitmap(P[2].SprAtlas[ind]);
-    }
-    for (int ind = 0; ind < 10; ind++) { destroy_bitmap(spr_num[ind]); }
-    for (int ind = 0; ind < 30; ind++) { destroy_bitmap(AnimTrans[ind]); }
-    destroy_bitmap(LayerHUD);
-    destroy_bitmap(LayerHUDa);
-    destroy_bitmap(LayerHUDb);
-    destroy_bitmap(ed_mode1_on);
-    destroy_bitmap(ed_mode2_on);
-    destroy_bitmap(ed_mode1_off);
-    destroy_bitmap(ed_mode2_off);
-    destroy_bitmap(edit_prevchar);
-    destroy_bitmap(edit_nextchar);
-    destroy_bitmap(edit_firstchar);
-    destroy_bitmap(edit_lastchar);
-    destroy_bitmap(spr_nao_implementado);
-    destroy_bitmap(bt_reset_input);
-    destroy_bitmap(mouse);
-    destroy_bitmap(mouse2);
-    destroy_bitmap(spr_input_0);
-    destroy_bitmap(spr_input_1);
-    destroy_bitmap(spr_input_2);
-    destroy_bitmap(spr_input_3);
-    destroy_bitmap(spr_input_4);
-    destroy_bitmap(spr_input_5);
-    destroy_bitmap(spr_input_6);
-    destroy_bitmap(spr_input_7);
-    destroy_bitmap(spr_input_8);
-    destroy_bitmap(spr_input_9);
-    destroy_bitmap(spr_input_10);
-    destroy_bitmap(spr_input_11);
-    destroy_bitmap(spr_input_12);
-    destroy_bitmap(spr_input_13);
-    destroy_bitmap(spr_input_14);
-    destroy_bitmap(spr_input_15);
-    destroy_bitmap(spr_input_16);
-    destroy_bitmap(spr_input_17);
-    destroy_bitmap(bufferx);
-    destroy_bitmap(bt_joystick);
-    destroy_bitmap(bt_up_1);
-    destroy_bitmap(bt_up_2);
-    destroy_bitmap(bt_up_3);
-    destroy_bitmap(bt_down_1);
-    destroy_bitmap(bt_down_2);
-    destroy_bitmap(bt_down_3);
-    destroy_bitmap(bt_left_1);
-    destroy_bitmap(bt_left_2);
-    destroy_bitmap(bt_left_3);
-    destroy_bitmap(bt_right_1);
-    destroy_bitmap(bt_right_2);
-    destroy_bitmap(bt_right_3);
-    destroy_bitmap(bt_1);
-    destroy_bitmap(bt_2);
-    destroy_bitmap(bt_3);
-    destroy_bitmap(bt_ss_1);
-    destroy_bitmap(bt_ss_2);
-    destroy_bitmap(bt_ss_3);
-    destroy_bitmap(P[1].Spr);
-    destroy_bitmap(P[2].Spr);
-    destroy_bitmap(ED_Spr);
-    destroy_bitmap(Fireball[1].Spr);
-    destroy_bitmap(Fireball[2].Spr);
-    //destroy_bitmap(P1_Spr_Aux); destroy_bitmap(P2_Spr_Aux); destroy_bitmap(ED_Spr_Aux); //desativado, pois sao destruidos durante o loop de jogo
-    destroy_bitmap(P1_1);
-    destroy_bitmap(P2_1);
-    for (int ind = 0; ind < MAX_CHARS; ind++) { destroy_bitmap(MINIsprDisplay[ind]); }
-    for (int ind = 0; ind < MAX_CHARS; ind++) { destroy_bitmap(MINIsprDisplayArcadeMode[ind]); }
-    destroy_bitmap(P1BIGDisplay);
-    destroy_bitmap(P2BIGDisplay);
-    destroy_bitmap(P2BIGDisplayInv);
-    destroy_bitmap(spr_energy_bar);
-    destroy_bitmap(spr_energy_bar_full);
-    destroy_bitmap(P1_energy_flip);
-    destroy_bitmap(P1_energy_red_flip);
-    destroy_bitmap(char_generic);
-    destroy_bitmap(char_generic2x);
-    destroy_bitmap(spr_mold_results);
-    destroy_bitmap(spr_result_perfect);
-    destroy_bitmap(spr_result_win);
-    destroy_bitmap(spr_splash_draw);
-    destroy_bitmap(spr_splash_fight);
-    destroy_bitmap(spr_splash_ko);
-    destroy_bitmap(spr_splash_perfect);
-    destroy_bitmap(spr_splash_round1);
-    destroy_bitmap(spr_splash_round2);
-    destroy_bitmap(spr_splash_round3);
-    destroy_bitmap(spr_splash_round4);
-    destroy_bitmap(spr_splash_round5);
-    destroy_bitmap(spr_splash_youlose);
-    destroy_bitmap(spr_splash_youwin);
-    destroy_sample(round1);
-    destroy_sample(round2);
-    destroy_sample(round3);
-    destroy_sample(fight);
-    destroy_sample(ko);
-    destroy_sample(perfect);
-    destroy_sample(intro);
-    destroy_sample(back);
-    destroy_sample(choice);
-    destroy_sample(confirm);
-    destroy_sample(cursor);
-    destroy_sample(attacklvl1);
-    destroy_sample(attacklvl2);
-    destroy_sample(attacklvl3);
-    destroy_sample(hitlvl1);
-    destroy_sample(hitlvl2);
-    destroy_sample(hitlvl3);
-    destroy_midi(bgm_apresentacao);
-    destroy_midi(bgm_continue);
-    destroy_midi(bgm_select_screen);
-    destroy_midi(bgm_versus_mode);
-    clear_keybuf();
-}
