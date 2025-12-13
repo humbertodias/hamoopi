@@ -123,13 +123,16 @@ target_include_directories(HAMOOPI PRIVATE
 if (APPLE)
     # For static linking on macOS, we need additional system libraries
     # that SDL2 and its extensions depend on
+    
+    # Use CMake's FindBZip2 for better bzip2 detection
+    find_package(BZip2)
+    
     find_library(ICONV_LIB iconv)
     find_library(PNG_LIB png)
     find_library(JPEG_LIB jpeg)
     find_library(WEBP_LIB webp)
     find_library(TIFF_LIB tiff)
     find_library(ZLIB_LIB z)
-    find_library(BZ2_LIB bz2)
     find_library(FREETYPE_LIB freetype)
     find_library(HARFBUZZ_LIB harfbuzz)
     find_library(VORBIS_LIB vorbis)
@@ -160,6 +163,7 @@ if (APPLE)
         "-framework CoreGraphics"
         "-framework AppKit"
         "-framework Foundation"
+        "-framework GameController"
     )
     
     # Link optional image/audio format libraries if found
@@ -181,8 +185,8 @@ if (APPLE)
     if(ZLIB_LIB)
         target_link_libraries(HAMOOPI ${ZLIB_LIB})
     endif()
-    if(BZ2_LIB)
-        target_link_libraries(HAMOOPI ${BZ2_LIB})
+    if(BZIP2_FOUND)
+        target_link_libraries(HAMOOPI ${BZIP2_LIBRARIES})
     endif()
     if(FREETYPE_LIB)
         target_link_libraries(HAMOOPI ${FREETYPE_LIB})
