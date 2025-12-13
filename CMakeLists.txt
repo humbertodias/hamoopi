@@ -87,6 +87,10 @@ endif()
 
 #
 # Link bundled library and dependencies to executable
+# Note: SDL2 libraries must be linked to the final executable (not bundled)
+# because bundle_static_library only bundles CMake target libraries, not
+# external libraries found via find_package(). The bundled library contains
+# only the HAMOOPI application code.
 #
 target_link_libraries(HAMOOPI 
     HAMOOPI_BUNDLED
