@@ -22,9 +22,15 @@ include(bundle_static_library)
 
 add_compile_definitions(__STATIC__=1)
 
-# Prefer static libraries for our code, but allow shared for system libraries
-# Note: CMAKE_FIND_LIBRARY_SUFFIXES controls find_library, not find_package
-# SDL2 will use shared libraries (.so) if static (.a) dependencies are incomplete
+# Prefer static libraries (.a) over shared libraries (.so/.dylib)
+# Note: If static libraries are not available, CMake will fall back to shared libraries
+if(APPLE)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".dylib")
+elseif(WIN32)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib" ".dll.a")
+else()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".so")
+endif()
 set(CMAKE_FIND_FRAMEWORK NEVER)
 set(CMAKE_FIND_APPBUNDLE NEVER)
 
@@ -115,6 +121,26 @@ target_include_directories(HAMOOPI PRIVATE
 # Platform-specific system libraries
 #
 if (APPLE)
+    # For static linking on macOS, we need additional system libraries
+    # that SDL2 and its extensions depend on
+    find_library(ICONV_LIB iconv)
+    find_library(PNG_LIB png)
+    find_library(JPEG_LIB jpeg)
+    find_library(WEBP_LIB webp)
+    find_library(TIFF_LIB tiff)
+    find_library(ZLIB_LIB z)
+    find_library(BZ2_LIB bz2)
+    find_library(FREETYPE_LIB freetype)
+    find_library(HARFBUZZ_LIB harfbuzz)
+    find_library(VORBIS_LIB vorbis)
+    find_library(VORBISFILE_LIB vorbisfile)
+    find_library(OGG_LIB ogg)
+    find_library(FLAC_LIB FLAC)
+    find_library(MPG123_LIB mpg123)
+    find_library(OPUS_LIB opus)
+    find_library(OPUSFILE_LIB opusfile)
+    find_library(MODPLUG_LIB modplug)
+    
     target_link_libraries(HAMOOPI
         "-framework CoreAudio"
         "-framework AudioToolbox"
@@ -126,8 +152,65 @@ if (APPLE)
         "-framework ForceFeedback"
         "-framework CoreVideo"
         "-framework Metal"
-        "-framework CoreHaptics"  # Framework para haptic feedback
+        "-framework CoreHaptics"
+        "-framework CoreFoundation"
+        "-framework CoreGraphics"
+        "-framework AppKit"
+        "-framework Foundation"
     )
+    
+    # Link optional image/audio format libraries if found
+    if(ICONV_LIB)
+        target_link_libraries(HAMOOPI ${ICONV_LIB})
+    endif()
+    if(PNG_LIB)
+        target_link_libraries(HAMOOPI ${PNG_LIB})
+    endif()
+    if(JPEG_LIB)
+        target_link_libraries(HAMOOPI ${JPEG_LIB})
+    endif()
+    if(WEBP_LIB)
+        target_link_libraries(HAMOOPI ${WEBP_LIB})
+    endif()
+    if(TIFF_LIB)
+        target_link_libraries(HAMOOPI ${TIFF_LIB})
+    endif()
+    if(ZLIB_LIB)
+        target_link_libraries(HAMOOPI ${ZLIB_LIB})
+    endif()
+    if(BZ2_LIB)
+        target_link_libraries(HAMOOPI ${BZ2_LIB})
+    endif()
+    if(FREETYPE_LIB)
+        target_link_libraries(HAMOOPI ${FREETYPE_LIB})
+    endif()
+    if(HARFBUZZ_LIB)
+        target_link_libraries(HAMOOPI ${HARFBUZZ_LIB})
+    endif()
+    if(VORBISFILE_LIB)
+        target_link_libraries(HAMOOPI ${VORBISFILE_LIB})
+    endif()
+    if(VORBIS_LIB)
+        target_link_libraries(HAMOOPI ${VORBIS_LIB})
+    endif()
+    if(OGG_LIB)
+        target_link_libraries(HAMOOPI ${OGG_LIB})
+    endif()
+    if(FLAC_LIB)
+        target_link_libraries(HAMOOPI ${FLAC_LIB})
+    endif()
+    if(MPG123_LIB)
+        target_link_libraries(HAMOOPI ${MPG123_LIB})
+    endif()
+    if(OPUS_LIB)
+        target_link_libraries(HAMOOPI ${OPUS_LIB})
+    endif()
+    if(OPUSFILE_LIB)
+        target_link_libraries(HAMOOPI ${OPUSFILE_LIB})
+    endif()
+    if(MODPLUG_LIB)
+        target_link_libraries(HAMOOPI ${MODPLUG_LIB})
+    endif()
 endif ()
 
 if (UNIX AND NOT APPLE)
