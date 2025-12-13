@@ -108,7 +108,7 @@ target_include_directories(HAMOOPI PRIVATE
 )
 
 #
-# Extra system libs for static Linux builds
+# Platform-specific system libraries
 #
 if (APPLE)
     target_link_libraries(HAMOOPI
@@ -127,12 +127,8 @@ if (APPLE)
 endif ()
 
 if (UNIX AND NOT APPLE)
-    # Link with m pthread dl rt (standard system libraries)
+    # Link standard system libraries
     target_link_libraries(HAMOOPI
-        ${SDL2_LIBRARIES}
-        ${SDL2_IMAGE_LIBRARIES}
-        ${SDL2_MIXER_LIBRARIES}
-        ${SDL2_TTF_LIBRARIES}
         m
         pthread
         dl
