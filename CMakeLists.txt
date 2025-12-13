@@ -101,25 +101,24 @@ if(BUILD_DEPS_FROM_SOURCE)
     FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_mixer SDL2_ttf)
     
     # Set variables for later use
-    # Note: FetchContent creates targets like SDL2::SDL2-static
+    # Note: FetchContent creates targets with proper include directories
     if(TARGET SDL2::SDL2-static)
         set(SDL2_LIBRARIES SDL2::SDL2-static)
+        # Get include directories from the target
+        get_target_property(SDL2_INCLUDE_DIRS SDL2::SDL2-static INTERFACE_INCLUDE_DIRECTORIES)
     endif()
     if(TARGET SDL2_image::SDL2_image-static)
         set(SDL2_IMAGE_LIBRARIES SDL2_image::SDL2_image-static)
+        get_target_property(SDL2_IMAGE_INCLUDE_DIRS SDL2_image::SDL2_image-static INTERFACE_INCLUDE_DIRECTORIES)
     endif()
     if(TARGET SDL2_mixer::SDL2_mixer-static)
         set(SDL2_MIXER_LIBRARIES SDL2_mixer::SDL2_mixer-static)
+        get_target_property(SDL2_MIXER_INCLUDE_DIRS SDL2_mixer::SDL2_mixer-static INTERFACE_INCLUDE_DIRECTORIES)
     endif()
     if(TARGET SDL2_ttf::SDL2_ttf-static)
         set(SDL2_TTF_LIBRARIES SDL2_ttf::SDL2_ttf-static)
+        get_target_property(SDL2_TTF_INCLUDE_DIRS SDL2_ttf::SDL2_ttf-static INTERFACE_INCLUDE_DIRECTORIES)
     endif()
-    
-    # FetchContent creates lowercase _SOURCE_DIR variables
-    set(SDL2_INCLUDE_DIRS ${sdl2_SOURCE_DIR}/include)
-    set(SDL2_IMAGE_INCLUDE_DIRS ${sdl2_image_SOURCE_DIR}/include)
-    set(SDL2_MIXER_INCLUDE_DIRS ${sdl2_mixer_SOURCE_DIR}/include)
-    set(SDL2_TTF_INCLUDE_DIRS ${sdl2_ttf_SOURCE_DIR}/include)
 else()
     # Use system-installed SDL2 libraries
     find_package(SDL2 REQUIRED)
