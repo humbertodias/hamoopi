@@ -1,5 +1,3 @@
-#pragma once
-
 #include "options.h"
 
 void GameLoop_OptionsMode() {
