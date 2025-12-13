@@ -50,7 +50,7 @@ if(BUILD_DEPS_FROM_SOURCE)
     FetchContent_Declare(
         SDL2
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG release-2.30.0
+        GIT_TAG release-2.30.10
         GIT_SHALLOW TRUE
     )
     
@@ -58,7 +58,7 @@ if(BUILD_DEPS_FROM_SOURCE)
     FetchContent_Declare(
         SDL2_image
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
-        GIT_TAG release-2.8.2
+        GIT_TAG release-2.8.3
         GIT_SHALLOW TRUE
     )
     
@@ -66,7 +66,7 @@ if(BUILD_DEPS_FROM_SOURCE)
     FetchContent_Declare(
         SDL2_mixer
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
-        GIT_TAG release-2.8.0
+        GIT_TAG release-2.8.1
         GIT_SHALLOW TRUE
     )
     
@@ -74,7 +74,7 @@ if(BUILD_DEPS_FROM_SOURCE)
     FetchContent_Declare(
         SDL2_ttf
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
-        GIT_TAG release-2.22.0
+        GIT_TAG release-2.24.0
         GIT_SHALLOW TRUE
     )
     
@@ -101,11 +101,21 @@ if(BUILD_DEPS_FROM_SOURCE)
     FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_mixer SDL2_ttf)
     
     # Set variables for later use
-    set(SDL2_LIBRARIES SDL2::SDL2-static)
-    set(SDL2_IMAGE_LIBRARIES SDL2_image::SDL2_image-static)
-    set(SDL2_MIXER_LIBRARIES SDL2_mixer::SDL2_mixer-static)
-    set(SDL2_TTF_LIBRARIES SDL2_ttf::SDL2_ttf-static)
+    # Note: FetchContent creates targets like SDL2::SDL2-static
+    if(TARGET SDL2::SDL2-static)
+        set(SDL2_LIBRARIES SDL2::SDL2-static)
+    endif()
+    if(TARGET SDL2_image::SDL2_image-static)
+        set(SDL2_IMAGE_LIBRARIES SDL2_image::SDL2_image-static)
+    endif()
+    if(TARGET SDL2_mixer::SDL2_mixer-static)
+        set(SDL2_MIXER_LIBRARIES SDL2_mixer::SDL2_mixer-static)
+    endif()
+    if(TARGET SDL2_ttf::SDL2_ttf-static)
+        set(SDL2_TTF_LIBRARIES SDL2_ttf::SDL2_ttf-static)
+    endif()
     
+    # FetchContent creates lowercase _SOURCE_DIR variables
     set(SDL2_INCLUDE_DIRS ${sdl2_SOURCE_DIR}/include)
     set(SDL2_IMAGE_INCLUDE_DIRS ${sdl2_image_SOURCE_DIR}/include)
     set(SDL2_MIXER_INCLUDE_DIRS ${sdl2_mixer_SOURCE_DIR}/include)
