@@ -44,7 +44,12 @@ set(PNG_SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
 set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
 set(PNG_ZLIB_VERSION "internal" CACHE STRING "" FORCE)
 set(ZLIB_ROOT "${zlib_SOURCE_DIR}" CACHE PATH "" FORCE)
-
+# --- ZLIB for libpng (Windows fix) ---
+set(ZLIB_LIBRARY zlib CACHE FILEPATH "" FORCE)
+set(ZLIB_INCLUDE_DIR
+    ${zlib_SOURCE_DIR}
+    CACHE PATH "" FORCE
+)
 FetchContent_Declare(
     libpng
     GIT_REPOSITORY https://github.com/glennrp/libpng.git
