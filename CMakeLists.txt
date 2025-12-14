@@ -125,6 +125,11 @@ else()
     add_executable(HAMOOPI src/main.c)
 endif()
 
+if(WIN32)
+    target_compile_definitions(HAMOOPI PRIVATE SDL_MAIN_HANDLED)
+endif(
+    
+)
 if(APPLE)
     target_link_libraries(HAMOOPI
         "-framework CoreFoundation"
