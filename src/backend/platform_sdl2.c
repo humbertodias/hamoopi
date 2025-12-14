@@ -839,20 +839,23 @@ void platform_textprintf_centre_ex(PlatformBitmap *bitmap, PlatformFont *font,
 // ============================================================================
 
 int platform_install_sound(int digi, int midi, const char *cfg) {
+    // Initialize TTF for font rendering
     if (TTF_Init() < 0) {
         fprintf(stderr, "TTF_Init failed: %s\n", TTF_GetError());
         return -1;
     }
 
+    // Only try to initialize audio if it wasn't already initialized in platform_init()
     if (!g_audio_initialized) {
         if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
             fprintf(stderr, "Mix_OpenAudio failed: %s\n", Mix_GetError());
-            return -1;
+            // Don't fail completely if audio fails - allow game to run without sound
+            return 0;
         }
         g_audio_initialized = 1;
+        Mix_AllocateChannels(16);
     }
 
-    Mix_AllocateChannels(16);
     return 0;
 }
 

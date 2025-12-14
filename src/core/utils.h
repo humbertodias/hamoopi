@@ -36,13 +36,11 @@ static inline BITMAP* load_bitmap_with_fallback(const char* path, const char* fa
  * @return Ponteiro para o bitmap carregado
  */
 static inline BITMAP* load_character_sprite(const char* char_name, const char* sprite_file) {
-    // Return fallback if character name is invalid
-    if (!is_valid_character_name(char_name)) {
-        return load_bitmap("data/system/000_01.png", NULL);
-    }
+    // Use fallback if character name is invalid
+    const char* safe_char_name = is_valid_character_name(char_name) ? char_name : "";
     
     char path[MAX_PATH_LENGTH];
-    snprintf(path, sizeof(path), "data/chars/%s/%s", char_name, sprite_file);
+    snprintf(path, sizeof(path), "data/chars/%s/%s", safe_char_name, sprite_file);
     return load_bitmap_with_fallback(path, "data/system/000_01.png");
 }
 
