@@ -73,7 +73,7 @@ set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR} CACHE PATH "" FORCE)
 FetchContent_Declare(
     libpng
     GIT_REPOSITORY https://github.com/glennrp/libpng.git
-    GIT_TAG v1.6.43
+    GIT_TAG v1.6.53
 )
 FetchContent_MakeAvailable(libpng)
 
@@ -148,7 +148,9 @@ target_include_directories(HAMOOPI_LIB PRIVATE
 # --- Executável ---
 add_executable(HAMOOPI src/main.c)
 
-target_compile_definitions(HAMOOPI PRIVATE SDL_MAIN_HANDLED)
+if(WIN32)
+    target_compile_definitions(HAMOOPI PRIVATE SDL_MAIN_HANDLED)
+endif()
 
 if(APPLE)
     target_link_libraries(HAMOOPI
