@@ -2,7 +2,7 @@
 #define HAMOOPI_GLOBALS_H
 
 #include "types.h"
-#include <SDL2/SDL.h>  // For Uint64 type
+#include <SDL.h>  // For Uint64 type
 
 // Global variable declarations for HAMOOPI game engine
 // These are defined in HAMOOPI.c and accessible to all modules

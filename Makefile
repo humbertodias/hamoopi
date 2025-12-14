@@ -5,11 +5,11 @@ PLATFORM     := $(shell uname -s)-$(shell uname -m)
 
 # Options
 BUILD_TYPE   := Debug
-CMAKE_FLAGS  :=
+CMAKE_FLAGS  := -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 .PHONY: build clean zip
 
-build: clean
+build:
 	cmake -B $(BUILD_DIR) $(CMAKE_FLAGS)
 	cmake --build $(BUILD_DIR) --config $(BUILD_TYPE)
 

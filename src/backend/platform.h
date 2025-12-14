@@ -8,10 +8,10 @@
 #include <stdlib.h>
 
 // Include SDL2 headers
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
 
 // SDL2 structures with exposed w,h for compatibility
 struct PlatformBitmap {
