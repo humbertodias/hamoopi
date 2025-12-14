@@ -2,7 +2,7 @@
 #define HAMOOPI_GLOBALS_H
 
 #include "types.h"
-#define SDL_MAIN_HANDLED // Prevent SDL from overriding main()
+//#define SDL_MAIN_HANDLED // Prevent SDL from overriding main()
 #include <SDL.h>  // For Uint64 type
 #include <string.h>
 
