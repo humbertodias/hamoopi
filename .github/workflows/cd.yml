@@ -2,29 +2,44 @@ name: CD
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
     tags:
-      - 'v*'
+      - "v*"
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
+    name: Build on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
+          # ---------- Linux ----------
           - os: ubuntu-latest
+            name: linux
             platform_name: linux
+            steamdeck: false
+
+          - os: ubuntu-latest
+            name: steamdeck
+            platform_name: steamdeck
+            steamdeck: true
+
+          # ---------- macOS ----------
           - os: macos-latest
+            name: macos
             platform_name: macos
+            steamdeck: false
+
+          # ---------- Windows ----------
           - os: windows-latest
+            name: windows
             platform_name: windows
+            steamdeck: false
 
     steps:
       - name: Checkout
@@ -36,37 +51,43 @@ jobs:
       - name: Configure
         shell: bash
         run: |
+          CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/dist"
+
+          if [ "${{ matrix.steamdeck }}" = "true" ]; then
+            CMAKE_FLAGS="$CMAKE_FLAGS -DSTEAMDECK=ON"
+          fi
+
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/dist
+            cmake -B build -G "MinGW Makefiles" $CMAKE_FLAGS
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/dist
+            cmake -B build -DCMAKE_POLICY_VERSION_MINIMUM=3.5 $CMAKE_FLAGS
           else
-            cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/dist
+            cmake -B build $CMAKE_FLAGS
           fi
 
       # --------------------
       # Build
       # --------------------
       - name: Build
+        shell: bash
         run: |
           cmake --build build --config Release --parallel
-        shell: bash
 
       # --------------------
       # Package
       # --------------------
       - name: Package
+        shell: bash
         run: |
           cmake --install build --config Release
 
+          cd dist
+
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cd dist
             7z a ../HAMOOPI-${{ matrix.platform_name }}.zip *
           else
-            cd dist
             tar czf ../HAMOOPI-${{ matrix.platform_name }}.tar.gz *
           fi
-        shell: bash
 
       # --------------------
       # Upload artifacts
