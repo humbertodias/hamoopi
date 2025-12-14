@@ -9,3 +9,4 @@ TTF2PCX
 _codeql_*
 CMakeLists.txt.user
 dist
+*.zip

@@ -8,12 +8,23 @@ on:
   pull_request:
     branches: [main, master]
   workflow_dispatch:
-
+    inputs:
+      build_type:
+        description: "CMake build type"
+        required: true
+        default: Release
+        type: choice
+        options:
+          - Release
+          - Debug
+          - RelWithDebInfo
+          - MinSizeRel
 jobs:
   build:
     name: Build on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-
+    env:
+      CMAKE_BUILD_TYPE: ${{ github.event.inputs.build_type || 'Release' }}
     strategy:
       fail-fast: false
       matrix:
@@ -51,7 +62,7 @@ jobs:
       - name: Configure
         shell: bash
         run: |
-          CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}"
+          CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}"
 
           if [ "${{ matrix.steamdeck }}" = "true" ]; then
             CMAKE_FLAGS="$CMAKE_FLAGS -DSTEAMDECK=ON"
@@ -71,7 +82,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          cmake --build build --config Release --parallel
+          cmake --build build --parallel
 
       # --------------------
       # Package
