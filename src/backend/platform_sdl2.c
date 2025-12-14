@@ -1,6 +1,7 @@
 // platform_sdl2.c - SDL2 implementation of platform abstraction layer
 
 #include "platform.h"
+#define SDL_MAIN_HANDLED // Prevent SDL from overriding main()
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
