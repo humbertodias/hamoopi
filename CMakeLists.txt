@@ -34,7 +34,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(zlib)
 
 # libpng
-set(PNG_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 set(PNG_SHARED OFF CACHE BOOL "" FORCE)
 set(PNG_STATIC ON CACHE BOOL "" FORCE)
 set(PNG_FRAMEWORK OFF CACHE BOOL "" FORCE)
