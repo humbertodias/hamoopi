@@ -49,6 +49,8 @@ set(PNG_TESTS OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(libpng)
 
+set(SDL_PIPEWIRE OFF CACHE BOOL "" FORCE)
+
 # SDL2
 FetchContent_Declare(
     SDL2
