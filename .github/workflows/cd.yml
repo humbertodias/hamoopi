@@ -79,15 +79,18 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cmake --install build --config Release
-
-          cd dist
-
+          cmake --install build --config Release --prefix dist/tmp
+      
+          cd dist/tmp
+      
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             7z a ../HAMOOPI-${{ matrix.platform_name }}.zip *
           else
             tar czf ../HAMOOPI-${{ matrix.platform_name }}.tar.gz *
           fi
+      
+          cd ../..
+          rm -rf dist/tmp  # limpa a pasta temporária
 
       # --------------------
       # Upload artifacts
