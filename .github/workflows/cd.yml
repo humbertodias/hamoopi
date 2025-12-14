@@ -37,11 +37,11 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+            cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/dist
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/dist
           else
-            cmake -B build -DCMAKE_BUILD_TYPE=Release
+            cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/dist
           fi
 
       # --------------------
@@ -57,7 +57,7 @@ jobs:
       # --------------------
       - name: Package
         run: |
-          cmake --install build --config Release --prefix dist
+          cmake --install build --config Release
 
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             cd dist
