@@ -148,9 +148,7 @@ target_include_directories(HAMOOPI_LIB PRIVATE
 # --- Executável ---
 add_executable(HAMOOPI src/main.c)
 
-if(WIN32)
-    target_compile_definitions(HAMOOPI PRIVATE SDL_MAIN_HANDLED)
-endif()
+target_compile_definitions(HAMOOPI PRIVATE SDL_MAIN_HANDLED)
 
 if(APPLE)
     target_link_libraries(HAMOOPI
