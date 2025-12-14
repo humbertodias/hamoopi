@@ -140,9 +140,6 @@ int platform_init(void) {
     SDL_SetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION, "1");
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d,opengl,opengles2,software");
 
-    /* ---------- Force modern audio backend ---------- */
-    SDL_setenv("SDL_AUDIODRIVER", "pipewire", 0); /* fallback handled by SDL */
-
     /* ---------- Init VIDEO + TIMER (mandatory) ---------- */
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
         fprintf(stderr, "SDL_Init(VIDEO) failed: %s\n", SDL_GetError());
