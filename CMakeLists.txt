@@ -34,8 +34,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(zlib)
 
 # libpng
-set(PNG_FRAMEWORK OFF CACHE BOOL "" FORCE)
+set(PNG_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 set(PNG_SHARED OFF CACHE BOOL "" FORCE)
+set(PNG_STATIC ON CACHE BOOL "" FORCE)
+set(PNG_FRAMEWORK OFF CACHE BOOL "" FORCE)
 set(PNG_TESTS OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
@@ -44,8 +46,6 @@ FetchContent_Declare(
     GIT_TAG v1.6.43
 )
 
-set(PNG_SHARED OFF CACHE BOOL "" FORCE)
-set(PNG_TESTS OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(libpng)
 
