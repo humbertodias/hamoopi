@@ -36,7 +36,7 @@ jobs:
       - name: Configure
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cmake -B build -A x64 -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
+            cmake -B build -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
           else
             cmake -B build -DCMAKE_BUILD_TYPE=Release
           fi
