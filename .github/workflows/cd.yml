@@ -90,7 +90,7 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cmake --install build -prefix dist
+          cmake --install build --prefix dist
             
       # --------------------
       # Upload artifacts
