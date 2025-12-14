@@ -77,9 +77,10 @@ FetchContent_MakeAvailable(libpng)
 
 # --- SDL2 (Steam Deck tweaks antes do FetchContent) ---
 if(STEAMDECK)
-    set(SDL_AUDIO_DRIVER_PIPEWIRE ON CACHE BOOL "" FORCE)
-    set(SDL_AUDIO_DRIVER_PULSEAUDIO ON CACHE BOOL "" FORCE)
-    set(SDL_AUDIO_DRIVER_ALSA ON CACHE BOOL "" FORCE)
+    # SDL estático, mas backends dinâmicos
+    set(SDL_AUDIO_DRIVER_PIPEWIRE OFF CACHE BOOL "" FORCE)
+    set(SDL_AUDIO_DRIVER_PULSEAUDIO OFF CACHE BOOL "" FORCE)
+    set(SDL_AUDIO_DRIVER_ALSA OFF CACHE BOOL "" FORCE)
 
     set(SDL_VIDEO_WAYLAND ON CACHE BOOL "" FORCE)
     set(SDL_VIDEO_X11 ON CACHE BOOL "" FORCE)
@@ -186,6 +187,10 @@ if(STEAMDECK)
         dl
         pthread
         rt
+        # 🔊 Audio backends
+        asound          # ALSA
+        pulse           # PulseAudio
+        pipewire-0.3    # PipeWire
     )
 
     set_target_properties(HAMOOPI PROPERTIES
