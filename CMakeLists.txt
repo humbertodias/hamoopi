@@ -75,9 +75,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(libpng)
 
-# --- SDL2 (Steam Deck tweaks antes do FetchContent) ---
 if(STEAMDECK)
-    # SDL estático, mas backends dinâmicos
+    # SDL estático, áudio dinâmico (CORRETO)
     set(SDL_AUDIO_DRIVER_PIPEWIRE OFF CACHE BOOL "" FORCE)
     set(SDL_AUDIO_DRIVER_PULSEAUDIO OFF CACHE BOOL "" FORCE)
     set(SDL_AUDIO_DRIVER_ALSA OFF CACHE BOOL "" FORCE)
@@ -180,17 +179,13 @@ target_link_libraries(HAMOOPI
     zlibstatic
 )
 
-# --- Steam Deck: libs obrigatórias + RPATH ---
+# --- Steam Deck: runtime-safe link + RPATH ---
 if(STEAMDECK)
     target_link_libraries(HAMOOPI
         m
         dl
         pthread
         rt
-        # 🔊 Audio backends
-        asound          # ALSA
-        pulse           # PulseAudio
-        pipewire-0.3    # PipeWire
     )
 
     set_target_properties(HAMOOPI PROPERTIES
