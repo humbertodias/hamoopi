@@ -205,7 +205,7 @@ target_include_directories(HAMOOPI PRIVATE
     ${CMAKE_SOURCE_DIR}/src/backend/minini
 )
 
-if(STEAMDECK)
+if(UNIX AND NOT APPLE)
     install(FILES data/system/hamoopi_logo.png DESTINATION .)
     install(FILES ${CMAKE_BINARY_DIR}/hamoopi.desktop DESTINATION .)
     configure_file(
