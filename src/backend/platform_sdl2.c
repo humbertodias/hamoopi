@@ -19,6 +19,7 @@ static PlatformBitmap *g_screen = NULL;
 static volatile Uint8 *g_sdl_key_state = NULL;
 static int g_key_state_size = 0;
 static void (*g_close_callback)(void) = NULL;
+static int g_audio_initialized = 0;
 
 // Drawing state
 static int g_drawing_mode = PDRAW_MODE_SOLID;
@@ -160,6 +161,8 @@ int platform_init(void) {
         if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
             fprintf(stderr, "Mix_OpenAudio failed: %s\n", Mix_GetError());
             audio_enabled = 0;
+        } else {
+            g_audio_initialized = 1;
         }
     }
 
@@ -841,9 +844,12 @@ int platform_install_sound(int digi, int midi, const char *cfg) {
         return -1;
     }
 
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-        fprintf(stderr, "Mix_OpenAudio failed: %s\n", Mix_GetError());
-        return -1;
+    if (!g_audio_initialized) {
+        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+            fprintf(stderr, "Mix_OpenAudio failed: %s\n", Mix_GetError());
+            return -1;
+        }
+        g_audio_initialized = 1;
     }
 
     Mix_AllocateChannels(16);
@@ -930,6 +936,9 @@ void platform_destroy_midi(PlatformMidi *midi) {
 }
 
 int platform_play_sample(PlatformSample *sample, int vol, int pan, int freq, int loop) {
+    if (!g_audio_initialized) {
+        return -1;
+    }
     if (sample && sample->chunk) {
         Mix_VolumeChunk(sample->chunk, (vol * MIX_MAX_VOLUME) / 255);
         sample->channel = Mix_PlayChannel(-1, sample->chunk, loop ? -1 : 0);
@@ -939,6 +948,9 @@ int platform_play_sample(PlatformSample *sample, int vol, int pan, int freq, int
 }
 
 int platform_play_midi(PlatformMidi *midi, int loop) {
+    if (!g_audio_initialized) {
+        return -1;
+    }
     if (midi && midi->music) {
         return Mix_PlayMusic(midi->music, loop ? -1 : 0);
     }
@@ -946,15 +958,24 @@ int platform_play_midi(PlatformMidi *midi, int loop) {
 }
 
 void platform_stop_midi(void) {
+    if (!g_audio_initialized) {
+        return;
+    }
     Mix_HaltMusic();
 }
 
 void platform_set_volume(int digi, int midi) {
+    if (!g_audio_initialized) {
+        return;
+    }
     Mix_Volume(-1, (digi * MIX_MAX_VOLUME) / 255);
     Mix_VolumeMusic((midi * MIX_MAX_VOLUME) / 255);
 }
 
 void platform_adjust_sample(PlatformSample *sample, int vol, int pan, int freq, int loop) {
+    if (!g_audio_initialized) {
+        return;
+    }
     if (sample && sample->chunk) {
         Mix_VolumeChunk(sample->chunk, (vol * MIX_MAX_VOLUME) / 255);
         if (sample->channel >= 0) {

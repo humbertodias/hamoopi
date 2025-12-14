@@ -1692,8 +1692,14 @@ int main() {
     }
     //abastece Atlas de cenario
     for (int ind = 1; ind <= MAX_STAGES; ind++) {
-        sprintf(bg_choice, "data/backgrounds/%s/000_00.png", Lista_de_Cenarios_Instalados[ind]);
-        bg_hamoopi[ind] = load_bitmap(bg_choice, NULL);
+        // Only load background if name is not empty
+        if (Lista_de_Cenarios_Instalados[ind] != NULL && 
+            strlen(Lista_de_Cenarios_Instalados[ind]) > 0) {
+            sprintf(bg_choice, "data/backgrounds/%s/000_00.png", Lista_de_Cenarios_Instalados[ind]);
+            bg_hamoopi[ind] = load_bitmap(bg_choice, NULL);
+        } else {
+            bg_hamoopi[ind] = NULL;
+        }
     }
 
     if (create_render_buffers() != 0) {
