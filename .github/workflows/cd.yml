@@ -44,7 +44,7 @@ jobs:
           fi
       
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            GENERATOR='-G "MinGW Makefiles"'
+            GENERATOR="-G 'MinGW Makefiles'"
           fi
       
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release $EXTRA $GENERATOR
