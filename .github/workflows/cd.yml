@@ -51,7 +51,7 @@ jobs:
       - name: Configure
         shell: bash
         run: |
-          CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/dist"
+          CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}"
 
           if [ "${{ matrix.steamdeck }}" = "true" ]; then
             CMAKE_FLAGS="$CMAKE_FLAGS -DSTEAMDECK=ON"
@@ -79,29 +79,16 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cmake --install build --config Release --prefix dist/tmp
-      
-          cd dist/tmp
-      
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            7z a ../../HAMOOPI-${{ matrix.platform_name }}.zip *
-          else
-            tar czf ../../HAMOOPI-${{ matrix.platform_name }}.tar.gz *
-          fi
-      
-          cd ../..
-          rm -rf dist/tmp  # limpa a pasta temporária
-
+          cmake --install build --config Release --prefix dist
+            
       # --------------------
       # Upload artifacts
       # --------------------
       - name: Upload artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: HAMOOPI-${{ matrix.platform_name }}
-          path: |
-            HAMOOPI-${{ matrix.platform_name }}.tar.gz
-            HAMOOPI-${{ matrix.platform_name }}.zip
+          path: dist/
           retention-days: 30
 
   release:
