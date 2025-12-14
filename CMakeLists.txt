@@ -125,6 +125,25 @@ else()
     add_executable(HAMOOPI src/main.c)
 endif()
 
+if(APPLE)
+    target_link_libraries(HAMOOPI
+        "-framework CoreFoundation"
+        "-framework Foundation"
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework ForceFeedback"
+        "-framework GameController"
+        "-framework CoreHaptics"
+        "-framework CoreAudio"
+        "-framework AudioToolbox"
+        "-framework AudioUnit"
+        "-framework CoreVideo"
+        "-framework CoreGraphics"
+        "-framework Metal"
+        "-framework AppKit"
+    )
+endif()
+
 target_link_libraries(HAMOOPI
     HAMOOPI_LIB
     SDL2::SDL2-static
