@@ -168,6 +168,7 @@ target_include_directories(HAMOOPI PRIVATE
     ${CMAKE_SOURCE_DIR}/src/backend/minini
 )
 
+set(CMAKE_SKIP_INSTALL_RULES ON)
 install(TARGETS HAMOOPI
     RUNTIME DESTINATION .
 )
