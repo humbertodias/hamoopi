@@ -38,7 +38,7 @@ set(PNG_SHARED OFF CACHE BOOL "" FORCE)
 set(PNG_STATIC ON CACHE BOOL "" FORCE)
 set(PNG_FRAMEWORK OFF CACHE BOOL "" FORCE)
 set(PNG_TESTS OFF CACHE BOOL "" FORCE)
-set(PNG_INSTALL OFF CACHE BOOL "" FORCE)  # evita export/install problemático
+set(PNG_INSTALL OFF CACHE BOOL "" FORCE) # evita export/install problemático
 # 🔴 ESSAS DUAS são as que realmente resolvem
 set(PNG_SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
 set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
@@ -46,10 +46,7 @@ set(PNG_ZLIB_VERSION "internal" CACHE STRING "" FORCE)
 set(ZLIB_ROOT "${zlib_SOURCE_DIR}" CACHE PATH "" FORCE)
 # --- ZLIB for libpng (Windows fix) ---
 set(ZLIB_LIBRARY zlib CACHE FILEPATH "" FORCE)
-set(ZLIB_INCLUDE_DIR
-    ${zlib_SOURCE_DIR}
-    CACHE PATH "" FORCE
-)
+set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR} CACHE PATH "" FORCE)
 FetchContent_Declare(
     libpng
     GIT_REPOSITORY https://github.com/glennrp/libpng.git
@@ -87,7 +84,6 @@ set(SDL2_IMAGE_INCLUDE_DIRS "./build/_deps/sdl2_image-src/include")
 set(SDL2_MIXER_INCLUDE_DIRS "./build/_deps/sdl2_mixer-src/include")
 
 get_target_property(_SDL2_TTF_INCLUDES SDL2_ttf::SDL2_ttf-static INTERFACE_INCLUDE_DIRECTORIES)
-message("_SDL2_TTF_INCLUDES ${_SDL2_TTF_INCLUDES}")
 set(SDL2_TTF_INCLUDE_DIRS ${_SDL2_TTF_INCLUDES})
 
 # --- Biblioteca HAMOOPI ---
@@ -168,9 +164,6 @@ target_include_directories(HAMOOPI PRIVATE
     ${CMAKE_SOURCE_DIR}/src/backend/minini
 )
 
-set(CMAKE_SKIP_INSTALL_RULES ON)
-install(TARGETS HAMOOPI
-    RUNTIME DESTINATION .
-)
+install(TARGETS HAMOOPI RUNTIME DESTINATION .)
 install(DIRECTORY data DESTINATION .)
 install(FILES SETUP.ini README.md LICENSE DESTINATION .)
