@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(HAMOOPI C)
+set(EXECUTABLE_NAME "HAMOOPI")
+set(ICON_NAME "hamoopi")
 
 option(STEAMDECK "Build specifically for Steam Deck (SteamOS)" OFF)
 
@@ -203,6 +205,17 @@ target_include_directories(HAMOOPI PRIVATE
     ${CMAKE_SOURCE_DIR}/src/backend/minini
 )
 
+if(STEAMDECK)
+    install(FILES data/system/hamoopi_logo.png DESTINATION .)
+    install(FILES ${CMAKE_BINARY_DIR}/hamoopi.desktop DESTINATION .)
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/cmake/hamoopi.desktop.in
+        ${CMAKE_BINARY_DIR}/hamoopi.desktop
+        @ONLY
+    )
+endif()
+
+#set(CMAKE_SKIP_INSTALL_RULES ON)
 install(TARGETS HAMOOPI RUNTIME DESTINATION .)
 install(DIRECTORY data DESTINATION .)
 install(FILES SETUP.ini README.md LICENSE DESTINATION .)
