@@ -34,13 +34,20 @@ jobs:
       # Configure CMake
       # --------------------
       - name: Configure
-        run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cmake -B build -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
-          else
-            cmake -B build -DCMAKE_BUILD_TYPE=Release
-          fi
         shell: bash
+        run: |
+          EXTRA=""
+          GENERATOR=""
+      
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then
+            EXTRA="-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+          fi
+      
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            GENERATOR='-G "MinGW Makefiles"'
+          fi
+      
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release $EXTRA $GENERATOR
 
       # --------------------
       # Build
