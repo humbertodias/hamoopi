@@ -49,7 +49,7 @@ set(ZLIB_BUILD_STATIC ON CACHE BOOL "" FORCE)
 FetchContent_Declare(
     zlib
     GIT_REPOSITORY https://github.com/madler/zlib.git
-    GIT_TAG v1.3.1
+    GIT_TAG v1.3.1.2
 )
 FetchContent_MakeAvailable(zlib)
 
