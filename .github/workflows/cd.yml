@@ -98,7 +98,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: HAMOOPI-${{ matrix.platform_name }}
+          name: HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}
           path: dist/
           retention-days: 30
 
