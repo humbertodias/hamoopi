@@ -57,18 +57,7 @@ jobs:
       # --------------------
       - name: Package
         run: |
-          mkdir -p dist
-
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cp build/Release/HAMOOPI.exe dist/
-          else
-            cp build/HAMOOPI dist/
-          fi
-
-          cp -r data dist/
-          cp SETUP.ini dist/
-          cp README.md dist/
-          cp LICENSE dist/
+          cmake --install build --config Release --prefix dist
 
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             cd dist

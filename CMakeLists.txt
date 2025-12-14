@@ -128,7 +128,7 @@ endif()
 if(WIN32)
     target_compile_definitions(HAMOOPI PRIVATE SDL_MAIN_HANDLED)
 endif(
-    
+
 )
 if(APPLE)
     target_link_libraries(HAMOOPI
@@ -168,13 +168,8 @@ target_include_directories(HAMOOPI PRIVATE
     ${CMAKE_SOURCE_DIR}/src/backend/minini
 )
 
-# --- Pós-build ---
-add_custom_command(TARGET HAMOOPI POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:HAMOOPI> ${CMAKE_SOURCE_DIR}
+install(TARGETS HAMOOPI
+    RUNTIME DESTINATION .
 )
-add_custom_command(TARGET HAMOOPI POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:HAMOOPI>/data
-)
-add_custom_command(TARGET HAMOOPI POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/SETUP.ini $<TARGET_FILE_DIR:HAMOOPI>/SETUP.ini
-)
+install(DIRECTORY data DESTINATION .)
+install(FILES SETUP.ini README.md LICENSE DESTINATION .)
