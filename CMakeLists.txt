@@ -111,6 +111,9 @@ set(SDL2TTF_VENDORED ON CACHE BOOL "" FORCE)
 # Disable AVIF / dav1d (avoids NASM dependency)
 set(SDL2IMAGE_AVIF OFF CACHE BOOL "" FORCE)
 set(SDL2IMAGE_VENDORED_DAV1D OFF CACHE BOOL "" FORCE)
+# Disable TIFF support (avoids libtiff.so dependency)
+set(SDL2IMAGE_TIF OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_TIFF OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_mixer SDL2_ttf)
 
