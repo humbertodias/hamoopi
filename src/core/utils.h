@@ -30,6 +30,15 @@ static inline BITMAP* load_bitmap_with_fallback(const char* path, const char* fa
 }
 
 /**
+ * Verifica se uma string representa um nome de personagem válido
+ * @param name Nome a verificar
+ * @return 1 se válido, 0 caso contrário
+ */
+static inline int is_valid_character_name(const char* name) {
+    return name && name[0] != '\0' && strlen(name) < MAX_NAME_LENGTH;
+}
+
+/**
  * Carrega um bitmap de personagem com fallback automático
  * @param char_name Nome do personagem
  * @param sprite_file Nome do arquivo de sprite (ex: "000_01.png")
@@ -61,15 +70,6 @@ static inline BITMAP* load_stage_bitmap(const char* stage_name, const char* spri
     char path[MAX_PATH_LENGTH];
     snprintf(path, sizeof(path), "data/backgrounds/%s/%s", stage_name, sprite_file);
     return load_bitmap(path, NULL);
-}
-
-/**
- * Verifica se uma string representa um nome de personagem válido
- * @param name Nome a verificar
- * @return 1 se válido, 0 caso contrário
- */
-static inline int is_valid_character_name(const char* name) {
-    return name && name[0] != '\0' && strlen(name) < MAX_NAME_LENGTH;
 }
 
 /**
