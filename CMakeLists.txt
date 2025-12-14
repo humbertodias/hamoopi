@@ -39,7 +39,7 @@ if(TARGET zlibstatic AND NOT TARGET ZLIB::ZLIB)
 endif()
 
 # libpng
-set(PNG_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+set(ZLIB_ROOT "${zlib_SOURCE_DIR}" CACHE PATH "Path to zlib" FORCE)
 set(PNG_SHARED OFF CACHE BOOL "" FORCE)
 set(PNG_STATIC ON CACHE BOOL "" FORCE)
 set(PNG_FRAMEWORK OFF CACHE BOOL "" FORCE)
@@ -50,8 +50,6 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/glennrp/libpng.git
     GIT_TAG v1.6.43
 )
-
-
 FetchContent_MakeAvailable(libpng)
 
 set(SDL_PIPEWIRE OFF CACHE BOOL "" FORCE)
