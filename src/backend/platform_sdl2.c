@@ -1,10 +1,10 @@
 // platform_sdl2.c - SDL2 implementation of platform abstraction layer
 
 #include "platform.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
 #include <stdarg.h>
 #include <string.h>
 #include <stdint.h>
@@ -134,27 +134,48 @@ static void init_key_mapping(void) {
 // ============================================================================
 
 int platform_init(void) {
-    // Set SDL hints for better performance
-    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");  // Disable VSync via hint as well
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // Nearest neighbor (faster)
-    SDL_SetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION, "1");  // Enable if available
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d,opengl,opengles2,software");  // Prefer hardware
+    /* ---------- SDL hints ---------- */
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+    SDL_SetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION, "1");
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d,opengl,opengles2,software");
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
-        fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
+    /* ---------- Init VIDEO + TIMER (mandatory) ---------- */
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
+        fprintf(stderr, "SDL_Init(VIDEO) failed: %s\n", SDL_GetError());
         return -1;
     }
 
+    const char* driver = SDL_GetCurrentVideoDriver();
+    printf("SDL video driver: %s\n", driver);
+
     init_key_mapping();
 
-    // Initialize SDL_image for PNG support
-    int img_flags = IMG_INIT_PNG | IMG_INIT_JPG;
-    if (!(IMG_Init(img_flags) & img_flags)) {
-        fprintf(stderr, "IMG_Init failed: %s\n", IMG_GetError());
+    /* ---------- Init AUDIO (optional) ---------- */
+    int audio_enabled = 1;
+
+    if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
+        fprintf(stderr, "SDL audio disabled: %s\n", SDL_GetError());
+        audio_enabled = 0;
     }
 
-    return 0;
+    if (audio_enabled) {
+        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+            fprintf(stderr, "Mix_OpenAudio failed: %s\n", Mix_GetError());
+            audio_enabled = 0;
+        }
+    }
+
+    /* ---------- Init SDL_image ---------- */
+    int img_flags = IMG_INIT_PNG | IMG_INIT_JPG;
+    if ((IMG_Init(img_flags) & img_flags) != img_flags) {
+        fprintf(stderr, "IMG_Init failed: %s\n", IMG_GetError());
+        /* Not fatal */
+    }
+
+    return audio_enabled;
 }
+
 
 void platform_set_uformat(int format) {
     // SDL2 uses UTF-8 internally, no action needed
@@ -826,6 +847,13 @@ int platform_install_sound(int digi, int midi, const char *cfg) {
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         fprintf(stderr, "Mix_OpenAudio failed: %s\n", Mix_GetError());
         return -1;
+    }
+
+    const char *driver = SDL_GetCurrentAudioDriver();
+    if (driver) {
+        printf("SDL audio driver: %s\n", driver);
+    } else {
+        printf("No SDL audio driver\n");
     }
 
     Mix_AllocateChannels(16);

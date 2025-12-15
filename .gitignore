@@ -8,3 +8,5 @@ TTF2PCX
 *.exe
 _codeql_*
 CMakeLists.txt.user
+dist
+*.zip
