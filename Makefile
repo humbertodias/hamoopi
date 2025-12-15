@@ -4,17 +4,18 @@ BUILD_DIR    := build
 PLATFORM     := $(shell uname -s)-$(shell uname -m)
 
 # Options
-BUILD_TYPE   := Debug
-CMAKE_FLAGS  :=
+BUILD_TYPE   := Release
+CMAKE_FLAGS  := -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 .PHONY: build clean zip
 
-build: clean
-	cmake -B $(BUILD_DIR) $(CMAKE_FLAGS)
-	cmake --build $(BUILD_DIR) --config $(BUILD_TYPE)
+build:
+	cmake -B $(BUILD_DIR) $(CMAKE_FLAGS) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DCMAKE_INSTALL_PREFIX=`pwd`/dist
+	cmake --build $(BUILD_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET) $(TARGET).exe *.o *.so
 
 zip:
-	zip -r $(TARGET)-$(PLATFORM).zip data LICENSE README.md SETUP.ini $(TARGET) $(TARGET).exe
+	cmake --install build --prefix dist
+	zip -r $(TARGET)-$(PLATFORM).zip dist/*
