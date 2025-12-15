@@ -67,6 +67,10 @@ jobs:
               libasound2-dev libpulse-dev libpipewire-0.3-dev
           fi
 
+      - name: Install zip
+        if: runner.name == 'windows'
+        run: choco install zip -y
+                  
       # --------------------
       # Configure CMake
       # --------------------
