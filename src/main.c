@@ -59,7 +59,7 @@
 // DECLARACOES INICIAIS -------------------------------------------------[**01]
 ///////////////////////////////////////////////////////////////////////////////
 
-char versao[45] = "HAMOOPI v.001A";
+char versao[45] = "HAMOOPI v.002A";
 
 int sair = 0;
 void sair_allegro() { sair = 1; }
