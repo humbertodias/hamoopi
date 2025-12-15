@@ -102,15 +102,17 @@ jobs:
         shell: bash
         run: |
           cmake --install build --prefix dist
+          cd dist
+          zip -r ../HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}.zip *
 
       # --------------------
-      # Upload artifacts
+      # Upload artifacts (zips only)
       # --------------------
-      - name: Upload artifacts
+      - name: Upload artifact zip
         uses: actions/upload-artifact@v6
         with:
           name: HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}
-          path: dist/
+          path: HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}.zip
           retention-days: 30
 
   release:
@@ -118,12 +120,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-
     permissions:
       contents: write
 
     steps:
-      - name: Download artifacts
+      - name: Download artifact zips
         uses: actions/download-artifact@v6
         with:
           path: artifacts
@@ -131,6 +132,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*/*
+          files: artifacts/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
