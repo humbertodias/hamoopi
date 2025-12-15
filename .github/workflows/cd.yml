@@ -98,15 +98,21 @@ jobs:
       # --------------------
       # Package
       # --------------------
-      - name: Package
+      - name: Package (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
         run: |
           cmake --install build --prefix dist
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            pwsh -Command "Compress-Archive -Path dist\\* -DestinationPath HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}.zip"
-          else
-            cd dist
-            zip -r ../HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}.zip *
-          fi          
+          Compress-Archive -Path dist\* -DestinationPath HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}.zip
+   
+      - name: Package
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          cmake --install build --prefix dist
+          cd dist
+          zip -r ../HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}.zip *
+
 
       # --------------------
       # Upload artifacts (zips only)
