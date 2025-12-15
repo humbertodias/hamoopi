@@ -134,9 +134,12 @@ jobs:
 
     steps:
       - name: Download artifact zips
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
+
+      - name: List files in artifacts folder
+        run: ls -al artifacts/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
