@@ -52,6 +52,12 @@ jobs:
             platform_name: windows
             steamdeck: false
 
+          # ---------- Nintendo Switch ----------
+          - os: ubuntu-latest
+            name: switch
+            platform_name: switch
+            steamdeck: false
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -66,6 +72,26 @@ jobs:
               libxinerama-dev libxi-dev libxss-dev libxrender-dev \
               libasound2-dev libpulse-dev libpipewire-0.3-dev
           fi
+
+      - name: Install devkitPro for Nintendo Switch
+        if: matrix.name == 'switch'
+        shell: bash
+        run: |
+          # Install devkitPro pacman
+          wget https://github.com/devkitPro/pacman/releases/latest/download/devkitpro-pacman.amd64.deb
+          sudo dpkg -i devkitpro-pacman.amd64.deb
+          
+          # Update package database
+          sudo dkp-pacman -Sy --noconfirm
+          
+          # Install Nintendo Switch development tools
+          sudo dkp-pacman -S --noconfirm switch-dev
+          
+          # Set environment variables
+          echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
+          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
+          echo "DEVKITA64=/opt/devkitpro/devkitA64" >> $GITHUB_ENV
+          echo "/opt/devkitpro/tools/bin" >> $GITHUB_PATH
                   
       # --------------------
       # Configure CMake
@@ -79,7 +105,9 @@ jobs:
             CMAKE_FLAGS="$CMAKE_FLAGS -DSTEAMDECK=ON"
           fi
 
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          if [ "${{ matrix.name }}" = "switch" ]; then
+            cmake -B build -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake $CMAKE_FLAGS
+          elif [ "${{ matrix.os }}" = "windows-latest" ]; then
             cmake -B build -G "MinGW Makefiles" $CMAKE_FLAGS
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
             cmake -B build $CMAKE_FLAGS
@@ -104,9 +132,19 @@ jobs:
         run: |
           cmake --install build --prefix dist
           Compress-Archive -Path dist\* -DestinationPath HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}.zip
+
+      - name: Package (Nintendo Switch)
+        if: matrix.name == 'switch'
+        shell: bash
+        run: |
+          cmake --install build --prefix dist
+          # The NRO file should be generated during the build process
+          # Package it along with data files
+          cd dist
+          zip -r ../HAMOOPI-${{ matrix.platform_name }}-${{ env.CMAKE_BUILD_TYPE }}.zip *
    
       - name: Package
-        if: matrix.os != 'windows-latest'
+        if: matrix.os != 'windows-latest' && matrix.name != 'switch'
         shell: bash
         run: |
           cmake --install build --prefix dist
