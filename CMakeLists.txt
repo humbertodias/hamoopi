@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(HAMOOPI C)
+project(HAMOOPI VERSION 1.0.0 LANGUAGES C)
 set(EXECUTABLE_NAME "HAMOOPI")
 set(ICON_NAME "hamoopi")
 
@@ -161,16 +161,49 @@ if(NOT NINTENDO_SWITCH)
     set(SDL2_TTF_INCLUDE_DIRS ${_SDL2_TTF_INCLUDES})
 else()
     # Nintendo Switch: Find SDL2 from portlibs
-    find_package(SDL2 REQUIRED)
-    find_package(SDL2_image REQUIRED)
-    find_package(SDL2_mixer REQUIRED)
-    find_package(SDL2_ttf REQUIRED)
+    find_package(SDL2 QUIET)
+    find_package(SDL2_image QUIET)
+    find_package(SDL2_mixer QUIET)
+    find_package(SDL2_ttf QUIET)
+    
+    if(NOT SDL2_FOUND)
+        message(FATAL_ERROR "SDL2 not found. Please ensure devkitPro portlibs are installed (switch-dev package).")
+    endif()
+    if(NOT SDL2_image_FOUND)
+        message(FATAL_ERROR "SDL2_image not found. Please ensure devkitPro portlibs are installed (switch-dev package).")
+    endif()
+    if(NOT SDL2_mixer_FOUND)
+        message(FATAL_ERROR "SDL2_mixer not found. Please ensure devkitPro portlibs are installed (switch-dev package).")
+    endif()
+    if(NOT SDL2_ttf_FOUND)
+        message(FATAL_ERROR "SDL2_ttf not found. Please ensure devkitPro portlibs are installed (switch-dev package).")
+    endif()
     
     # Set include directories from found packages
-    set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDE_DIR})
-    set(SDL2_IMAGE_INCLUDE_DIRS ${SDL2_IMAGE_INCLUDE_DIR})
-    set(SDL2_MIXER_INCLUDE_DIRS ${SDL2_MIXER_INCLUDE_DIR})
-    set(SDL2_TTF_INCLUDE_DIRS ${SDL2_TTF_INCLUDE_DIR})
+    # Handle both singular and plural forms returned by different FindSDL2 modules
+    if(SDL2_INCLUDE_DIRS)
+        set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDE_DIRS})
+    elseif(SDL2_INCLUDE_DIR)
+        set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDE_DIR})
+    endif()
+    
+    if(SDL2_IMAGE_INCLUDE_DIRS)
+        set(SDL2_IMAGE_INCLUDE_DIRS ${SDL2_IMAGE_INCLUDE_DIRS})
+    elseif(SDL2_IMAGE_INCLUDE_DIR)
+        set(SDL2_IMAGE_INCLUDE_DIRS ${SDL2_IMAGE_INCLUDE_DIR})
+    endif()
+    
+    if(SDL2_MIXER_INCLUDE_DIRS)
+        set(SDL2_MIXER_INCLUDE_DIRS ${SDL2_MIXER_INCLUDE_DIRS})
+    elseif(SDL2_MIXER_INCLUDE_DIR)
+        set(SDL2_MIXER_INCLUDE_DIRS ${SDL2_MIXER_INCLUDE_DIR})
+    endif()
+    
+    if(SDL2_TTF_INCLUDE_DIRS)
+        set(SDL2_TTF_INCLUDE_DIRS ${SDL2_TTF_INCLUDE_DIRS})
+    elseif(SDL2_TTF_INCLUDE_DIR)
+        set(SDL2_TTF_INCLUDE_DIRS ${SDL2_TTF_INCLUDE_DIR})
+    endif()
 endif()
 
 # --- Biblioteca ---
@@ -279,20 +312,25 @@ if(NINTENDO_SWITCH)
             SUFFIX ".elf"
     )
     
-    # Create NRO file using elf2nro
-    add_custom_command(TARGET HAMOOPI POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E env DEVKITPRO=/opt/devkitpro
-            elf2nro $<TARGET_FILE:HAMOOPI> ${CMAKE_BINARY_DIR}/HAMOOPI.nro
-            --icon=${CMAKE_SOURCE_DIR}/data/system/hamoopi_logo.png
-            --nacp=${CMAKE_BINARY_DIR}/HAMOOPI.nacp
-            COMMENT "Converting ELF to NRO format for Nintendo Switch"
-    )
+    # Get DEVKITPRO path from environment or use default
+    if(DEFINED ENV{DEVKITPRO})
+        set(DEVKITPRO_PATH $ENV{DEVKITPRO})
+    else()
+        set(DEVKITPRO_PATH "/opt/devkitpro")
+    endif()
     
     # Create NACP file (Nintendo Switch metadata)
     add_custom_command(TARGET HAMOOPI PRE_LINK
-            COMMAND ${CMAKE_COMMAND} -E env DEVKITPRO=/opt/devkitpro
-            nacptool --create "HAMOOPI" "humbertodias" "1.0.0" ${CMAKE_BINARY_DIR}/HAMOOPI.nacp
+            COMMAND nacptool --create "HAMOOPI" "humbertodias" "${PROJECT_VERSION}" ${CMAKE_BINARY_DIR}/HAMOOPI.nacp
             COMMENT "Creating NACP metadata for Nintendo Switch"
+    )
+    
+    # Create NRO file using elf2nro
+    add_custom_command(TARGET HAMOOPI POST_BUILD
+            COMMAND elf2nro $<TARGET_FILE:HAMOOPI> ${CMAKE_BINARY_DIR}/HAMOOPI.nro
+            --icon=${CMAKE_SOURCE_DIR}/data/system/hamoopi_logo.png
+            --nacp=${CMAKE_BINARY_DIR}/HAMOOPI.nacp
+            COMMENT "Converting ELF to NRO format for Nintendo Switch"
     )
 endif()
 

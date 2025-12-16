@@ -89,7 +89,6 @@ jobs:
           
           # Set environment variables
           echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
           echo "DEVKITA64=/opt/devkitpro/devkitA64" >> $GITHUB_ENV
           echo "/opt/devkitpro/tools/bin" >> $GITHUB_PATH
                   
