@@ -181,27 +181,19 @@ else()
     
     # Set include directories from found packages
     # Handle both singular and plural forms returned by different FindSDL2 modules
-    if(SDL2_INCLUDE_DIRS)
-        set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDE_DIRS})
-    elseif(SDL2_INCLUDE_DIR)
+    if(NOT SDL2_INCLUDE_DIRS AND SDL2_INCLUDE_DIR)
         set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDE_DIR})
     endif()
     
-    if(SDL2_IMAGE_INCLUDE_DIRS)
-        set(SDL2_IMAGE_INCLUDE_DIRS ${SDL2_IMAGE_INCLUDE_DIRS})
-    elseif(SDL2_IMAGE_INCLUDE_DIR)
+    if(NOT SDL2_IMAGE_INCLUDE_DIRS AND SDL2_IMAGE_INCLUDE_DIR)
         set(SDL2_IMAGE_INCLUDE_DIRS ${SDL2_IMAGE_INCLUDE_DIR})
     endif()
     
-    if(SDL2_MIXER_INCLUDE_DIRS)
-        set(SDL2_MIXER_INCLUDE_DIRS ${SDL2_MIXER_INCLUDE_DIRS})
-    elseif(SDL2_MIXER_INCLUDE_DIR)
+    if(NOT SDL2_MIXER_INCLUDE_DIRS AND SDL2_MIXER_INCLUDE_DIR)
         set(SDL2_MIXER_INCLUDE_DIRS ${SDL2_MIXER_INCLUDE_DIR})
     endif()
     
-    if(SDL2_TTF_INCLUDE_DIRS)
-        set(SDL2_TTF_INCLUDE_DIRS ${SDL2_TTF_INCLUDE_DIRS})
-    elseif(SDL2_TTF_INCLUDE_DIR)
+    if(NOT SDL2_TTF_INCLUDE_DIRS AND SDL2_TTF_INCLUDE_DIR)
         set(SDL2_TTF_INCLUDE_DIRS ${SDL2_TTF_INCLUDE_DIR})
     endif()
 endif()
