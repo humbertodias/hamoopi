@@ -77,20 +77,26 @@ jobs:
         if: matrix.name == 'switch'
         shell: bash
         run: |
-          # Install devkitPro pacman
-          wget https://github.com/devkitPro/pacman/releases/latest/download/devkitpro-pacman.amd64.deb
-          sudo dpkg -i devkitpro-pacman.amd64.deb
+          # Baixar o script de instalação
+          wget https://apt.devkitpro.org/install-devkitpro-pacman
           
-          # Update package database
+          # Tornar o script executável
+          chmod +x ./install-devkitpro-pacman
+          
+          # Executar o script de instalação
+          sudo ./install-devkitpro-pacman
+          
+          # Atualizar o banco de dados de pacotes
           sudo dkp-pacman -Sy --noconfirm
           
-          # Install Nintendo Switch development tools
+          # Instalar ferramentas de desenvolvimento para Nintendo Switch
           sudo dkp-pacman -S --noconfirm switch-dev
           
-          # Set environment variables
+          # Definir variáveis de ambiente
           echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
           echo "DEVKITA64=/opt/devkitpro/devkitA64" >> $GITHUB_ENV
           echo "/opt/devkitpro/tools/bin" >> $GITHUB_PATH
+
                   
       # --------------------
       # Configure CMake
