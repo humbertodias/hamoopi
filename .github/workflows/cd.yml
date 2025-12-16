@@ -87,7 +87,7 @@ jobs:
           sudo ./install-devkitpro-pacman
           
           # Atualizar o banco de dados de pacotes
-          sudo dkp-pacman -Sy --noconfirm
+          sudo dkp-pacman -Sy --noconfirm --allow-weak-key-signatures
           
           # Instalar ferramentas de desenvolvimento para Nintendo Switch
           sudo dkp-pacman -S --noconfirm switch-dev
